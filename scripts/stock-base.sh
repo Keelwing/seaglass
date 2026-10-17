@@ -11,10 +11,13 @@ version=${1:?a Sailfish OS version, e.g. 5.1.0.11}
 case $version in *[!0-9.]*|'') die "not a Sailfish OS version: $version" ;; esac
 dir=$OUT_DIR/compat/$version
 base=$dir/base
-if [ ! -f "$base/OS_VERSION" ]; then
+files=()
+while IFS= read -r f; do files+=("./$f"); done < <(python3 -I "$REPO_ROOT/hook/apply_hook.py" --files)
+complete=1
+for f in "${files[@]}"; do [ -f "$base/$f" ] || complete=; done
+# a base made before the hook changed more files is unpacked again
+if [ ! -f "$base/OS_VERSION" ] || [ -z "$complete" ]; then
     tools_image
-    files=()
-    while IFS= read -r f; do files+=("./$f"); done < <(python3 -I "$REPO_ROOT/hook/apply_hook.py" --files)
     rm -rf "${dir:?}"
     mkdir -p "$base"
     docker run --rm -v "$REPO_ROOT:/src:ro" -v "$dir:/out" "$TOOLS_IMAGE" sh -euc '
