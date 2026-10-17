@@ -241,7 +241,9 @@ class RepoTest(unittest.TestCase):
         funding = (REPO / ".github" / "FUNDING.yml").read_text(encoding="utf-8")
         name = re.search(r"(?m)^ko_fi: (\w+)$", funding).group(1)
         url = f"https://ko-fi.com/{name}"
-        self.assertIn(f"({url})", (REPO / "README.md").read_text(encoding="utf-8"))
+        readme = (REPO / "README.md").read_text(encoding="utf-8")
+        self.assertIn(f"({url})", readme)
+        self.assertIn(f'<a href="{url}"><img src="docs/images/support.svg"', readme)
         self.assertIn(f'SUPPORT = "{url}"', (REPO / "scripts" / "site.py").read_text(encoding="utf-8"))
         for template in ("index.html", "templates/nav.html", "templates/footer.html"):
             self.assertIn('href="{{support}}"', (REPO / "site" / template).read_text(encoding="utf-8"), template)
