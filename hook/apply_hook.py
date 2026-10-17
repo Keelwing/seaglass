@@ -32,14 +32,17 @@ WALLPAPER_URL = MODULE + "glass/LauncherWallpaper.qml"
 BADGE_URL = MODULE + "badges/IconBadge.qml"
 SWITCHER_URL = MODULE + "switcher/SwitcherController.qml"
 CHIP_URL = MODULE + "switcher/SwitcherChip.qml"
+ANIMATIONS_URL = MODULE + "animations/AnimationController.qml"
+LOADING_URL = MODULE + "animations/CoverLoading.qml"
 # every file of ours the hook loads
 URLS = [PREVIEW_URL, CONTROLLER_URL, CHOOSER_URL, TILE_URL, MOTION_URL, WALLPAPER_URL, BADGE_URL, SWITCHER_URL,
-        CHIP_URL]
+        CHIP_URL, ANIMATIONS_URL, LOADING_URL]
 
 # The stock files the hook changes, in diff order
 FILES = [f"{HOME}/launcher/LauncherFolder.qml", f"{HOME}/launcher/LauncherGrid.qml",
          f"{HOME}/main/EditableGridDelegate.qml", f"{HOME}/layers/LauncherLayer.qml",
-         f"{HOME}/switcher/Switcher.qml", f"{HOME}/switcher/SwitcherItem.qml"]
+         f"{HOME}/switcher/Switcher.qml", f"{HOME}/switcher/SwitcherItem.qml", f"{HOME}/compositor.qml",
+         f"{HOME}/layers/StackLayer.qml"]
 
 
 class AnchorError(Exception):
@@ -468,8 +471,37 @@ def hook_switcher(text):
 def hook_switcher_item(text):
     """switcher/SwitcherItem.qml: an app's cover in the task switcher. Under the cover, its name chip
     (SwitcherChip.qml), in the cover's content item, so that it moves, scales and fades with the cover; it fades
-    out in the stock housekeeping mode (the stock close button sits on the cover's bottom edge)."""
+    out in the stock housekeeping mode (the stock close button sits on the cover's bottom edge). While the app
+    starts, the loading effect over the cover (CoverLoading.qml) in place of the busy indicator and the icon; and a
+    cover being closed tells the switcher's controller first, for the closing effect over it."""
     what = "SwitcherItem.qml"
+    close = find_once(text, "    function close() {\n", what=what) + len("    function close() {\n")
+    text = text[:close] + indent([
+        "// seaglass: the closing effect over the cover (/usr/share/seaglass)",
+        "if (seaglassSwitcher.item)",
+        "    seaglassSwitcher.item.coverClosing(wrapper)",
+    ], 8) + text[close:]
+    playing = "(seaglassLoading.item && seaglassLoading.item.playing)"
+    text = replace_line(text, "        opacity: hideCover ? 1.0 : 0.0",
+                        f"        opacity: hideCover && !{playing} ? 1.0 : 0.0", what)
+    busy = find_once(text, "    BusyIndicator {\n        anchors.centerIn: parent\n", what=what)
+    busy_end = block_end(text, busy)
+    running = find_once(text, "        running: launching\n", busy, busy_end, what)
+    text = (text[:running] + f"        running: launching && !{playing}\n"
+            + text[running + len("        running: launching\n"):])
+    busy_end = block_end(text, busy)
+    text = text[:busy_end] + "\n\n" + indent([
+        "// seaglass: the loading effect over the cover while its app starts (/usr/share/seaglass);",
+        "// the busy indicator and the icon stay when it is not there",
+        "Loader {",
+        "    id: seaglassLoading",
+        "    property var launcherItem: wrapper.launcherItem",
+        "    property real radius: windowPixmap.radius",
+        "    anchors.fill: parent",
+        "    active: wrapper.launching",
+        f'    source: "{LOADING_URL}"',
+        "}",
+    ], 4)[:-1] + text[busy_end:]
     pos = find_once(text, "    Loader {\n        id: loader\n", what=what)
     return text[:pos] + indent([
         "// seaglass: the app's name chip under the cover (/usr/share/seaglass)",
@@ -489,8 +521,76 @@ def hook_switcher_item(text):
     ], 4) + text[pos:]
 
 
+def hook_compositor(text):
+    """compositor.qml: the opening and closing effects (AnimationController.qml), in a Loader right after the app
+    layer: above it and under the dialog and alarm layers, in the same coordinates. The app layer gets the loaded
+    item as seaglassTransitions, which its show animation asks for an opening effect (StackLayer.qml). The closing
+    effects play in an item of their own above the layer that holds the app layer (peekLayer): that layer hides as
+    soon as the stock close is over, and the effect lasts longer."""
+    what = "compositor.qml"
+    head = "                    AppLayer {\n                        id: appLayerItem\n"
+    start = find_once(text, head, what=what)
+    text = text[:start + len(head)] + indent([
+        "// seaglass: the opening and closing effects (/usr/share/seaglass); null without them",
+        "seaglassTransitions: seaglassAnimations.item",
+    ], 24) + text[start + len(head):]
+    end = block_end(text, start)
+    text = text[:end] + "\n\n" + indent([
+        "// seaglass: the opening and closing effects over the app layer (/usr/share/seaglass);",
+        "// the stock fade and close stay when they cannot be loaded",
+        "Loader {",
+        "    id: seaglassAnimations",
+        "    property Item appLayer: appLayerItem",
+        "    property Item overlay: seaglassAboveLayers",
+        "    anchors.fill: parent",
+        f'    source: "{ANIMATIONS_URL}"',
+        "}",
+    ], 20)[:-1] + text[end:]
+    # before peekLayer in the file (the versions of a series differ further down), above it by z
+    peek = find_once(text, "        Layer {\n            id: peekLayer\n", what=what)
+    return text[:peek] + indent([
+        "// seaglass: the closing effects play here, above the layers: they outlast peekLayer (/usr/share/seaglass)",
+        "Item {",
+        "    id: seaglassAboveLayers",
+        "    anchors.fill: parent",
+        "    z: 1",
+        "}",
+        "",
+    ], 8) + text[peek:]
+
+
+def hook_stack_layer(text):
+    """layers/StackLayer.qml: the app, dialog and alarm layers. On the app layer seaglassTransitions is set
+    (compositor.qml): its show animation tells it just before the fade, and it may play an opening effect over a
+    copy of the layer, which it hides meanwhile. The fade still runs, unseen: a running animation keeps the
+    durations it started with, and the copy leaves out the layer's own opacity. The layer stays transitioning while
+    the effect plays, so that the home screen under it is still drawn. Without it (and on the other layers) every
+    value is the stock one."""
+    what = "StackLayer.qml"
+    text = insert_after(text, "    property bool _effectiveDelaySwitch: delaySwitch || snapshotInUse\n", [
+        "// seaglass: the opening and closing effects (/usr/share/seaglass), on the app layer only",
+        "property QtObject seaglassTransitions: null",
+    ], 4, what)
+    text = replace_line(
+        text, "    transitioning: showAnimation.running || showAnimation.retries > 0",
+        "    transitioning: showAnimation.running || showAnimation.retries > 0\n"
+        "                   || (seaglassTransitions !== null && seaglassTransitions.playing)", what)
+    fade = "        FadeAnimator {\n            target: layer\n            duration: 300\n"
+    pos = find_once(text, fade, what=what)
+    return text[:pos] + indent([
+        "// seaglass: an opening effect over the fade (/usr/share/seaglass); told on the pass that fades only",
+        "// (retries is above 0 while the window is not drawn yet)",
+        "ScriptAction {",
+        "    script: {",
+        "        if (showAnimation.retries === 0 && layer.seaglassTransitions !== null)",
+        "            layer.seaglassTransitions.opening(layer)",
+        "    }",
+        "}",
+    ], 8) + text[pos:]
+
+
 HOOKS = {FILES[0]: hook_folder, FILES[1]: hook_grid, FILES[2]: hook_delegate, FILES[3]: hook_layer,
-         FILES[4]: hook_switcher, FILES[5]: hook_switcher_item}
+         FILES[4]: hook_switcher, FILES[5]: hook_switcher_item, FILES[6]: hook_compositor, FILES[7]: hook_stack_layer}
 
 
 def build(base):

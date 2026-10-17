@@ -283,9 +283,19 @@ SWITCHER_ITEM = """EditableGridDelegate {
     id: wrapper
 
     property var launcherItem
+    property bool launching: pending
+
+    function close() {
+        closeAnimation.start()
+    }
+
+    WindowPixmapItem {
+        id: windowPixmap
+    }
 
     LauncherIcon {
         icon: launcherItem ? launcherItem.iconId : ""
+        opacity: hideCover ? 1.0 : 0.0
     }
 
     Loader {
@@ -293,15 +303,99 @@ SWITCHER_ITEM = """EditableGridDelegate {
 
         width: parent.width
     }
+
+    BusyIndicator {
+        anchors.centerIn: parent
+        running: launching
+    }
+
+    StartupWatcher {
+        running: wrapper.launching
+    }
+}
+"""
+
+
+COMPOSITOR = """Compositor {
+    id: root
+
+    Item {
+        id: layersParent
+
+        Layer {
+            id: peekLayer
+
+            Item {
+                id: peekBlurSource
+
+                Item {
+                    id: applicationBlurSource
+
+                    AppLayer {
+                        id: appLayerItem
+
+                        peekedAt: false
+                        onRequestFocus: {
+                            if (root.visible) {
+                                root.unlock()
+                            }
+                        }
+                    }
+
+                    ApplicationCloseGestureHint {
+                        id: closeGestureHint
+                    }
+                }
+            }
+        }
+
+        OverlayLayer {
+            id: overlayLayer
+        }
+    }
+}
+"""
+
+STACK_LAYER = """Layer {
+    id: layer
+
+    property bool snapshotInUse
+    property bool _effectiveDelaySwitch: delaySwitch || snapshotInUse
+
+    readonly property int closingWindowId: 0
+
+    enabled: active
+    transitioning: showAnimation.running || showAnimation.retries > 0
+
+    SequentialAnimation {
+        id: showAnimation
+
+        property int retries
+
+        PauseAnimation { id: delayAnimation; duration: 150 }
+        ScriptAction {
+            script: {
+                showAnimation.retries = 0
+            }
+        }
+        FadeAnimator {
+            target: layer
+            duration: 300
+            from: 0.0
+            to: 1.0
+            easing.type: Easing.InOutQuad
+        }
+    }
 }
 """
 
 
 def write_base(root, grid=GRID, folder=FOLDER, delegate=DELEGATE, layer=LAYER, switcher=SWITCHER,
-               switcher_item=SWITCHER_ITEM):
+               switcher_item=SWITCHER_ITEM, compositor=COMPOSITOR, stack_layer=STACK_LAYER):
     for path, text in ((apply_hook.FILES[0], folder), (apply_hook.FILES[1], grid), (apply_hook.FILES[2], delegate),
                        (apply_hook.FILES[3], layer), (apply_hook.FILES[4], switcher),
-                       (apply_hook.FILES[5], switcher_item)):
+                       (apply_hook.FILES[5], switcher_item), (apply_hook.FILES[6], compositor),
+                       (apply_hook.FILES[7], stack_layer)):
         target = Path(root, path)
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(text, encoding="utf-8")
@@ -536,6 +630,60 @@ class HookTest(unittest.TestCase):
         self.assertIn("active: seaglassSwitcher.item ? seaglassSwitcher.item.chips : false", text)
         self.assertLess(text.index("id: seaglassChip"), text.index("id: loader"))
 
+    # The animations
+
+    def test_compositor_loads_the_animations_after_the_app_layer(self):
+        write_base(self.base)
+        text = self.patched(apply_hook.FILES[6])
+        self.assertIn(f'source: "{apply_hook.ANIMATIONS_URL}"', text)
+        self.assertIn("property Item appLayer: appLayerItem", text)
+        self.assertIn("seaglassTransitions: seaglassAnimations.item", text)
+        # above the app layer (after it), as its sibling, in the same coordinates
+        layer = text.index("AppLayer {")
+        self.assertLess(apply_hook.block_end(text, layer), text.index("id: seaglassAnimations"))
+        self.assertLess(text.index("id: seaglassAnimations"), text.index("ApplicationCloseGestureHint {"))
+        self.assertIn("anchors.fill: parent", text[text.index("id: seaglassAnimations"):])
+        # the closing effects' own item: before the layer that holds the app layer in the file, above it by z
+        self.assertIn("property Item overlay: seaglassAboveLayers", text)
+        self.assertLess(text.index("id: seaglassAboveLayers"), text.index("        Layer {\n            id: peekLayer\n"))
+        self.assertIn("    id: seaglassAboveLayers\n            anchors.fill: parent\n            z: 1\n", text)
+
+    def test_stack_layer_tells_of_the_fade_before_it_runs(self):
+        write_base(self.base)
+        text = self.patched(apply_hook.FILES[7])
+        self.assertIn("    property QtObject seaglassTransitions: null\n", text)
+        ask = text.index("if (showAnimation.retries === 0 && layer.seaglassTransitions !== null)")
+        self.assertLess(text.index("showAnimation.retries = 0"), ask)
+        self.assertLess(ask, text.index("FadeAnimator {"))
+        self.assertIn("layer.seaglassTransitions.opening(layer)\n", text)
+        # the stock fade stays as it is
+        self.assertIn("        FadeAnimator {\n            target: layer\n            duration: 300\n", text)
+
+    def test_stack_layer_keeps_transitioning_while_an_effect_plays(self):
+        write_base(self.base)
+        text = self.patched(apply_hook.FILES[7])
+        self.assertIn("    transitioning: showAnimation.running || showAnimation.retries > 0\n"
+                      "                   || (seaglassTransitions !== null && seaglassTransitions.playing)\n", text)
+
+    def test_cover_loads_its_loading_effect_in_place_of_the_busy_indicator(self):
+        write_base(self.base)
+        text = self.patched(apply_hook.FILES[5])
+        self.assertIn(f'source: "{apply_hook.LOADING_URL}"', text)
+        self.assertIn("active: wrapper.launching", text)
+        self.assertIn("property var launcherItem: wrapper.launcherItem", text)
+        playing = "(seaglassLoading.item && seaglassLoading.item.playing)"
+        self.assertIn(f"        running: launching && !{playing}\n", text)
+        self.assertIn(f"opacity: hideCover && !{playing} ? 1.0 : 0.0", text)
+        # the startup watcher keeps its own line
+        self.assertIn("        running: wrapper.launching\n    }", text)
+        self.assertLess(text.index("BusyIndicator {"), text.index("id: seaglassLoading"))
+
+    def test_cover_close_tells_the_switcher_first(self):
+        write_base(self.base)
+        text = self.patched(apply_hook.FILES[5])
+        self.assertIn("    function close() {\n        // seaglass: the closing effect over the cover", text)
+        self.assertLess(text.index("seaglassSwitcher.item.coverClosing(wrapper)"), text.index("closeAnimation.start()"))
+
     def test_drag_delegate_draws_at_target_x(self):
         write_base(self.base)
         text = self.patched(apply_hook.FILES[2])
@@ -602,6 +750,8 @@ class HookTest(unittest.TestCase):
             "delegateContentItem.x = wrapper.x",
             "ScriptAction { script: { delegateContentItem.x = wrapper.x } }",
             "delegateContentItem.x = wrapper.x",
+            "opacity: hideCover ? 1.0 : 0.0",
+            "running: launching",
         ]))
 
     def test_braces_stay_balanced(self):

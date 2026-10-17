@@ -509,9 +509,22 @@
  }
 --- a/usr/share/lipstick-jolla-home-qt5/switcher/SwitcherItem.qml
 +++ b/usr/share/lipstick-jolla-home-qt5/switcher/SwitcherItem.qml
-@@ -238,6 +238,20 @@
+@@ -128,6 +128,9 @@
+     }
+ 
+     function close() {
++        // seaglass: the closing effect over the cover (/usr/share/seaglass)
++        if (seaglassSwitcher.item)
++            seaglassSwitcher.item.coverClosing(wrapper)
+         _persistHousekeeping |= switcherRoot.housekeeping
+         closeAnimation.start()
+     }
+@@ -236,8 +239,22 @@
+         scale: parent.width/Theme.coverSizeLarge.width
+         icon: launcherItem ? launcherItem.iconId : ""
          layer.effect: null
-         opacity: hideCover ? 1.0 : 0.0
+-        opacity: hideCover ? 1.0 : 0.0
++        opacity: hideCover && !(seaglassLoading.item && seaglassLoading.item.playing) ? 1.0 : 0.0
          Behavior on opacity { FadeAnimation { duration: 500 } }
 +    }
 +
@@ -530,3 +543,100 @@
      }
  
      Loader {
+@@ -288,7 +305,18 @@
+         scale: parent.width/Theme.coverSizeLarge.width
+         color: Theme.primaryColor
+         size: BusyIndicatorSize.Large
+-        running: launching
++        running: launching && !(seaglassLoading.item && seaglassLoading.item.playing)
++    }
++
++    // seaglass: the loading effect over the cover while its app starts (/usr/share/seaglass);
++    // the busy indicator and the icon stay when it is not there
++    Loader {
++        id: seaglassLoading
++        property var launcherItem: wrapper.launcherItem
++        property real radius: windowPixmap.radius
++        anchors.fill: parent
++        active: wrapper.launching
++        source: "file:///usr/share/seaglass/qml/animations/CoverLoading.qml"
+     }
+ 
+     Component {
+--- a/usr/share/lipstick-jolla-home-qt5/compositor.qml
++++ b/usr/share/lipstick-jolla-home-qt5/compositor.qml
+@@ -895,6 +895,13 @@
+             }
+         }
+ 
++        // seaglass: the closing effects play here, above the layers: they outlast peekLayer (/usr/share/seaglass)
++        Item {
++            id: seaglassAboveLayers
++            anchors.fill: parent
++            z: 1
++        }
++
+         Layer {
+             id: peekLayer
+ 
+@@ -1037,6 +1044,8 @@
+ 
+                     AppLayer {
+                         id: appLayerItem
++                        // seaglass: the opening and closing effects (/usr/share/seaglass); null without them
++                        seaglassTransitions: seaglassAnimations.item
+ 
+                         peekedAt: !launcherLayerItem.opaque
+                                     && !topMenuLayerItem.opaque
+@@ -1078,6 +1087,16 @@
+                                 root.unlock()
+                             }
+                         }
++                    }
++
++                    // seaglass: the opening and closing effects over the app layer (/usr/share/seaglass);
++                    // the stock fade and close stay when they cannot be loaded
++                    Loader {
++                        id: seaglassAnimations
++                        property Item appLayer: appLayerItem
++                        property Item overlay: seaglassAboveLayers
++                        anchors.fill: parent
++                        source: "file:///usr/share/seaglass/qml/animations/AnimationController.qml"
+                     }
+ 
+                     ApplicationCloseGestureHint {
+--- a/usr/share/lipstick-jolla-home-qt5/layers/StackLayer.qml
++++ b/usr/share/lipstick-jolla-home-qt5/layers/StackLayer.qml
+@@ -23,6 +23,9 @@
+     property bool snapshotInUse
+     property bool _effectiveDelaySwitch: delaySwitch || snapshotInUse
+ 
++    // seaglass: the opening and closing effects (/usr/share/seaglass), on the app layer only
++    property QtObject seaglassTransitions: null
++
+     readonly property int closingWindowId: (peekFilter.topActive || (closing && _closeDismissedWindow))
+                 && window
+             ? window.window.windowId
+@@ -38,6 +41,7 @@
+     enabled: active
+     delayClose: peekingAtHome || snapshotInUse
+     transitioning: showAnimation.running || showAnimation.retries > 0
++                   || (seaglassTransitions !== null && seaglassTransitions.playing)
+ 
+     peekFilter.onGestureTriggered: _closeDismissedWindow = peekFilter.topActive
+ 
+@@ -393,6 +397,14 @@
+                 }
+             }
+         }
++        // seaglass: an opening effect over the fade (/usr/share/seaglass); told on the pass that fades only
++        // (retries is above 0 while the window is not drawn yet)
++        ScriptAction {
++            script: {
++                if (showAnimation.retries === 0 && layer.seaglassTransitions !== null)
++                    layer.seaglassTransitions.opening(layer)
++            }
++        }
+         FadeAnimator {
+             target: layer
+             duration: 300
