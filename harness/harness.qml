@@ -13,6 +13,8 @@
 //   switcher  the task switcher with made-up covers, grid or cards (SwitcherScene.qml)
 //   widgets   data widgets among the icons with sample data: normal, edit or the gallery (WidgetsScene.qml)
 //   touch     data widgets driven by mouse events: taps, long press, drags, the gallery (TouchScene.qml)
+//   animations  an opening, loading or closing effect on a made-up app, or every shader's compile check
+//             (AnimationsScene.qml)
 // The scene file next to this one holds "NAME [ARGUMENT]".
 //
 // XDG_CONFIG_HOME points at a copy of ~/.config/lipstick, so this LauncherFolderModel reads the real folders

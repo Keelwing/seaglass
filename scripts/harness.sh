@@ -7,8 +7,8 @@
 #        [--wait SECS] [--keep] [--own-apps] [--slow-animations]
 #   --scene  folders (default), selector ["Android=panel"], controller ["AI=card,Android=panel,..."],
 #            layout ["normal|edit AI=card@5,... drag=AI drop=Android"], motion ["zoom|spring|reveal|slide|fade
-#            [nocascade] [nodepth] [from=TITLE] [card] [slow=8]"]
-#            (harness/harness.qml)
+#            [nocascade] [nodepth] [from=TITLE] [card] [slow=8]"], animations ["STYLE open|close|load [PROGRESS]"
+#            | "check"] (harness/harness.qml)
 #   --shot   copy the harness's own screenshot to out/shots/NAME.png
 #   --grab   when the harness takes that screenshot, in seconds after the scene starts (default 2.5)
 #   --frames the frames a scene grabbed (motion) to out/frames/NAME/, with their delay in centiseconds
@@ -71,6 +71,10 @@ ssh -o BatchMode=yes "$SEAGLASS_SSH" "rm -rf ~/$dir && mkdir -p ~/$dir/config/li
     && cp -R ~/.config/lipstick/. ~/$dir/config/lipstick/ && ln -s ~/.config/dconf ~/$dir/config/dconf"
 COPYFILE_DISABLE=1 tar --exclude="._*" --exclude=.DS_Store -C "$REPO_ROOT" -cf - qml harness \
     | ssh -o BatchMode=yes "$SEAGLASS_SSH" "tar -C ~/$dir -xf -"
+# the animations' noise tile, which the package build makes
+mkdir -p "$OUT_DIR"
+python3 -I "$REPO_ROOT/scripts/noise.py" "$OUT_DIR/noise.png"
+ssh -o BatchMode=yes "$SEAGLASS_SSH" "cat > ~/$dir/qml/animations/noise.png" < "$OUT_DIR/noise.png"
 # the public launcher replaces the copy of the phone's menu, and the data directories hide the phone's own apps
 xdg=
 if [ "$public" = 1 ]; then
