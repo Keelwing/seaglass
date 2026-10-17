@@ -60,8 +60,14 @@ Item {
         var tapped = Motion.takeAppOrigin(3000)
         var launcher = Lipstick.compositor.launcherLayer
         var from = tapped && launcher && launcher.exposed ? tapped : null
-        if (!from && Motion.switcher && Lipstick.compositor.homeVisible !== false && layer.window.window)
+        var kind = from ? "icon" : "middle"
+        if (!from && Motion.switcher && layer.window.window) {
             from = Motion.switcher.coverRectFor(layer.window.window.windowId)
+            if (from)
+                kind = "cover"
+        }
+        debugLog("open from the", kind, "(an icon tapped:", tapped !== null, "app grid:", launcher ? launcher.exposed : "-",
+                 "switcher:", Motion.switcher !== null, ")")
         if (from && width > 0 && height > 0) {
             var corner = controller.mapFromItem(null, from.x, from.y)
             return Qt.rect(corner.x / width, corner.y / height, from.width / width, from.height / height)

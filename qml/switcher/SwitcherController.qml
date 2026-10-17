@@ -907,7 +907,10 @@ Item {
     function coverRectFor(windowId) {
         for (var i = 0; coverRepeater && windowId && i < coverRepeater.count; i++) {
             var stock = coverRepeater.itemAt(i)
-            if (!stock || stock.windowId !== windowId)
+            // a cover still launching has no window yet: the stock matches it by its app (Switcher.checkMinimized)
+            if (!stock || (stock.windowId !== windowId
+                           && (stock.running || !stock.launcherItem || !switcher
+                               || !switcher.isWindowIdFor(windowId, stock.launcherItem))))
                 continue
             var drawn = stock.contentItem
             var corner = drawn.mapToItem(null, 0, 0)
