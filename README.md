@@ -10,6 +10,8 @@ on disk: a Patchmanager patch of a few lines loads our QML, and the stock home s
 
 Tested on a Jolla Phone with Sailfish OS 5.2.0.20 (`lipstick-jolla-home-qt5` 1.27.18.1).
 
+<a href="https://ko-fi.com/D31m05z"><img src="docs/images/support.svg" height="40" alt="Support Seaglass on Ko-fi"></a>
+
 <p align="center">
   <img src="docs/images/widgets.jpg" width="250" alt="The app grid on glass, with a clock, the status, now playing, the next events and the weather">
   <img src="docs/images/folders.jpg" width="250" alt="Folder previews, and folders shown as a card and a panel among the icons">
@@ -189,6 +191,14 @@ lipstick-jolla-home-qt5 (stock QML, unchanged on disk)
 The hook is generated from anchors in the stock files, and it refuses to apply when they move. Only root-owned QML
 from the package runs in the home screen. Details are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Building,
 testing and the development harness are covered in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
+
+## Support
+
+Seaglass is free software and stays free. If it makes your phone a little nicer, a coffee on
+[Ko-fi](https://ko-fi.com/D31m05z) helps keep it going: new Sailfish OS versions, fixes and new features. The same
+page supports the developer's other Sailfish OS apps.
+
+<a href="https://ko-fi.com/D31m05z"><img src="docs/images/support.svg" height="40" alt="Support Seaglass on Ko-fi"></a>
 
 ## License
 

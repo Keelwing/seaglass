@@ -26,6 +26,7 @@ The first public release.
   or swallow the app. A style per moment, or a surprise each time, set up on a page with a live preview. Off by
   default.
 - Settings: a first page that says whether Seaglass runs, and if not, why and what to do; a page per feature with
-  live previews; a reset; and a backup of the settings, widgets and folder types to Documents.
+  live previews; a reset; a backup of the settings, widgets and folder types to Documents; and a link to support
+  Seaglass on Ko-fi.
 - Sailfish OS 5.2.0.18 and 5.2.0.20. Each release also has a testers' package for 5.1 and 5.0, which CI checks but
   which has not run on such a phone yet.

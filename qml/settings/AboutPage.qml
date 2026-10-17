@@ -119,6 +119,8 @@ Page {
     }
 
     readonly property string repository: "https://github.com/D31m05z/seaglass"
+    // the developer's Ko-fi page (README.md, .github/FUNDING.yml and the site link the same)
+    readonly property string support: "https://ko-fi.com/D31m05z"
     // the installed version, from the installed patch.json
     property string version
 
@@ -234,8 +236,8 @@ Page {
                 font.pixelSize: Theme.fontSizeExtraSmall
                 color: Theme.secondaryHighlightColor
                 text: qsTr("Home screen extensions for Sailfish OS: folder previews and widgets, folder motion, glass, "
-                           + "app search, notification badges, the task switcher and data widgets. A small Patchmanager "
-                           + "hook; switch the patch off to get the stock home screen back.")
+                           + "app search, notification badges, the task switcher, data widgets and app animations. A "
+                           + "small Patchmanager hook; switch the patch off to get the stock home screen back.")
             }
 
             // the repository, opened in the browser
@@ -265,6 +267,38 @@ Page {
                         font.pixelSize: Theme.fontSizeSmall
                         color: repositoryItem.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
                         text: page.repository.replace(/^https:\/\//, "")
+                    }
+                }
+            }
+
+            // the Ko-fi page, opened in the browser
+            BackgroundItem {
+                id: supportItem
+
+                width: parent.width
+                height: supportColumn.height + 2 * Theme.paddingMedium
+                onClicked: Qt.openUrlExternally(page.support)
+
+                Column {
+                    id: supportColumn
+
+                    x: Theme.horizontalPageMargin
+                    width: parent.width - 2 * x
+                    anchors.verticalCenter: parent.verticalCenter
+
+                    Label {
+                        width: parent.width
+                        color: supportItem.highlighted ? Theme.highlightColor : Theme.primaryColor
+                        text: qsTr("Support Seaglass")
+                    }
+
+                    Label {
+                        width: parent.width
+                        wrapMode: Text.Wrap
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: supportItem.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
+                        text: qsTr("Seaglass is free and stays free. A coffee on Ko-fi helps keep it going: %1")
+                              .arg(page.support.replace(/^https:\/\//, ""))
                     }
                 }
             }

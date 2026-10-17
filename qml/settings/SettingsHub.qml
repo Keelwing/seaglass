@@ -24,6 +24,8 @@ SilicaFlickable {
     property int applied: -1
 
     readonly property string repository: "https://github.com/D31m05z/seaglass"
+    // the developer's Ko-fi page (README.md, .github/FUNDING.yml and the site link the same)
+    readonly property string support: "https://ko-fi.com/D31m05z"
     readonly property string problem: {
         if (version === "")
             return ""
@@ -336,6 +338,13 @@ SilicaFlickable {
             title: qsTr("About")
             summary: general.debug ? qsTr("Debug log on") : ""
             onClicked: hub.open("AboutPage")
+        }
+
+        FeatureRow {
+            icon: "icon-m-like"
+            title: qsTr("Support Seaglass")
+            summary: qsTr("Free software: a coffee on Ko-fi keeps it going")
+            onClicked: Qt.openUrlExternally(hub.support)
         }
     }
 }
