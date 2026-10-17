@@ -236,6 +236,20 @@ class RepoTest(unittest.TestCase):
             self.assertNotRegex(text, r"(?m)^import (org\.nemomobile\.lipstick|Sailfish\.Lipstick)", name)
             self.assertNotIn("Lipstick.", text, name)
 
+    def test_support_links_agree(self):
+        # one Ko-fi page for the developer's apps: GitHub's Sponsor button, the README, the site and the settings
+        funding = (REPO / ".github" / "FUNDING.yml").read_text(encoding="utf-8")
+        name = re.search(r"(?m)^ko_fi: (\w+)$", funding).group(1)
+        url = f"https://ko-fi.com/{name}"
+        self.assertIn(f"({url})", (REPO / "README.md").read_text(encoding="utf-8"))
+        self.assertIn(f'SUPPORT = "{url}"', (REPO / "scripts" / "site.py").read_text(encoding="utf-8"))
+        for template in ("index.html", "templates/nav.html", "templates/footer.html"):
+            self.assertIn('href="{{support}}"', (REPO / "site" / template).read_text(encoding="utf-8"), template)
+        for page in ("SettingsHub.qml", "AboutPage.qml"):
+            text = (REPO / "qml" / "settings" / page).read_text(encoding="utf-8")
+            self.assertIn(f'readonly property string support: "{url}"', text, page)
+            self.assertRegex(text, r"Qt\.openUrlExternally\(\w+\.support\)", page)
+
     def test_badges_log_no_notification_texts(self):
         # the probe logs who a notification is from, never what it says
         source = (REPO / "qml" / "badges" / "BadgeSource.qml").read_text(encoding="utf-8")
