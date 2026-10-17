@@ -51,13 +51,15 @@ highlight colour instead: a blue ambience burns blue. Seaglass is always in the 
 *Settings → Patchmanager → Seaglass → Animations*, a new row on the status page between *Task switcher* and
 *Widgets*, with the chosen style as its summary ("Off" when off).
 
-- **Preview.** A small home screen over the ambience's picture, as on the *Glass* page: an app opens, closes,
-  loads and opens again with the chosen style, over and over. Three buttons under it play one moment at a time:
-  *Open*, *Loading*, *Close*. The preview uses the same effect files as the home screen, on a made-up app and
-  stock icons.
+- **Preview.** A small home screen over the ambience's picture, as on the *Glass* page: Notes opens from its icon
+  in the app grid and closes, then starts on a new cover in the switcher, opens from there and closes, over and
+  over. Each moment takes its style as the home screen would, so *Moments*, *Surprise me* and *Speed* show in it at
+  once. Three buttons under it jump to one moment: *Open*, *Loading*, *Close*. The preview uses the same effect
+  files as the home screen, on a made-up app and stock icons.
 - **App animations.** On or off. Off is the stock behaviour.
 - **Style.** The ten styles as tiles, three to a row under their group's name, each tile showing its loading
-  effect live. A tap picks the style for all three moments and plays it in the preview.
+  effect live. A tap picks the style for every moment that has none of its own (below), turns the animations on,
+  and plays a round of it in the preview.
 - **Surprise me.** A different style each time an app opens, loads or closes (never *Stock*).
 - **Moments.** *Opening*, *Loading* and *Closing*, each *Same as style* (the default), *Stock* or any style. One can
   keep the calm opening of *Seaglass* and close with *Ember*.
