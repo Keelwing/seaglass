@@ -1,6 +1,6 @@
 name: Older Sailfish OS
 description: How the testers' package went on Sailfish OS 5.1 or 5.0
-labels: [older-sailfish-os]
+labels: ["older sailfish os"]
 body:
   - type: markdown
     attributes:
