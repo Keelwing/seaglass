@@ -28,6 +28,8 @@ ROOT=$TOP/SOURCES/root
 mkdir -p "$ROOT/usr/share/seaglass"
 
 cp -R "$SRC/qml" "$ROOT/usr/share/seaglass/"
+# the animations' noise tile, made here rather than committed
+python3 -I "$SRC/scripts/noise.py" "$ROOT/usr/share/seaglass/qml/animations/noise.png"
 install -D -m 0644 "$SRC/patchmanager/patch.json" "$ROOT/usr/share/patchmanager/patches/seaglass/patch.json"
 if [ "$CHANNEL" = preview ]; then
     python3 -I - "$ROOT/usr/share/patchmanager/patches/seaglass/patch.json" "$SRC/patchmanager/versions" <<'PY'
