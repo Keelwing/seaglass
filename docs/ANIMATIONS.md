@@ -104,8 +104,8 @@ compositor.qml
        appLayerItem gets `seaglassTransitions: <the loaded item>`
 layers/StackLayer.qml
   ├─ property QtObject seaglassTransitions: null                    (set only on the app layer)
-  ├─ showAnimation: before the FadeAnimator, a ScriptAction asks seaglassTransitions.opening(layer);
-  │                 when it takes over, the fade's duration is 0 (the layer is shown at once, the effect hides it)
+  ├─ showAnimation: before the FadeAnimator, a ScriptAction tells seaglassTransitions.opening(layer);
+  │                 the fade runs on, unseen under the effect
   └─ transitioning: also true while the effect plays, so lipstick keeps drawing the home screen under it
 switcher/Switcher.qml       SwitcherController.qml learns the launching cover and taps on covers (no new lines)
 switcher/SwitcherItem.qml
@@ -132,8 +132,9 @@ fades (the stock restarts the animation while the window is not mapped yet, with
    under the effect in its overlay, and runs `progress` from 0 to 1;
 4. lets the stock layer show again when done.
 
-The fade's duration becomes 0, so the layer's opacity is 1 at once and the effect alone decides what shows. While
-the effect plays, the hook keeps the layer `transitioning`; otherwise lipstick sees an opaque app layer and stops
+The stock fade runs on underneath, unseen: a running animation keeps the durations it started with, so it cannot be
+cut short from inside, and the copy leaves out the layer's own opacity, which is what the fade changes. While the
+effect plays, the hook keeps the layer `transitioning`; otherwise lipstick sees an opaque app layer and stops
 drawing the home screen under the half-open app.
 
 ### Loading
@@ -222,8 +223,9 @@ a shader can be tuned on the Mac before it goes to the phone. The page itself is
 ## Testing
 
 - **The harness** gets an `animations STYLE MOMENT [PROGRESS]` scene on stand-ins, like the others: one frame
-  (`--shot`) or a run (`--frames`) for the docs' WebP. A `check` mode builds every style's three effects and logs
-  `harness: animations OK|FAIL`, with the shader log for a failure (`ShaderEffect.status` and `log`).
+  (`--shot`) or a run (`--frames`) for the docs' WebP. A `check` mode draws every style's three effects; a shader
+  that does not compile shows up as Qt's `QOpenGLShader::compile` warning. (`ShaderEffect.status` cannot tell: on
+  Sailfish OS 5.2 it reads `Error` for shaders that compiled and draw.)
 - **Tests** check that every style in `styles.js` has its three shaders, the keys list, and the settings page's
   entries. CI compiles every shader with `glslangValidator` as GLSL ES 1.00.
 - **On the phone,** before the rest: whether hiding the app layer during the stock close works, whether the fade's
