@@ -38,7 +38,7 @@ SECTIONS = [
     ("Guide", [("README.md", "docs/guide.html", "Install and use"),
                ("CHANGELOG.md", "docs/changelog.html", None)]),
     ("How it works", [(f"docs/{name}.md", f"docs/{name.lower()}.html", None)
-                      for name in ("FOLDERS", "GLASS", "SEARCH", "BADGES", "SWITCHER", "WIDGETS")]),
+                      for name in ("FOLDERS", "GLASS", "SEARCH", "BADGES", "SWITCHER", "WIDGETS", "ANIMATIONS")]),
     ("Development", [("docs/ARCHITECTURE.md", "docs/architecture.html", None),
                      ("docs/DEVELOPMENT.md", "docs/development.html", None)]),
 ]

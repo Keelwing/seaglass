@@ -8,7 +8,7 @@
 #   --scene  folders (default), selector ["Android=panel"], controller ["AI=card,Android=panel,..."],
 #            layout ["normal|edit AI=card@5,... drag=AI drop=Android"], motion ["zoom|spring|reveal|slide|fade
 #            [nocascade] [nodepth] [from=TITLE] [card] [slow=8]"], animations ["STYLE open|close|load [PROGRESS]"
-#            | "check"] (harness/harness.qml)
+#            | "check"], reel ["STYLE,STYLE,... [slow=3]"] (harness/harness.qml)
 #   --shot   copy the harness's own screenshot to out/shots/NAME.png
 #   --grab   when the harness takes that screenshot, in seconds after the scene starts (default 2.5)
 #   --frames the frames a scene grabbed (motion) to out/frames/NAME/, with their delay in centiseconds

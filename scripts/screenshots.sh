@@ -24,10 +24,15 @@ shots=(
     "switcher-pinch.webp|switcher mode=pinch chips=1 recent=1|24"
     "switcher-close.webp|switcher mode=cards chips=1 recent=1|20"
     "glass.webp|glass|26|||w=320 q=60"
+    "glass-clear.webp|glass look=clear photo=ruska|26|||w=320 q=60"
     "search-typing.webp|search pos=bottom type=ca,set,med|26||1032x1440+0+0"
     "widget-move.webp|film clip=move|50|||slow"
     "widget-add.webp|film clip=add|60|||slow"
     "widget-resize.webp|film clip=resize|50|||slow"
+    "settings-animations|settings Animations|10|1.2"
+    "animations-sailfish.webp|reel seaglass,tide,aurora|30|||w=300 q=55"
+    "animations-elements.webp|reel ember,volt,frost|30|||w=300 q=55"
+    "animations-extreme.webp|reel shatter,singularity,dust|32|||w=300 q=55"
 )
 
 # wanted NAME [FILTER...]: no filter, or NAME is one of them

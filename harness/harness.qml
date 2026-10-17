@@ -15,6 +15,8 @@
 //   touch     data widgets driven by mouse events: taps, long press, drags, the gallery (TouchScene.qml)
 //   animations  an opening, loading or closing effect on a made-up app, or every shader's compile check
 //             (AnimationsScene.qml)
+//   reel      styles one after the other: Notes opens from its icon and closes, slowed down for frames
+//             (ReelScene.qml)
 // The scene file next to this one holds "NAME [ARGUMENT]".
 //
 // XDG_CONFIG_HOME points at a copy of ~/.config/lipstick, so this LauncherFolderModel reads the real folders
