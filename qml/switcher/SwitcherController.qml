@@ -227,10 +227,15 @@ Item {
     }
 
     Component.onCompleted: {
+        Motion.setSwitcher(controller)
         loadRecent()
         // the other way of a pinch gives a little, around the fingers
         if (pinchArea)
             pinchArea.transform = [stretchScale]
+    }
+    Component.onDestruction: {
+        if (Motion.switcher === controller)
+            Motion.setSwitcher(null)
     }
 
     RecentApps {
@@ -845,6 +850,20 @@ Item {
                 return r
         }
         return 0
+    }
+
+    // The cover of a window in scene coordinates ({x, y, width, height}), for the opening effect
+    // (animations/AnimationController.qml); null when it has none
+    function coverRectFor(windowId) {
+        for (var i = 0; coverRepeater && windowId && i < coverRepeater.count; i++) {
+            var stock = coverRepeater.itemAt(i)
+            if (!stock || stock.windowId !== windowId)
+                continue
+            var drawn = stock.contentItem
+            var corner = drawn.mapToItem(null, 0, 0)
+            return { "x": corner.x, "y": corner.y, "width": drawn.width, "height": drawn.height }
+        }
+        return null
     }
 
     // The cover under the fingers (in the pinch area), or the nearest one: its index in the stock model

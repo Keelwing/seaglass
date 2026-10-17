@@ -20,6 +20,41 @@ function takeOrigin() {
     return rect
 }
 
+// where an app opens from (the icon or cover tapped): {x, y, width, height} in scene coordinates and when
+// (Date.now()), for the opening effects (animations/AnimationController.qml)
+var appOrigin = null
+
+function setAppOrigin(rect) {
+    appOrigin = rect ? { "x": rect.x, "y": rect.y, "width": rect.width, "height": rect.height, "time": Date.now() }
+                     : null
+}
+
+// the origin noted at most maxAge ms ago, once; else null
+function takeAppOrigin(maxAge) {
+    var rect = appOrigin
+    appOrigin = null
+    return rect && Date.now() - rect.time <= maxAge ? rect : null
+}
+
+// the window an app's own close gesture (a swipe down from the top) is closing: {id, time}, or null. Its cover then
+// closes with it in the switcher without an effect of its own (SwitcherController.qml)
+var closingWindow = null
+
+function noteWindowClosing(id) {
+    closingWindow = id ? { "id": id, "time": Date.now() } : null
+}
+
+function windowJustClosed(id) {
+    return closingWindow !== null && closingWindow.id === id && Date.now() - closingWindow.time < 3000
+}
+
+// SwitcherController.qml, or null: the covers, for the opening effects
+var switcher = null
+
+function setSwitcher(controller) {
+    switcher = controller
+}
+
 function setHome(controller) {
     home = controller
 }
