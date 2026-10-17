@@ -1,0 +1,74 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
+  <!-- The colour icon (OpenRepos, README, the site; docs/BRAND.md): a Sailfish app icon shape, a phone with Seaglass
+       on its screen, a glass clock card lifted out past its edge, and the ember sea glass pebble with the plus.
+       make icons renders out/icons/seaglass-200.png and the GitHub preview from it. -->
+  <defs>
+    <linearGradient id="bg" x1="1" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#7ff0d8"/>
+      <stop offset="0.45" stop-color="#14a39a"/>
+      <stop offset="1" stop-color="#1a3c8f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.75" cy="0.18" r="0.6">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="screen" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#127a80"/>
+      <stop offset="1" stop-color="#16285e"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.98"/>
+      <stop offset="1" stop-color="#d3fbef" stop-opacity="0.92"/>
+    </linearGradient>
+    <linearGradient id="pebble" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffd38a"/>
+      <stop offset="0.55" stop-color="#ff9a5c"/>
+      <stop offset="1" stop-color="#f2575f"/>
+    </linearGradient>
+    <linearGradient id="facet" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.8"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="5"/>
+      <feOffset dx="-3" dy="6"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.38"/></feComponentTransfer>
+      <feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="shape"><path d="M0 256V128A128 128 0 0 1 128 0A128 128 0 0 1 256 128A128 128 0 0 1 128 256Z"/></clipPath>
+    <clipPath id="screenclip"><rect x="70" y="58" width="84" height="150" rx="12"/></clipPath>
+  </defs>
+  <g clip-path="url(#shape)">
+    <rect width="256" height="256" fill="url(#bg)"/>
+    <rect width="256" height="256" fill="url(#glow)"/>
+    <path d="M-20 214C60 176 122 208 200 158S280 128 300 118V300H-20Z" fill="#ffffff" opacity="0.08"/>
+    <path d="M-20 242C70 210 140 238 210 196S280 172 300 166V300H-20Z" fill="#ffffff" opacity="0.07"/>
+  </g>
+  <g filter="url(#shadow)"><rect x="62" y="48" width="100" height="170" rx="20" fill="#f3fbf9"/></g>
+  <rect x="70" y="58" width="84" height="150" rx="12" fill="url(#screen)"/>
+  <g clip-path="url(#screenclip)" fill="#ffffff">
+    <rect x="78" y="118" width="68" height="22" rx="8" opacity="0.3"/>
+    <circle cx="90" cy="129" r="5"/><circle cx="106" cy="129" r="5" opacity="0.7"/><circle cx="122" cy="129" r="5" opacity="0.45"/>
+    <g opacity="0.55">
+      <rect x="78" y="150" width="13" height="13" rx="4.5"/><rect x="96" y="150" width="13" height="13" rx="4.5"/>
+      <rect x="114" y="150" width="13" height="13" rx="4.5"/><rect x="132" y="150" width="13" height="13" rx="4.5"/>
+      <rect x="78" y="170" width="13" height="13" rx="4.5"/><rect x="96" y="170" width="13" height="13" rx="4.5"/>
+    </g>
+    <rect x="78" y="190" width="68" height="12" rx="6" opacity="0.28"/>
+  </g>
+  <!-- the clock widget, lifted out of the screen and past the phone's edge -->
+  <g filter="url(#shadow)" transform="rotate(-8 150 92)">
+    <rect x="96" y="62" width="112" height="62" rx="16" fill="url(#glass)"/>
+    <rect x="110" y="76" width="52" height="15" rx="7.5" fill="#0f6e63"/>
+    <rect x="110" y="99" width="32" height="7" rx="3.5" fill="#0f6e63" opacity="0.45"/>
+    <circle cx="186" cy="93" r="12" fill="none" stroke="#7fdcc6" stroke-width="5"/>
+    <path d="M186 81A12 12 0 0 1 198 93" fill="none" stroke="#0f6e63" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <!-- a warm piece of sea glass with the plus: more than stock -->
+  <g filter="url(#shadow)">
+    <path d="M150 168C160 150 190 146 208 158C226 170 228 198 214 214C200 230 170 232 154 220C138 208 140 184 150 168Z"
+          fill="url(#pebble)"/>
+    <path d="M160 168C168 158 184 156 196 161C186 164 174 170 168 180C164 186 158 182 160 168Z" fill="url(#facet)"/>
+    <path d="M183 172V208M165 190H201" stroke="#ffffff" stroke-width="8" stroke-linecap="round"/>
+  </g>
+</svg>

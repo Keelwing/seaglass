@@ -1,0 +1,56 @@
+name: Older Sailfish OS
+description: How the testers' package went on Sailfish OS 5.1 or 5.0
+labels: [older-sailfish-os]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for trying it. Each release has a testers' package (`-0.preview1`) for Sailfish OS 5.1 and 5.0. Its
+        hook is checked against those releases' files and its QML compiles with their Qt, but a version only moves
+        into the regular package once it has run on a phone. Good news is as useful as bad.
+  - type: input
+    id: os
+    attributes:
+      label: Sailfish OS version
+      description: Settings → About product
+      placeholder: 5.1.0.11
+    validations:
+      required: true
+  - type: input
+    id: phone
+    attributes:
+      label: Phone
+      placeholder: Xperia 10 III
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Seaglass version
+      placeholder: 1.0.0-0.preview1
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: How did it go?
+      options:
+        - Everything I tried works
+        - Most of it works (details below)
+        - The home screen stayed stock
+        - The home screen broke and I had to switch the patch off
+    validations:
+      required: true
+  - type: textarea
+    id: details
+    attributes:
+      label: Details
+      description: What you tried (folders, glass, search, badges, the switcher, widgets) and what looked wrong.
+  - type: textarea
+    id: journal
+    attributes:
+      label: Journal lines
+      description: |
+        With Debug log on (About page of the settings): `devel-su journalctl -b | grep -e seaglass: -e qml`.
+        Look through them before you post: they can name apps and accounts.
+      render: text

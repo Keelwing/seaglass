@@ -1,0 +1,8 @@
+# Build output and the stock home screen files pulled from the phone (Jolla's, proprietary): never commit
+out/
+
+# macOS
+.DS_Store
+
+# Python bytecode
+__pycache__/

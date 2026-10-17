@@ -1,0 +1,47 @@
+# Build a release and publish it on GitHub (docs/DEVELOPMENT.md, "Releasing"): on a pushed tag vX.Y.Z, or by hand
+# for an existing tag. The same scripts as on a development machine: make test lint, then scripts/release.sh
+# --publish (the package, the OpenRepos icon, SHA256SUMS and the notes from CHANGELOG.md; a draft first, published
+# once every asset is up; an existing release gets its notes and assets replaced).
+name: release
+
+on:
+  push:
+    tags: ["v[0-9]*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to release (vX.Y.Z)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+env:
+  RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+      - name: Unit tests
+        run: make test
+      - name: Static checks
+        run: make lint
+      - name: Build and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/release.sh "$RELEASE_TAG" --publish
+      - uses: actions/upload-artifact@v7
+        with:
+          name: release-${{ env.RELEASE_TAG }}
+          path: out/release/${{ env.RELEASE_TAG }}/
+          if-no-files-found: error

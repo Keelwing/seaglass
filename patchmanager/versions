@@ -1,0 +1,8 @@
+# The Sailfish OS versions the hook is made for, one per line: VERSION CHANNEL. make check-hooks checks each one
+# against its stock files; each series (5.2, 5.1...) has its diff in diffs/SERIES.patch.
+#   release  tested on a phone; listed in patch.json
+#   preview  checked by CI only; in the testers' package (make rpm CHANNEL=preview)
+5.2.0.20 release
+5.2.0.18 release
+5.1.0.11 preview
+5.0.0.78 preview

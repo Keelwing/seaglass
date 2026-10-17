@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{title}} – Seaglass</title>
+  <meta name="description" content="{{description}}">
+  <meta name="color-scheme" content="dark light">
+  <link rel="icon" href="{{root}}icon.svg" type="image/svg+xml">
+  {{fonts}}
+  <link rel="stylesheet" href="{{root}}assets/site.css">
+</head>
+<body class="docs">
+  <a class="skip" href="#main">Skip to the content</a>
+  {{nav}}
+  <div class="doc">
+    <nav class="doc-nav" aria-label="Documentation">
+      {{docnav}}
+    </nav>
+    <main id="main" class="doc-body">
+      <h1>{{title}}</h1>
+      {{content}}
+      <p class="doc-edit">{{source}}</p>
+    </main>
+    <nav class="doc-toc" aria-label="On this page">
+      {{toc}}
+    </nav>
+  </div>
+  {{footer}}
+</body>
+</html>

@@ -1,0 +1,48 @@
+name: Bug report
+description: Something on the home screen does not work, or looks wrong
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead. A screenshot helps, without personal data.
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Sailfish OS version
+      description: Settings → About product
+      placeholder: 5.2.0.20
+    validations:
+      required: true
+  - type: input
+    id: phone
+    attributes:
+      label: Phone
+      placeholder: Jolla Phone
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Seaglass and Patchmanager versions
+      placeholder: Seaglass 1.0.0, Patchmanager 3.2.x
+    validations:
+      required: true
+  - type: input
+    id: status
+    attributes:
+      label: The status line
+      description: What the first page of Seaglass's settings says at the top
+      placeholder: Running
+  - type: textarea
+    id: journal
+    attributes:
+      label: Journal lines
+      description: |
+        With Debug log on (About page of the settings), after the problem happened:
+        `devel-su journalctl -b | grep seaglass:`. Look through them before you post: they can name apps and
+        accounts.
+      render: text

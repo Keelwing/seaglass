@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+ <!-- The patch's icon in Patchmanager's list (docs/BRAND.md), black for light ambiences (main.svg: white,
+      for dark ones). Qt's SVG renderer has no masks: the cut-outs are holes in the paths (evenodd). -->
+ <!-- the phone, open on its right where the card comes out -->
+ <path d="M38 15V13A7 7 0 0 0 31 6H15A7 7 0 0 0 8 13V51A7 7 0 0 0 15 58H31A7 7 0 0 0 38 51V37" fill="none" stroke="#000000" stroke-width="4"/>
+ <rect x="13" y="39" width="5" height="5" rx="1.5" fill="#000000"/>
+ <rect x="20.5" y="39" width="5" height="5" rx="1.5" fill="#000000"/>
+ <rect x="28" y="39" width="5" height="5" rx="1.5" fill="#000000"/>
+ <rect x="13" y="46.5" width="5" height="5" rx="1.5" fill="#000000"/>
+ <rect x="20.5" y="46.5" width="5" height="5" rx="1.5" fill="#000000"/>
+ <rect x="28" y="46.5" width="5" height="5" rx="1.5" fill="#000000"/>
+ <!-- the card lifted out of the screen, its lines cut out -->
+ <path fill="#000000" fill-rule="evenodd" d="M31 17H53A5 5 0 0 1 58 22V30A5 5 0 0 1 53 35H31A5 5 0 0 1 26 30V22A5 5 0 0 1 31 17ZM31 21.5H46V25.5H31ZM31 28.5H40V31H31Z"/>
+ <!-- the piece of sea glass with the plus cut out -->
+ <path fill="#000000" fill-rule="evenodd" d="M42.5 45C44 40.5 49 38.5 53.5 39.5C58.5 40.5 62.5 44.5 62 50C61.5 55.5 57 60.5 51.5 60.5C46 60.5 41.5 56.5 41.5 51C41.5 48.8 41.8 46.8 42.5 45ZM50 43.5H54V48H58.5V52H54V56.5H50V52H45.5V48H50Z"/>
+</svg>

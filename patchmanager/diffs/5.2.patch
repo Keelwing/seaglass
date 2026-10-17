@@ -1,0 +1,528 @@
+--- a/usr/share/lipstick-jolla-home-qt5/launcher/LauncherFolder.qml
++++ b/usr/share/lipstick-jolla-home-qt5/launcher/LauncherFolder.qml
+@@ -20,6 +20,18 @@
+     property Item iconSelector
+     property int visibleRowCount: launcherGrid.rows - 2
+ 
++    // seaglass: the folder's opening and closing motion (/usr/share/seaglass);
++    // the stock fade stays when it cannot be loaded
++    readonly property bool seaglassMotion: folderMotion.item ? folderMotion.item.managed : false
++    readonly property bool seaglassGlass: folderMotion.item ? folderMotion.item.glass === true : false
++
++    Loader {
++        id: folderMotion
++        property Item folder: launcherFolder
++        property Item grid: launcherGrid
++        source: "file:///usr/share/seaglass/qml/folders/FolderMotion.qml"
++    }
++
+     Connections {
+         target: Desktop.instance.switcher
+         onAppShowInProgressChanged: {
+@@ -29,6 +41,10 @@
+     }
+ 
+     function close() {
++
++        // seaglass: the closing motion first; it calls close() again when it is done
++        if (folderMotion.item && folderMotion.item.close())
++            return
+         launcherGrid.setEditMode(false)
+         opacity = 0.0
+         enabled = false
+@@ -43,17 +59,17 @@
+ 
+     z: 10
+     opacity: 0.0
+-    Behavior on opacity { SmoothedAnimation { duration: 400; velocity: 1000 / duration } }
++    Behavior on opacity { enabled: !seaglassMotion; SmoothedAnimation { duration: 400; velocity: 1000 / duration } }
+ 
+     gradient: Gradient {
+-        GradientStop { position: 0.0; color: Theme.rgba(Theme.overlayBackgroundColor, 1.0) }
+-        GradientStop { position: 1.0; color: Theme.rgba(Theme.overlayBackgroundColor, Theme.opacityOverlay) }
++        GradientStop { position: 0.0; color: Theme.rgba(Theme.overlayBackgroundColor, seaglassGlass ? 0.0 : 1.0) }
++        GradientStop { position: 1.0; color: Theme.rgba(Theme.overlayBackgroundColor, seaglassGlass ? 0.0 : Theme.opacityOverlay) }
+     }
+ 
+     width: launcherPager.width
+     height: launcherPager.height
+ 
+-    Component.onCompleted: opacity = 1.0
++    Component.onCompleted: if (!seaglassMotion) opacity = 1.0
+ 
+     Connections {
+         target: Lipstick.compositor
+@@ -155,11 +171,22 @@
+                     anchors.horizontalCenter: parent.horizontalCenter
+                     pressed: icon.pressed && icon.containsMouse
+ 
++                    // seaglass: small icons of the folder's apps (/usr/share/seaglass);
++                    // the item count below stays when they cannot be loaded
++                    Loader {
++                        id: headerFolderPreview
++                        property QtObject folder: model
++                        property bool pressed: icon.pressed && icon.containsMouse
++                        anchors.fill: parent
++                        source: "file:///usr/share/seaglass/qml/folders/FolderPreview.qml"
++                    }
++
+                     Text {
+                         font.pixelSize: Theme.fontSizeExtraLarge
+                         font.family: Theme.fontFamilyHeading
+                         color: Theme.lightPrimaryColor
+                         text: model.itemCount
++                        visible: headerFolderPreview.status !== Loader.Ready
+                         anchors.centerIn: parent
+                     }
+                 }
+@@ -354,7 +381,7 @@
+             }
+             width: folderIconGrid.width
+             height: launcherFolder.height - header.height
+-            contentHeight: folderIconGrid.height
++            contentHeight: folderIconGrid.height + (folderTypeChooser.item ? folderTypeChooser.item.height : 0)
+             opacity: selectIcon ? 1.0 : 0.0
+             Behavior on opacity { FadeAnimation { duration: 300 } }
+             enabled: selectIcon
+@@ -406,6 +433,16 @@
+                         }
+                     }
+                 }
++
++                // seaglass: how the folder shows on the home screen, below the shapes
++                Loader {
++                    id: folderTypeChooser
++                    property QtObject folder: launcherFolder.model
++                    y: folderIconGrid.height
++                    width: folderIconGrid.width
++                    source: "file:///usr/share/seaglass/qml/widgets/group/FolderTypeChooser.qml"
++                    onLoaded: item.finished.connect(function () { selectIcon = false })
++                }
+             }
+         }
+     }
+--- a/usr/share/lipstick-jolla-home-qt5/launcher/LauncherGrid.qml
++++ b/usr/share/lipstick-jolla-home-qt5/launcher/LauncherGrid.qml
+@@ -48,6 +48,19 @@
+     property bool reserveFirstRow: launcherClockConfig.launcher_clock_visible
+ 
+     signal itemLaunched
++
++    // seaglass: group widgets as blocks of the grid (/usr/share/seaglass);
++    // the stock grid stays when they cannot be loaded
++    readonly property var seaglassLayout: seaglass.item ? seaglass.item.layout : null
++
++    Loader {
++        id: seaglass
++        property Item grid: gridview
++        // the stock experimental clock, which the search row goes under when it is on
++        property Component clockHeader: launcherClockConfig.launcher_clock_visible ? clockHeader : null
++        active: rootFolder
++        source: "file:///usr/share/seaglass/qml/core/HomeController.qml"
++    }
+ 
+     function categoryQsTrIds() {
+         //% "AudioVideo"
+@@ -79,6 +92,10 @@
+     }
+ 
+     function showFolder(folder) {
++
++        // seaglass: where the folder opens from (its icon or widget), for its opening motion
++        if (seaglass.item)
++            seaglass.item.noteOrigin(folder)
+         if (openedChildFolder) {
+             // should never happen
+             openedChildFolder.close()
+@@ -106,7 +123,11 @@
+     // itself position them according to margins
+     pageHeight: launcherPager.height - topMargin - bottomMargin
+     cellHeight: Math.floor(launcherPager.height / rows)
+-    header: launcherClockConfig.launcher_clock_visible ? clockHeader : null
++    header: seaglass.item && seaglass.item.header ? seaglass.item.header
++                                                : (launcherClockConfig.launcher_clock_visible ? clockHeader : null)
++
++    // seaglass: room for the rows the widgets add, so that the pager makes enough pages
++    footer: seaglass.item ? seaglass.item.footer : null
+ 
+     ConfigurationGroup {
+         id: launcherClockConfig
+@@ -228,6 +249,11 @@
+     EditableGridManager {
+         id: gridManager
+ 
++        // seaglass: the item drawn at a point (with widgets the drawn grid is not the GridView's)
++        function itemAt(x, y) {
++            return seaglass.item ? seaglass.item.itemAt(x, y) : view.itemAt(x, y)
++        }
++
+         supportsFolders: rootFolder
+         pager: launcherPager
+         view: gridview
+@@ -248,7 +274,7 @@
+         opacity: show ? 1.0 : 0.0
+         Behavior on opacity { FadeAnimation {} }
+         y: target ? target.targetY + target.iconOffset : -20000
+-        anchors.horizontalCenter: target ? target.horizontalCenter : gridview.contentItem.horizontalCenter
++        x: target ? target.targetX + (target.width - width) / 2 : (gridview.contentItem.width - width) / 2
+         scale: 1.3
+         parent: gridview.contentItem
+         z: -3
+@@ -296,13 +322,28 @@
+         isFolder: model.object.type == LauncherModel.Folder
+         folderItemCount: isFolder && model.object ? model.object.itemCount : 0
+         editMode: gridview.launcherEditMode
++
++        // seaglass: the drawn block of this item; a widget folder spans several cells
++        readonly property var seaglassBlock: gridview.seaglassLayout ? gridview.seaglassLayout.cells[index] || null
++                                                                     : null
++        readonly property bool seaglassWidget: seaglassBlock !== null && (seaglassBlock.w > 1 || seaglassBlock.h > 1)
++        // the delegate itself keeps the stock cell size: the GridView scrolls to show the whole current item
++        // (set on every press), so a taller delegate would scroll the grid; only what is drawn is the block
++        targetX: seaglassBlock ? seaglassBlock.col * cellWidth : x
++        targetWidth: seaglassBlock ? seaglassBlock.w * cellWidth : width
++        targetHeight: seaglassBlock ? seaglassBlock.h * gridview.realCellHeight : height
+         scale: newFolderIcon.show && manager.folderIndex == index && !isFolder
+                ? 0.5 : (reordering || manager.folderIndex == index || scaleUpTimer.running
+-                        ? 1.3 : 1)
++                        ? (seaglassWidget ? 1.04 : 1.3) : 1)
+ 
+         // the grid view lays out item for full screen, this overrides the layouting so that
+         // the page has top and bottom margins
+         targetY: {
++
++            // seaglass: the block's row, on its page
++            if (seaglassBlock)
++                return gridview.originY + Math.floor(seaglassBlock.row / gridview.rows) * launcherPager.height
++                        + gridview.topMargin + (seaglassBlock.row % gridview.rows) * gridview.realCellHeight
+             var indexOffset = gridview.reserveFirstRow ? gridview.columns : 0
+             var rowInPage = Math.floor((index + indexOffset) % (gridview.columns * gridview.rows) / gridview.columns)
+             var pageNumber = Math.floor((model.index + indexOffset) / (gridview.columns * gridview.rows))
+@@ -368,6 +409,11 @@
+         }
+ 
+         onPressAndHold: {
++
++            // seaglass: a badged app's or folder's notifications instead of the edit mode, when the peek is on
++            if ((seaglassBadge.item && seaglassBadge.item.peek())
++                    || (folderPreview.item && folderPreview.item.peek !== undefined && folderPreview.item.peek()))
++                return
+             if (!launcherEditMode) {
+                 setEditMode(true)
+                 wrapper.startReordering(true)
+@@ -448,16 +494,57 @@
+             opacity: isUpdating && folderItemCount == 0 ? Theme.opacityFaint
+                                                         : wrapper.itemOpacity
+ 
++            // seaglass: small icons of the folder's apps (/usr/share/seaglass);
++            // the item count below stays when they cannot be loaded
++            Loader {
++                id: folderPreview
++                property QtObject folder: isFolder ? model.object : null
++                property bool pressed: down
++                property bool dropTarget: isFolder && manager.folderIndex == index
++                property Item controller: seaglass.item
++                property bool editMode: launcherEditMode
++                anchors.fill: parent
++                active: isFolder && !seaglassWidget
++                source: "file:///usr/share/seaglass/qml/folders/FolderPreview.qml"
++            }
++
+             Text {
+                 font.pixelSize: Theme.fontSizeExtraLarge
+                 font.family: Theme.fontFamilyHeading
+                 text: folderItemCount > 0 ? folderItemCount : ""
+                 color: Theme.lightPrimaryColor
+                 anchors.centerIn: parent
+-                visible: !isUpdating || model.object.updatingProgress < 0 || model.object.updatingProgress > 100
++                visible: folderPreview.status !== Loader.Ready && (!isUpdating || model.object.updatingProgress < 0 || model.object.updatingProgress > 100)
+                 opacity: reorderItem && folderItemCount >= 99 ? Theme.opacityLow : 1.0
+             }
+-        }
++
++            // seaglass: the app's notification badge (/usr/share/seaglass)
++            Loader {
++                id: seaglassBadge
++                property QtObject launcherItem: model.object
++                anchors.fill: parent
++                active: !isFolder
++                source: "file:///usr/share/seaglass/qml/badges/IconBadge.qml"
++            }
++        }
++
++        // seaglass: a widget folder draws its group widget instead of its icon and name
++        Loader {
++            id: seaglassTile
++            property QtObject folder: model.object
++            property Item controller: seaglass.item
++            property bool editMode: launcherEditMode
++            property bool dropTarget: manager.folderIndex == index
++            property bool lifted: reordering
++            anchors.fill: parent
++            active: seaglassWidget
++            source: "file:///usr/share/seaglass/qml/widgets/group/WidgetTile.qml"
++        }
++        Binding { target: launcherIcon; property: "visible"; value: seaglassTile.status !== Loader.Ready }
++        Binding { target: launcherText; property: "visible"; value: false; when: seaglassTile.status === Loader.Ready }
++        // seaglass: a glass folder draws its glass tile instead of the stock shape; the small icons are
++        // the shape's children, so only its picture goes (the stock icon binding comes back)
++        Binding { target: launcherIcon; property: "icon"; value: ""; when: folderPreview.item !== null && folderPreview.item.glass === true }
+ 
+         Label {
+             id: launcherText
+--- a/usr/share/lipstick-jolla-home-qt5/main/EditableGridDelegate.qml
++++ b/usr/share/lipstick-jolla-home-qt5/main/EditableGridDelegate.qml
+@@ -29,6 +29,11 @@
+     property bool animateMovement: true
+ 
+     property real targetY: y
++
++    // seaglass: the drawn x and size, as targetY is the drawn y (LauncherGrid.qml sets them all)
++    property real targetX: x
++    property real targetWidth: width
++    property real targetHeight: height
+ 
+     property alias contentItem: delegateContentItem
+     default property alias _content: delegateContentItem.data
+@@ -94,7 +99,7 @@
+         onTriggered: {
+             if (_viewWidth !== manager.view.width) {
+                 // Don't animate when created or view is resized
+-                delegateContentItem.x = wrapper.x
++                delegateContentItem.x = wrapper.targetX
+                 delegateContentItem.y = wrapper.targetY
+                 _viewWidth = manager.view.width
+                 _oldY = y
+@@ -168,8 +173,8 @@
+                 }
+             }
+ 
+-            if (item && item !== wrapper && item.y !== wrapper.y) {
+-                var yDist = item.y - targetY
++            if (item && item !== wrapper && item.targetY !== wrapper.targetY && item.height === wrapper.height) {
++                var yDist = item.targetY - targetY
+                 if (Math.abs(yDist) <= item.height - height/2) {
+                     // Our items have differing heights and we don't have enough overlap yet
+                     return
+@@ -184,9 +189,9 @@
+                         idx = item.modelIndex
+                     }
+                 } else {
+-                    var offset = gridViewPos.x - item.x
++                    var offset = gridViewPos.x - item.targetX
+                     var folderThreshold = manager.supportsFolders && !isFolder
+-                            ? item.width / 4 : item.width / 2
++                            ? item.targetWidth / 4 : item.targetWidth / 2
+ 
+                     if (offset < folderThreshold) {
+                         if (Math.abs(index - item.modelIndex) > 1
+@@ -195,7 +200,7 @@
+                             idx = index < item.modelIndex ? item.modelIndex - 1 : item.modelIndex
+                             manager.folderItem = null
+                         }
+-                    } else if (offset >= item.width - folderThreshold) {
++                    } else if (offset >= item.targetWidth - folderThreshold) {
+                         if (Math.abs(index - item.modelIndex) > 1
+                                 || index < item.modelIndex
+                                 || item.y !== wrapper.targetY) {
+@@ -239,7 +244,8 @@
+             var globalY = manager.pager.mapFromItem(delegateContentItem, 0, 0).y
+             if (globalY <= 0 && manager.pager.contentY > 0) {
+                 manager.scroll(true)
+-            } else if (globalY + height >= manager.pager.height && manager.pager.contentY < maxContentY) {
++            } else if (globalY + Math.min(height, manager.view.cellHeight || height) >= manager.pager.height
++                       && manager.pager.contentY < maxContentY) {
+                 manager.scroll(false)
+             } else {
+                 manager.stopScrolling()
+@@ -249,10 +255,10 @@
+         }
+ 
+         objectName: "EditableGridDelegate_contentItem"
+-        x: wrapper.x
++        x: wrapper.targetX
+         y: wrapper.targetY
+-        width: wrapper.width
+-        height: wrapper.height
++        width: wrapper.targetWidth
++        height: wrapper.targetHeight
+         parent: manager.contentContainer
+         transformOrigin: Item.Center
+ 
+@@ -307,7 +313,7 @@
+             PropertyChanges {
+                 target: delegateContentItem
+                 explicit: true
+-                x: wrapper.x
++                x: wrapper.targetX
+                 y: wrapper.y
+             }
+             PropertyChanges {
+@@ -319,6 +325,10 @@
+                 onTargetYChanged: {
+                     moveTimer.running = true
+                 }
++
++                onTargetXChanged: {
++                    moveTimer.running = true
++                }
+             }
+         }
+ 
+@@ -332,7 +342,7 @@
+             NumberAnimation {
+                 target: delegateContentItem
+                 property: "x"
+-                to: wrapper.x
++                to: wrapper.targetX
+                 duration: 150
+                 easing.type: Easing.InOutQuad
+             }
+@@ -346,7 +356,7 @@
+             onStopped: {
+                 // This is a safeguard. If the animation is canceled make sure the icon is left in
+                 // the correct state.
+-                delegateContentItem.x = wrapper.x
++                delegateContentItem.x = wrapper.targetX
+                 delegateContentItem.y = wrapper.targetY
+             }
+         }
+@@ -355,12 +365,12 @@
+             id: fadeMoveAnim
+ 
+             NumberAnimation { target: delegateContentItem; property: "opacity"; to: 0; duration: 75 }
+-            ScriptAction { script: { delegateContentItem.x = wrapper.x; delegateContentItem.y = wrapper.targetY } }
++            ScriptAction { script: { delegateContentItem.x = wrapper.targetX; delegateContentItem.y = wrapper.targetY } }
+             NumberAnimation { target: delegateContentItem; property: "opacity"; to: 1.0; duration: 75 }
+             onStopped: {
+                 // This is a safeguard. If the animation is canceled make sure the icon is left in
+                 // the correct state.
+-                delegateContentItem.x = wrapper.x
++                delegateContentItem.x = wrapper.targetX
+                 delegateContentItem.y = wrapper.targetY
+                 delegateContentItem.opacity = 1.0
+             }
+--- a/usr/share/lipstick-jolla-home-qt5/layers/LauncherLayer.qml
++++ b/usr/share/lipstick-jolla-home-qt5/layers/LauncherLayer.qml
+@@ -121,8 +121,22 @@
+ 
+     MenuBackground {
+         z: -1
++
++        // seaglass: hidden while our wallpaper covers it
++        visible: !(seaglassWallpaper.item && seaglassWallpaper.item.covers)
+         anchors.fill: parent
+         parent: launcherLayer.contentItem
++    }
++
++    // seaglass: a wallpaper behind the app grid (/usr/share/seaglass); the stock background
++    // stays when it cannot be loaded
++    Loader {
++        id: seaglassWallpaper
++        property Item edgeLayer: launcherLayer
++        z: -1
++        anchors.fill: parent
++        parent: launcherLayer.contentItem
++        source: "file:///usr/share/seaglass/qml/glass/LauncherWallpaper.qml"
+     }
+ 
+     Timer {
+--- a/usr/share/lipstick-jolla-home-qt5/switcher/Switcher.qml
++++ b/usr/share/lipstick-jolla-home-qt5/switcher/Switcher.qml
+@@ -49,7 +49,8 @@
+         columnChangeAnimation.complete()
+     }
+ 
+-    contentHeight: Math.ceil(switcherWrapper.y + switcherWrapper.height)
++    contentHeight: seaglassSwitcher.item && seaglassSwitcher.item.cards
++                   ? height : Math.ceil(switcherWrapper.y + switcherWrapper.height)
+ 
+     interactive: contentHeight > height || housekeeping
+ 
+@@ -382,15 +383,25 @@
+         visible: Lipstick.compositor.switcherLayer.scale === 1.0 && switcherRoot.contentHeight > switcherRoot.height
+     }
+ 
++    // seaglass: a pinch switches between the grid and the card row (/usr/share/seaglass);
++    // off without the controller
++    PinchArea {
++        id: seaglassPinch
++        width: switcherRoot.width
++        height: Math.max(switcherRoot.height, switcherWrapper.y + switcherWrapper.height)
++        enabled: seaglassSwitcher.item ? seaglassSwitcher.item.pinchEnabled : false
++
+     MouseArea {
+         id: switcherWrapper
+ 
+         objectName: "Switcher_wrapper"
+ 
+         y: switcherGrid.baseY
+-        height: switcherGrid.implicitHeight <= switcherRoot.height - y
++        // seaglass: room for the recently closed apps after the covers
++        readonly property real seaglassExtra: seaglassSwitcher.item ? seaglassSwitcher.item.extraHeight : 0
++        height: switcherGrid.implicitHeight + seaglassExtra <= switcherRoot.height - y
+                 ? switcherRoot.height - y
+-                : switcherGrid.implicitHeight + switcherGrid.rowSpacing - 1
++                : switcherGrid.implicitHeight + switcherGrid.rowSpacing - 1 + seaglassExtra
+         width: switcherRoot.width
+ 
+         onWidthChanged: switcherGrid.updateColumns()
+@@ -411,6 +422,12 @@
+             property QtObject ngfEffect
+ 
+             columns: largeColumns
++
++            // seaglass: room for the name chips under the covers (the stock spacing without them)
++            rowSpacing: (_largeScreen && _pageHeight > parent.width
++                         ? Math.ceil((_pageHeight - statusBarHeight - largeRows * Theme.coverSizeLarge.height)
++                                     / (largeRows + 1))
++                         : spacing) + (seaglassSwitcher.item ? seaglassSwitcher.item.chipSpace : 0)
+             statusBarHeight: Lipstick.compositor.multitaskingHome ? switcherRoot.statusBarHeight : 0
+ 
+             function updateColumns() {
+@@ -696,6 +713,22 @@
+             }
+         }
+     }
++    } // seaglass: seaglassPinch
++
++    // seaglass: glass under the covers, the recently closed apps, the card row (/usr/share/seaglass);
++    // the stock switcher stays when it cannot be loaded
++    Loader {
++        id: seaglassSwitcher
++        property Item switcher: switcherRoot
++        property Item grid: switcherGrid
++        property Item wrapper: switcherWrapper
++        property Item covers: switcherItems
++        property Item coverRepeater: repeater
++        property QtObject coverModel: switcherModel
++        property QtObject mruModel: mruSwitcherModel
++        property Item pinchArea: seaglassPinch
++        source: "file:///usr/share/seaglass/qml/switcher/SwitcherController.qml"
++    }
+ 
+     CloseAllAppsHint {}
+ }
+--- a/usr/share/lipstick-jolla-home-qt5/switcher/SwitcherItem.qml
++++ b/usr/share/lipstick-jolla-home-qt5/switcher/SwitcherItem.qml
+@@ -251,6 +251,20 @@
+         layer.effect: null
+         opacity: hideCover ? 1.0 : 0.0
+         Behavior on opacity { FadeAnimation { duration: 500 } }
++    }
++
++    // seaglass: the app's name chip under the cover (/usr/share/seaglass)
++    Loader {
++        id: seaglassChip
++        property var launcherItem: wrapper.launcherItem
++        property Item glass: seaglassSwitcher.item ? seaglassSwitcher.item.glass : null
++        property bool hidden: switcherRoot.housekeeping
++        property real maxWidth: wrapper.width
++        anchors.horizontalCenter: parent.horizontalCenter
++        anchors.top: parent.bottom
++        anchors.topMargin: Theme.paddingMedium
++        active: seaglassSwitcher.item ? seaglassSwitcher.item.chips : false
++        source: "file:///usr/share/seaglass/qml/switcher/SwitcherChip.qml"
+     }
+ 
+     Loader {

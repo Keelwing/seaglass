@@ -1,0 +1,9 @@
+# Keeps the GitHub Actions in .github/workflows/ at their latest versions: a pull request when one is released
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: CI

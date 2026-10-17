@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Seaglass for Sailfish OS</title>
+  <meta name="description" content="Widgets, glass, app search, notification badges and a richer task switcher for the Sailfish OS home screen.">
+  <meta name="color-scheme" content="dark light">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <meta property="og:title" content="Seaglass for Sailfish OS">
+  <meta property="og:description" content="Widgets, glass, app search, notification badges and a richer task switcher for the Sailfish OS home screen.">
+  <meta property="og:url" content="https://d31m05z.github.io/seaglass/">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://d31m05z.github.io/seaglass/images/widgets.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  {{fonts}}
+  <link rel="stylesheet" href="assets/site.css">
+  <script>document.documentElement.classList.add("js")</script>
+  <script src="assets/site.js" defer></script>
+</head>
+<body class="landing">
+  <a class="skip" href="#main">Skip to the content</a>
+  {{nav}}
+
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-text">
+        <h1 id="hero-title">Seaglass</h1>
+        <p class="lead">Widgets, glass, app search, notification badges and a richer task switcher for the Sailfish OS
+          home screen.</p>
+        <p class="hero-note">Every part is a setting. If Seaglass cannot load, you get the stock home screen.</p>
+        <div class="actions">
+          <a class="button primary" href="{{rpm_url}}">Download {{version}}</a>
+          <a class="button" href="#install">How to install</a>
+        </div>
+        <p class="requires">For Sailfish OS {{compatible}} with Patchmanager 3.2 or newer.</p>
+      </div>
+      <figure class="phone hero-phone">
+        <div class="screen">
+          <picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
+            <img src="images/widget-move.webp" width="360" height="793"
+                 alt="A long press lifts the weather widget; it is carried up while the clock and the icons make way">
+          </picture>
+        </div>
+        <div class="lift" aria-hidden="true">
+          <span class="lift-time">09:41</span>
+          <span class="lift-ring"></span>
+          <span class="lift-date">Thursday 15 October</span>
+        </div>
+        <div class="pebble" aria-hidden="true"></div>
+      </figure>
+    </section>
+
+    <section class="features" id="features" aria-label="Features">
+      <div class="steps">
+        <article class="feature" data-shot="images/widget-add.webp" data-still="images/widgets.jpg">
+          <h2>Data widgets</h2>
+          <p>Live information as glass blocks among your icons: a clock with the next alarm, the battery and your
+            connections, what is playing, your next events and the weather.</p>
+          <p>Add them in the edit mode: <em>Add widget</em> opens a gallery with live previews. Carry one out and let
+            it go where you want it.</p>
+          <figure class="phone"><div class="screen"><picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
+            <img src="images/widget-add.webp" width="360" height="793" loading="lazy"
+                 alt="Add widget: a status card carried out of the gallery onto the grid">
+          </picture></div></figure>
+        </article>
+
+        <article class="feature" data-shot="images/widget-move.webp" data-still="images/widgets.jpg">
+          <h2>Move them like icons</h2>
+          <p>A long press picks a widget up anywhere on it. The icons flow around it as it moves, and it takes its
+            place in the grid's order when you let go.</p>
+          <figure class="phone"><div class="screen"><picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
+            <img src="images/widget-move.webp" width="360" height="793" loading="lazy"
+                 alt="The weather widget carried up two rows while the clock and the icons make way">
+          </picture></div></figure>
+        </article>
+
+        <article class="feature" data-shot="images/widget-resize.webp" data-still="images/widgets.jpg">
+          <h2>Any size that fits</h2>
+          <p>The pill on a widget in the edit mode changes its size: a card of two by two cells, a shelf across the
+            screen, or a panel of two rows.</p>
+          <figure class="phone"><div class="screen"><picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
+            <img src="images/widget-resize.webp" width="360" height="793" loading="lazy"
+                 alt="The size pill turns the clock from a card into a shelf, and back">
+          </picture></div></figure>
+        </article>
+
+        <article class="feature" data-shot="images/glass.webp" data-still="images/widgets.jpg">
+          <h2>Glass over your ambience</h2>
+          <p>The app grid rises over the home screen's wallpaper, sharp or frosted like glass. The wallpaper eases
+            back and follows the pages more slowly than the icons, and another ambience's picture can take its place.
+            Folders, open folders and widgets are glass too.</p>
+          <figure class="phone"><div class="screen"><picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
+            <img src="images/glass.webp" width="320" height="705" loading="lazy"
+                 alt="The app grid pulled up over the wallpaper as it frosts, a page turned, and back">
+          </picture></div></figure>
+        </article>
+
+        <article class="feature" data-shot="images/folder-motion.webp" data-still="images/folders.jpg">
+          <h2>Folders you can see into</h2>
+          <p>A folder shows small icons of its apps instead of a number. It opens from its icon with a motion of your
+            choice, zoom, spring, reveal or slide, and closes back into it.</p>
+          <figure class="phone"><div class="screen"><picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="images/folders.jpg">
+            <img src="images/folder-motion.webp" width="360" height="793" loading="lazy"
+                 alt="A folder zooming open from its icon onto glass, and closing back">
+          </picture></div></figure>
+        </article>
+
+        <article class="feature" data-shot="images/folders.jpg" data-still="images/folders.jpg">
+          <h2>Folders as widgets</h2>
+          <p>Open a folder out into a card, a shelf or a panel on the grid, and its apps start with one tap. It stays an
+            ordinary folder underneath.</p>
+          <figure class="phone"><div class="screen">
+            <img src="images/folders.jpg" width="540" height="1189" loading="lazy"
+                 alt="Folder previews, and folders shown as a card and a panel among the icons">
+          </div></figure>
+        </article>
+
+        <article class="feature" data-shot="images/search-typing.webp" data-still="images/search.jpg">
+          <h2>Find any app as you type</h2>
+          <p>A glass pill on the first page holds the apps you use most. Tap it for every app from A to Z with a letter
+            rail, or start typing: accents don't matter, and initials and folder names match too.</p>
+          <figure class="phone"><div class="screen"><picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="images/search.jpg">
+            <img src="images/search-typing.webp" width="360" height="502" loading="lazy"
+                 alt="The search sheet growing out of the pill: the letter rail, then typing">
+          </picture></div></figure>
+        </article>
+
+        <article class="feature" data-shot="images/badges.jpg" data-still="images/badges.jpg">
+          <h2>Badges where they help</h2>
+          <p>Apps with notifications show how many on their icons, folders add theirs up, and a long press on an app or
+            a folder shows the notifications, to open or clear them.</p>
+          <figure class="phone"><div class="screen">
+            <img src="images/badges.jpg" width="540" height="1189" loading="lazy"
+                 alt="Badges on app icons and a folder, and the peek at a folder's notifications">
+          </div></figure>
+        </article>
+
+        <article class="feature" data-shot="images/switcher-pinch.webp" data-still="images/switcher.jpg">
+          <h2>A task switcher with names</h2>
+          <p>Covers get a chip with their app's name, and recently closed apps are one tap away. Pinch to switch between
+            the grid of covers and a row of cards.</p>
+          <figure class="phone"><div class="screen"><picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="images/switcher.jpg">
+            <img src="images/switcher-pinch.webp" width="360" height="793" loading="lazy"
+                 alt="A pinch switching the task switcher from the card row to the grid, and back">
+          </picture></div></figure>
+        </article>
+
+        <article class="feature" data-shot="images/switcher-close.webp" data-still="images/switcher.jpg">
+          <h2>Pull a card up to close it</h2>
+          <p>In the card row, the last app you used is in front. Pull a card up and the switcher shows the point of
+            closing; let go before it and the card springs back.</p>
+          <figure class="phone"><div class="screen"><picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="images/switcher.jpg">
+            <img src="images/switcher-close.webp" width="360" height="793" loading="lazy"
+                 alt="A card pulled up past the point of closing">
+          </picture></div></figure>
+        </article>
+      </div>
+
+      <div class="stage" aria-hidden="true">
+        <figure class="phone stage-phone">
+          <div class="screen"></div>
+        </figure>
+      </div>
+    </section>
+
+    <section class="install" id="install" aria-labelledby="install-title">
+      <h2 id="install-title">Install</h2>
+      <ol class="install-steps">
+        <li>
+          <h3>Get Patchmanager</h3>
+          <p>Seaglass is applied by Patchmanager 3.2 or newer. Install it from OpenRepos or Chum if you don't have it.</p>
+        </li>
+        <li>
+          <h3>Install the package</h3>
+          <p><a href="{{rpm_url}}">Download the RPM</a>, then install it in a terminal:</p>
+          <pre><code>devel-su pkcon install-local seaglass-{{version}}-1.noarch.rpm</code></pre>
+        </li>
+        <li>
+          <h3>Activate Seaglass</h3>
+          <p>Open <em>Settings</em>, then <em>Patchmanager</em>, activate <em>Seaglass</em>, and let Patchmanager
+            restart the home screen. Tap <em>Seaglass</em> there for its settings.</p>
+        </li>
+      </ol>
+      <p class="install-more">To take it back, deactivate it in Patchmanager or run
+        <code>devel-su rpm -e seaglass</code>. More in the <a href="docs/guide.html#install">install guide</a>
+        and <a href="docs/guide.html#troubleshooting">troubleshooting</a>.</p>
+    </section>
+
+    <section class="gallery" aria-labelledby="gallery-title">
+      <h2 id="gallery-title">Screens</h2>
+      <div class="gallery-row" tabindex="0" role="region" aria-label="Screenshots, scroll sideways">
+        <figure><div class="phone"><div class="screen"><img src="images/widgets.jpg" width="540" height="1189" loading="lazy" alt="The app grid on glass with data widgets"></div></div><figcaption>Data widgets on glass</figcaption></figure>
+        <figure><div class="phone"><div class="screen"><img src="images/folders.jpg" width="540" height="1189" loading="lazy" alt="Folder previews and folder widgets"></div></div><figcaption>Folders and folder widgets</figcaption></figure>
+        <figure><div class="phone"><div class="screen"><img src="images/search.jpg" width="540" height="754" loading="lazy" alt="The search sheet with its letter rail"></div></div><figcaption>App search</figcaption></figure>
+        <figure><div class="phone"><div class="screen"><img src="images/badges.jpg" width="540" height="1189" loading="lazy" alt="Notification badges and the peek"></div></div><figcaption>Badges and the peek</figcaption></figure>
+        <figure><div class="phone"><div class="screen"><img src="images/switcher.jpg" width="540" height="1189" loading="lazy" alt="The task switcher's card row"></div></div><figcaption>Task switcher</figcaption></figure>
+        <figure><div class="phone"><div class="screen"><img src="images/settings.jpg" width="540" height="1189" loading="lazy" alt="The first page of the Seaglass settings"></div></div><figcaption>Settings</figcaption></figure>
+      </div>
+    </section>
+
+    <section class="facts" aria-label="How it works and privacy">
+      <div>
+        <h2>Safe to try</h2>
+        <p>Seaglass never changes the home screen's files. Patchmanager adds a few lines that load our QML, and
+          wherever it does not load, that part of the home screen stays stock. Removing the package takes the patch out
+          first.</p>
+        <p><a href="docs/architecture.html">How it works</a></p>
+      </div>
+      <div>
+        <h2>Nothing leaves the phone</h2>
+        <p>Seaglass reads only what the home screen and its Events view already read. It sends nothing anywhere, keeps
+          its settings and launch counts on the phone, and writes nothing to the system journal unless you turn on
+          the debug log.</p>
+        <p><a href="docs/guide.html#privacy">What it reads</a></p>
+      </div>
+    </section>
+  </main>
+
+  {{footer}}
+</body>
+</html>

@@ -1,0 +1,5 @@
+module Sailfish.Weather
+singleton WeatherProvider 1.0 WeatherProvider.qml
+SavedWeathersModel 1.0 SavedWeathersModel.qml
+WeatherModel 1.0 WeatherModel.qml
+WeatherForecastModel 1.0 WeatherForecastModel.qml
