@@ -100,8 +100,11 @@ class RepoTest(unittest.TestCase):
     def test_workflows_run_the_make_targets(self):
         # CI and the release run what a development machine runs (docs/DEVELOPMENT.md)
         ci = (REPO / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
-        for target in ("make test", "make lint", "make rpm", "make site", "make check-hooks", "make qml-check"):
+        for target in ("make test", "make lint", "make rpm", "make site"):
             self.assertIn(f"run: {target}", ci)
+        sailfish = (REPO / ".github" / "workflows" / "sailfish.yml").read_text(encoding="utf-8")
+        for target in ('make check-hook VERSION="$SAILFISH_VERSION"', 'make qml-check TARGET="$SDK_TARGET"'):
+            self.assertIn(f"run: {target}", sailfish)
         pages = (REPO / ".github" / "workflows" / "pages.yml").read_text(encoding="utf-8")
         self.assertIn("run: make site", pages)
         self.assertIn("path: out/site", pages)

@@ -1,9 +1,8 @@
 # Checks on every push and pull request, with the same make targets as on a development machine: the unit tests,
-# the static checks (qmllint, shellcheck, actionlint, the Python byte compiler), the package, and the site (its
-# links checked; pages.yml publishes it from main). Then the older Sailfish OS versions (docs/DEVELOPMENT.md): the
-# hook against each version's stock files, downloaded from Jolla and never uploaded, and our QML compiled with each
-# older release's own Qt and Silica (the SDK's build targets). The harness and the phone's own check
-# (make check-hook) need a phone, and run only there.
+# the static checks (qmllint, shellcheck, actionlint, the Python byte compiler, glslangValidator for the shaders),
+# the package, and the site (its links checked; pages.yml publishes it from main). Each Sailfish OS version is
+# checked by a workflow of its own (sailfish-VERSION.yml, steps in sailfish.yml), for a badge of its own in
+# README.md. The harness and the phone's own check (make check-hook) need a phone, and run only there.
 name: ci
 
 on:
@@ -37,23 +36,3 @@ jobs:
           name: seaglass-rpm
           path: out/rpm/*.noarch.rpm
           if-no-files-found: error
-
-  hooks:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v7
-      - name: The hook on every version in patchmanager/versions
-        run: make check-hooks
-
-  qml:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/cache@v6
-        with:
-          path: out/sdk
-          key: sdk-targets-${{ hashFiles('scripts/qml-check.sh') }}
-      - name: Our QML on older Sailfish OS releases
-        run: make qml-check
