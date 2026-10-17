@@ -66,8 +66,8 @@ compatible=$(python3 -I -c 'import json, sys; print(" or ".join(json.load(open(s
     "$REPO_ROOT/patchmanager/patch.json")
 {
     echo "Home screen extensions for Sailfish OS: folder previews, group and data widgets, folder motion, glass, app"
-    echo "search, notification badges and a richer task switcher. Every part is a setting, and the stock home screen"
-    echo "stays whenever Seaglass cannot load."
+    echo "search, notification badges, a richer task switcher and app animations. Every part is a setting, and the"
+    echo "stock home screen stays whenever Seaglass cannot load."
     echo
     echo "## What's new in $version"
     echo
