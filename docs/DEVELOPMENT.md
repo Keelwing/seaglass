@@ -117,7 +117,7 @@ scenes:
 | `controller "FOLDER=card,…"` | `HomeController.qml` on a stand-in grid: the layout, the hit test, a rename, in the harness's copy of the menu |
 | `layout "normal\|edit FOLDER=card@5,… drag=… drop=…"` | widgets among the icons, the edit mode, a lifted widget, an app over a widget |
 | `motion "zoom\|spring\|reveal\|slide [card] from=FOLDER slow=10"` | a folder opening and closing, slowed down for `--frames` |
-| `glass` | the app grid on glass, with a glass folder and card: pull up, page and back |
+| `glass "[look=glass\|clear\|stock] [photo=AMBIENCE] …"` | the app grid on glass, with a glass folder and card: pull up, page and back; `photo=ruska` puts a stock ambience's picture under the grid; the other words are in [GlassScene.qml](../harness/GlassScene.qml) |
 | `probe "zoom\|anchor\|shift [frost]"` | two glass panes; at 1.5 s the glass zooms, moves its anchor or shifts: grab at 1 and 2.5 s, the picture must have moved |
 | `search "pos=bottom\|top"` | the search row and sheet: A–Z, the rail, typing |
 | `badges` | badges in each style, a folder's sum, a sketch of the peek |
@@ -125,6 +125,8 @@ scenes:
 | `widgets "normal\|edit\|gallery\|ghost [face=analogue] [glass] [idle\|empty\|none\|stale…] clock=card@0,…"` | data widgets with sample data; the states and setting words are in [WidgetsScene.qml](../harness/WidgetsScene.qml) |
 | `touch` | data widgets driven by mouse events (QtTest's `TestEvent`), each check logged |
 | `film "clip=move\|add\|resize"` | the widget clips for the README: the touch scene's controller and events, dressed as the home screen; run with `--slow-animations --frames` |
+| `animations "STYLE open\|close\|load [PROGRESS]"\|"check"` | one style's effect for a moment on a made-up app, running or held at a progress; `check` draws every shader once and logs the ones that loaded |
+| `reel "STYLE,STYLE,… [slow=3]"` | styles one after the other on the app grid: Notes opens from its icon and closes, with the style's name; for `--frames` |
 | `settings "[PAGE] [SCROLL]"` | the settings: the first page, or one of the others (`Glass`, `Widgets`, …), scrolled down so many pixels, with the live previews |
 
 `FOLDER` is the title of a folder: *Media*, *Office* or *Tools*, or one of the phone's with `--own-apps`.

@@ -3,8 +3,9 @@
 // (GroupWidget.qml) on the grid; the grid turns to its second page and back, then closes. Slowed down for frames
 // (scripts/harness.sh --frames makes a GIF). Argument: "[look=glass|clear|stock] [frost=0|1|2]
 // [tint=auto|dark|light|none] [parallax=0|1|2] [depth=0|1]
-//            [edge=0|1] [photo=PATH] [still=EXPOSURE] [slow=6]"
-// still=: no motion, the grid held at that exposure (0..1) for a screenshot (--shot)
+//            [edge=0|1] [photo=AMBIENCE] [still=EXPOSURE] [slow=6]"
+// photo=: the picture of a stock ambience (photo=ruska: /usr/share/ambience/ruska/images/ambience_ruska.jpg) in place
+// of the home wallpaper; still=: no motion, the grid held at that exposure (0..1) for a screenshot (--shot)
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Sailfish.Lipstick 1.0
@@ -29,6 +30,10 @@ Item {
     readonly property int rows: harness ? harness.grid.rows : 9
     readonly property int perPage: columns * (rows - 1)
 
+    function ambiencePicture(name) {
+        return "/usr/share/ambience/" + name + "/images/ambience_" + name + ".jpg"
+    }
+
     onHarnessChanged: {
         var words = (harness.sceneArgument || "").split(" ")
         var p = preset
@@ -38,7 +43,7 @@ Item {
                 continue
             if (w[0] === "slow") slow = parseFloat(w[1])
             else if (w[0] === "still") still = parseFloat(w[1])
-            else if (w[0] === "photo") { p.picture = "photo"; p.image = w[1] }
+            else if (w[0] === "photo") { p.picture = "photo"; p.image = ambiencePicture(w[1]) }
             else if (w[0] === "look" || w[0] === "tint") p[w[0]] = w[1]
             else if (w[0] === "depth" || w[0] === "edge") p[w[0]] = w[1] === "1"
             else p[w[0]] = parseFloat(w[1])
