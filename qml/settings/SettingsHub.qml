@@ -7,6 +7,7 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Nemo.DBus 2.0
+import "../animations/styles.js" as Styles
 
 SilicaFlickable {
     id: hub
@@ -65,7 +66,7 @@ SilicaFlickable {
     function resetSettings() {
         var pairs = [[general, generalDefaults], [motion, motionDefaults], [glass, glassDefaults],
                      [search, searchDefaults], [badges, badgeDefaults], [switcher, switcherDefaults],
-                     [widgets, widgetDefaults]]
+                     [animations, animationDefaults], [widgets, widgetDefaults]]
         for (var p = 0; p < pairs.length; p++) {
             var keys = pairs[p][0].keys
             for (var k = 0; k < keys.length; k++)
@@ -102,6 +103,7 @@ SilicaFlickable {
     SearchSettings { id: search }
     BadgeSettings { id: badges }
     SwitcherSettings { id: switcher }
+    AnimationSettings { id: animations }
     WidgetSettings { id: widgets }
 
     GeneralSettings { id: generalDefaults; path: "/apps/seaglass/defaults" }
@@ -110,6 +112,7 @@ SilicaFlickable {
     SearchSettings { id: searchDefaults; path: "/apps/seaglass/defaults/search" }
     BadgeSettings { id: badgeDefaults; path: "/apps/seaglass/defaults/badges" }
     SwitcherSettings { id: switcherDefaults; path: "/apps/seaglass/defaults/switcher" }
+    AnimationSettings { id: animationDefaults; path: "/apps/seaglass/defaults/animations" }
     WidgetSettings { id: widgetDefaults; path: "/apps/seaglass/defaults/widgets" }
 
     DBusInterface {
@@ -292,6 +295,20 @@ SilicaFlickable {
             summary: (switcher.layout === "cards" ? qsTr("Card row") : qsTr("Grid"))
                      + (switcher.chips ? ", " + qsTr("name chips") : "")
             onClicked: hub.open("SwitcherPage")
+        }
+
+        FeatureRow {
+            icon: "icon-m-wizard"
+            title: qsTr("Animations")
+            summary: {
+                if (!animations.enabled)
+                    return qsTr("Off")
+                if (animations.surprise)
+                    return qsTr("Surprise me")
+                var style = Styles.find(animations.style)
+                return style ? style.name : qsTr("Stock")
+            }
+            onClicked: hub.open("AnimationsPage")
         }
 
         FeatureRow {
