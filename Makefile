@@ -2,6 +2,8 @@
 .DEFAULT_GOAL := help
 # make hook VERSION=5.1.0.11: a release's stock files, downloaded, instead of the phone's
 VERSION ?=
+# make qml-check TARGET=5.1.0.11: only that SDK target
+TARGET ?=
 # make rpm CHANNEL=preview: the testers' package, with the versions only CI has checked
 CHANNEL ?= release
 export CHANNEL
@@ -17,6 +19,7 @@ help:
 	@echo "  make check-hook  check the hook against the phone's home screen (dry run, qmllint; VERSION= as above)"
 	@echo "  make check-hooks check the hook against every version in patchmanager/versions (no phone)"
 	@echo "  make qml-check   compile our QML with older Sailfish OS releases' Qt and Silica (SDK targets, Docker)"
+	@echo "                   (TARGET=5.1.0.11: only that one)"
 	@echo "  make screenshots the public screenshots (stock apps, stock ambience) -> docs/images/"
 	@echo "  make icons       the OpenRepos icon -> out/icons/seaglass-200.png"
 	@echo "  make site        the GitHub Pages site -> out/site/ (the landing page, the docs, the images)"
@@ -46,7 +49,7 @@ check-hooks:
 	scripts/check-hooks.sh
 
 qml-check:
-	scripts/qml-check.sh
+	scripts/qml-check.sh $(TARGET)
 
 harness:
 	scripts/harness.sh --shot harness

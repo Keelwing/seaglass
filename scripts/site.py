@@ -63,6 +63,11 @@ def relative(target, page):
 def split_title(text):
     """The first level-one heading as the title, and the text without it (and without the README's corner icon)."""
     text = re.sub(r'^<img src="icons/[^"]*"[^>]*>\n+', "", text)
+    # the parts for GitHub only: the README's badges and contents (the site has its own navigation, and loads nothing
+    # from other sites)
+    text = re.sub(r"<!-- github-only -->.*?<!-- /github-only -->\n*", "", text, flags=re.S)
+    # a badge from another site (the CI status in the README's Compatibility table) as a plain link to what it shows
+    text = re.sub(r"\[!\[[^\]]*\]\(https://[^)]+\)\]\(([^)]+)\)", r"[status](\1)", text)
     match = re.search(r"^# (.+)\n", text, re.M)
     if not match:
         return None, text
