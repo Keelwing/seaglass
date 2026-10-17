@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Seaglass for Sailfish OS</title>
-  <meta name="description" content="Widgets, glass, app search, notification badges and a richer task switcher for the Sailfish OS home screen.">
+  <meta name="description" content="Widgets, glass, app search, notification badges, a richer task switcher and app animations for the Sailfish OS home screen.">
   <meta name="color-scheme" content="dark light">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <meta property="og:title" content="Seaglass for Sailfish OS">
-  <meta property="og:description" content="Widgets, glass, app search, notification badges and a richer task switcher for the Sailfish OS home screen.">
+  <meta property="og:description" content="Widgets, glass, app search, notification badges, a richer task switcher and app animations for the Sailfish OS home screen.">
   <meta property="og:url" content="https://d31m05z.github.io/seaglass/">
   <meta property="og:type" content="website">
   <meta property="og:image" content="https://d31m05z.github.io/seaglass/images/widgets.jpg">
@@ -26,8 +26,8 @@
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-text">
         <h1 id="hero-title">Seaglass</h1>
-        <p class="lead">Widgets, glass, app search, notification badges and a richer task switcher for the Sailfish OS
-          home screen.</p>
+        <p class="lead">Widgets, glass, app search, notification badges, a richer task switcher and app animations for
+          the Sailfish OS home screen.</p>
         <p class="hero-note">Every part is a setting. If Seaglass cannot load, you get the stock home screen.</p>
         <div class="actions">
           <a class="button primary" href="{{rpm_url}}">Download {{version}}</a>
@@ -98,6 +98,57 @@
             <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
             <img src="images/glass.webp" width="320" height="705" loading="lazy"
                  alt="The app grid pulled up over the wallpaper as it frosts, a page turned, and back">
+          </picture></div></figure>
+        </article>
+
+        <article class="feature" data-shot="images/glass-clear.webp" data-still="images/widgets.jpg">
+          <h2>Another ambience under the icons</h2>
+          <p>In the clear look only the icons rise, and the picture of another ambience can come up with them. It rises
+            from below and blends into the wallpaper, so the app grid gets a backdrop of its own.</p>
+          <p>Choose one of the ambience pictures Sailfish OS ships, or a photo from the Gallery.</p>
+          <figure class="phone"><div class="screen"><picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
+            <img src="images/glass-clear.webp" width="320" height="704" loading="lazy"
+                 alt="The clear app grid pulled up as another ambience's picture rises and blends in, a page turned, and back">
+          </picture></div></figure>
+        </article>
+
+        <article class="feature" data-shot="images/animations-sailfish.webp" data-still="images/settings-animations.jpg">
+          <h2>Apps open where you tap them</h2>
+          <p>An app opens from the icon or the cover you tapped and closes with the swipe from the top, in one of nine
+            styles. The calm ones are made of the ambience's glass, water and light: Seaglass, Tide and Northern
+            lights.</p>
+          <p>While an app starts, its new cover in the switcher shows the style's loading effect instead of the busy
+            indicator. Every effect runs on the GPU, on a copy of the window, so Sailfish never waits for it.</p>
+          <figure class="phone"><div class="screen"><picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="images/settings-animations.jpg">
+            <img src="images/animations-sailfish.webp" width="300" height="661" loading="lazy"
+                 alt="Notes opening from its icon and closing in the Seaglass, Tide and Northern lights styles">
+          </picture></div></figure>
+        </article>
+
+        <article class="feature" data-shot="images/animations-elements.webp" data-still="images/settings-animations.jpg">
+          <h2>Fire, lightning and ice</h2>
+          <p>Ember opens an app in a ring of fire and burns it away from the bottom. Volt strikes it with lightning and
+            switches it off like an old TV. Frost thaws it from the icon and freezes it into snow.</p>
+          <p>With <em>Ambience colours</em> on, the fire, the water and the light take the ambience's highlight colour.</p>
+          <figure class="phone"><div class="screen"><picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="images/settings-animations.jpg">
+            <img src="images/animations-elements.webp" width="300" height="661" loading="lazy"
+                 alt="Notes opening from its icon and closing in the Ember, Volt and Frost styles">
+          </picture></div></figure>
+        </article>
+
+        <article class="feature" data-shot="images/animations-extreme.webp" data-still="images/settings-animations.jpg">
+          <h2>Loud on purpose</h2>
+          <p>Shatter breaks the window where your finger let go, Singularity pulls it into a black hole, and Dust lets
+            the wind take it.</p>
+          <p>Pick a style on a page with a live preview, a different one for opening, loading or closing, or let
+            <em>Surprise me</em> choose each time. Off, the apps open and close the Sailfish way.</p>
+          <figure class="phone"><div class="screen"><picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="images/settings-animations.jpg">
+            <img src="images/animations-extreme.webp" width="300" height="661" loading="lazy"
+                 alt="Notes opening from its icon and closing in the Shatter, Singularity and Dust styles">
           </picture></div></figure>
         </article>
 
@@ -205,6 +256,7 @@
         <figure><div class="phone"><div class="screen"><img src="images/badges.jpg" width="540" height="1189" loading="lazy" alt="Notification badges and the peek"></div></div><figcaption>Badges and the peek</figcaption></figure>
         <figure><div class="phone"><div class="screen"><img src="images/switcher.jpg" width="540" height="1189" loading="lazy" alt="The task switcher's card row"></div></div><figcaption>Task switcher</figcaption></figure>
         <figure><div class="phone"><div class="screen"><img src="images/settings.jpg" width="540" height="1189" loading="lazy" alt="The first page of the Seaglass settings"></div></div><figcaption>Settings</figcaption></figure>
+        <figure><div class="phone"><div class="screen"><img src="images/settings-animations.jpg" width="540" height="1189" loading="lazy" alt="The animations settings: a live preview, and the styles as tiles with their loading effects"></div></div><figcaption>Animations settings</figcaption></figure>
       </div>
     </section>
 
