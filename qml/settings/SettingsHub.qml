@@ -7,6 +7,7 @@
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import Nemo.DBus 2.0
+import "../animations/styles.js" as Styles
 
 SilicaFlickable {
     id: hub
@@ -294,6 +295,20 @@ SilicaFlickable {
             summary: (switcher.layout === "cards" ? qsTr("Card row") : qsTr("Grid"))
                      + (switcher.chips ? ", " + qsTr("name chips") : "")
             onClicked: hub.open("SwitcherPage")
+        }
+
+        FeatureRow {
+            icon: "icon-m-wizard"
+            title: qsTr("Animations")
+            summary: {
+                if (!animations.enabled)
+                    return qsTr("Off")
+                if (animations.surprise)
+                    return qsTr("Surprise me")
+                var style = Styles.find(animations.style)
+                return style ? style.name : qsTr("Stock")
+            }
+            onClicked: hub.open("AnimationsPage")
         }
 
         FeatureRow {
