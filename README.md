@@ -190,6 +190,12 @@ The hook is generated from anchors in the stock files, and it refuses to apply w
 from the package runs in the home screen. Details are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Building,
 testing and the development harness are covered in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
+## Support
+
+Seaglass is free software and stays free. If it makes your phone a little nicer, a coffee on
+[Ko-fi](https://ko-fi.com/D31m05z) helps keep it going: new Sailfish OS versions, fixes and new features. The same
+page supports the developer's other Sailfish OS apps.
+
 ## License
 
 Copyright (C) 2026 Syrtis Major

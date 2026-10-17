@@ -22,6 +22,8 @@ GITHUB = "https://github.com/D31m05z/seaglass"
 VERSION = (REPO / "VERSION").read_text().strip()
 COMPATIBLE = " or ".join(json.loads((REPO / "patchmanager" / "patch.json").read_text())["compatible"])
 RPM_URL = f"{GITHUB}/releases/download/v{VERSION}/seaglass-{VERSION}-1.noarch.rpm"
+# the developer's Ko-fi page (.github/FUNDING.yml, README.md and the settings' About page link the same)
+SUPPORT = "https://ko-fi.com/D31m05z"
 
 # The fonts: self-hosted when site/assets/fonts/ holds them (fonts.css), else from Google Fonts
 if (SITE / "assets" / "fonts.css").is_file():
@@ -91,7 +93,7 @@ def rewrite_links(body, source, page, pages):
 
 
 def partials(page, docs_current):
-    values = {"root": root_of(page), "github": GITHUB, "rpm_url": RPM_URL, "version": VERSION,
+    values = {"root": root_of(page), "github": GITHUB, "rpm_url": RPM_URL, "version": VERSION, "support": SUPPORT,
               "docs_current": ' aria-current="page"' if docs_current else ""}
     nav = fill((SITE / "templates" / "nav.html").read_text(encoding="utf-8"), values)
     footer = fill((SITE / "templates" / "footer.html").read_text(encoding="utf-8"), values)
@@ -181,7 +183,7 @@ def build():
     (OUT / "docs" / "index.html").write_text(fill(template, values), encoding="utf-8")
 
     # the landing page
-    values = {"version": VERSION, "compatible": COMPATIBLE, "rpm_url": RPM_URL}
+    values = {"version": VERSION, "compatible": COMPATIBLE, "rpm_url": RPM_URL, "support": SUPPORT}
     values.update(partials("index.html", False))
     (OUT / "index.html").write_text(fill((SITE / "index.html").read_text(encoding="utf-8"), values), encoding="utf-8")
     print(f"site: {len(docs) + 2} pages in {OUT}")
