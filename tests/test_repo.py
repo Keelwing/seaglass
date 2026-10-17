@@ -113,6 +113,33 @@ class RepoTest(unittest.TestCase):
         for step in ("run: make test", "run: make lint", 'run: scripts/release.sh "$RELEASE_TAG" --publish'):
             self.assertIn(step, release)
 
+    def test_every_version_has_its_ci_and_its_readme_row(self):
+        # each Sailfish OS version of patchmanager/versions: a workflow of its own (for its badge), and a row of the
+        # README's Compatibility table with that badge; the README's shield lists the release versions
+        versions = {}
+        for line in (REPO / "patchmanager" / "versions").read_text(encoding="utf-8").splitlines():
+            words = line.split("#")[0].split()
+            if words:
+                versions[words[0]] = words[1]
+        workflows = REPO / ".github" / "workflows"
+        self.assertEqual(sorted(p.name for p in workflows.glob("sailfish-*.yml")),
+                         sorted(f"sailfish-{v}.yml" for v in versions))
+        readme = (REPO / "README.md").read_text(encoding="utf-8")
+        for version, channel in versions.items():
+            text = (workflows / f"sailfish-{version}.yml").read_text(encoding="utf-8")
+            self.assertIn(f"name: Sailfish OS {version}\n", text)
+            self.assertIn("uses: ./.github/workflows/sailfish.yml", text)
+            self.assertIn(f'version: "{version}"', text)
+            # the older series have an SDK target, which compiles our QML
+            self.assertEqual("sdk-target:" in text, not version.startswith("5.2."), version)
+            row = re.search(r"(?m)^\| %s \| (release|testers') \|.*$" % re.escape(version), readme)
+            self.assertTrue(row, f"README.md: no Compatibility row for {version}")
+            self.assertEqual(row.group(1), "release" if channel == "release" else "testers'", version)
+            self.assertIn(f"actions/workflows/sailfish-{version}.yml/badge.svg", row.group(0))
+        meta = json.loads((REPO / "patchmanager" / "patch.json").read_text(encoding="utf-8"))
+        shield = "%20%7C%20".join(meta["compatible"])
+        self.assertIn(f"img.shields.io/badge/Sailfish%20OS-{shield}-", readme)
+
     def test_release_notes_come_from_the_changelog(self):
         # scripts/release.sh takes the version's section of CHANGELOG.md: it starts with "## VERSION (DATE)"
         version = (REPO / "VERSION").read_text().strip()

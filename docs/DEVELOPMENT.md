@@ -20,7 +20,7 @@ QML. The scripts behind the make targets (`scripts/`) reach the phone over SSH. 
 
 ```bash
 make test         # unit tests: the hook on stand-in files, layout, search, repository consistency
-make lint         # qmllint (Qt 5), shellcheck, the Python byte compiler
+make lint         # qmllint (Qt 5), shellcheck, actionlint, the Python byte compiler, the shaders (glslang)
 make rpm          # out/rpm/seaglass-VERSION-1.noarch.rpm
 make deploy       # copy it to the phone (~/seaglass) and check it with rpm -U --test
 make install      # devel-su rpm -U on the phone (asks for the developer-mode password)
@@ -80,6 +80,11 @@ diff. Two checks cover those versions without a phone, here and in CI:
 | the hook checked against the stock files | yes | yes | yes |
 | our QML compiled with that release's Qt and Silica | no (no 5.2 target yet) | yes | yes |
 | run on a phone | yes | no | no |
+
+In CI each version has a workflow of its own, `.github/workflows/sailfish-VERSION.yml`, which calls
+`sailfish.yml` with the version and its SDK target: `make check-hook VERSION=…` and `make qml-check TARGET=…`. So
+each version has a status badge of its own, in the README's Compatibility table. A new version needs its line in
+`patchmanager/versions`, its workflow and its row; `tests/test_repo.py` checks that they agree.
 
 So `patch.json` lists the 5.2 versions only. Each release also carries a testers' package for 5.1 and 5.0
 (`-0.preview1`, built with `CHANNEL=preview`), whose `patch.json` lists those versions too. A version moves from
