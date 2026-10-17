@@ -142,12 +142,12 @@ What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 Seaglass patches the stock home screen of particular Sailfish OS versions, so each version is checked on its own, and
 Patchmanager applies the patch only to the versions listed in the package's `patch.json`.
 
-| Sailfish OS | Package | Checked by CI | On a phone | CI status |
+| Sailfish OS | Package | Checked by CI | On a phone | Status |
 |---|---|---|---|---|
-| 5.2.0.20 | release | the hook | Jolla Phone (`lipstick-jolla-home-qt5` 1.27.18.1) | [![Sailfish OS 5.2.0.20](https://github.com/D31m05z/seaglass/actions/workflows/sailfish-5.2.0.20.yml/badge.svg?branch=main)](https://github.com/D31m05z/seaglass/actions/workflows/sailfish-5.2.0.20.yml) |
-| 5.2.0.18 | release | the hook | Jolla Phone | [![Sailfish OS 5.2.0.18](https://github.com/D31m05z/seaglass/actions/workflows/sailfish-5.2.0.18.yml/badge.svg?branch=main)](https://github.com/D31m05z/seaglass/actions/workflows/sailfish-5.2.0.18.yml) |
-| 5.1.0.11 | testers' | the hook; the QML with the 5.1.0.11 SDK target | not yet | [![Sailfish OS 5.1.0.11](https://github.com/D31m05z/seaglass/actions/workflows/sailfish-5.1.0.11.yml/badge.svg?branch=main)](https://github.com/D31m05z/seaglass/actions/workflows/sailfish-5.1.0.11.yml) |
-| 5.0.0.78 | testers' | the hook; the QML with the 5.0.0.62 SDK target | not yet | [![Sailfish OS 5.0.0.78](https://github.com/D31m05z/seaglass/actions/workflows/sailfish-5.0.0.78.yml/badge.svg?branch=main)](https://github.com/D31m05z/seaglass/actions/workflows/sailfish-5.0.0.78.yml) |
+| 5.2.0.20 | release | the hook | Jolla Phone (`lipstick-jolla-home-qt5` 1.27.18.1) | [![Sailfish OS 5.2.0.20 in CI](https://img.shields.io/github/check-runs/D31m05z/seaglass/main?nameFilter=Sailfish%20OS%205.2.0.20&label=CI)](https://github.com/D31m05z/seaglass/actions/workflows/ci.yml) |
+| 5.2.0.18 | release | the hook | Jolla Phone | [![Sailfish OS 5.2.0.18 in CI](https://img.shields.io/github/check-runs/D31m05z/seaglass/main?nameFilter=Sailfish%20OS%205.2.0.18&label=CI)](https://github.com/D31m05z/seaglass/actions/workflows/ci.yml) |
+| 5.1.0.11 | testers' | the hook; the QML with the 5.1.0.11 SDK target | not yet | [![Sailfish OS 5.1.0.11 in CI](https://img.shields.io/github/check-runs/D31m05z/seaglass/main?nameFilter=Sailfish%20OS%205.1.0.11&label=CI)](https://github.com/D31m05z/seaglass/actions/workflows/ci.yml) |
+| 5.0.0.78 | testers' | the hook; the QML with the 5.0.0.62 SDK target | not yet | [![Sailfish OS 5.0.0.78 in CI](https://img.shields.io/github/check-runs/D31m05z/seaglass/main?nameFilter=Sailfish%20OS%205.0.0.78&label=CI)](https://github.com/D31m05z/seaglass/actions/workflows/ci.yml) |
 
 - **Release** versions are in the `patch.json` of the package on OpenRepos and on the releases page, and have run on
   a phone.

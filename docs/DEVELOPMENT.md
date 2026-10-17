@@ -81,10 +81,11 @@ diff. Two checks cover those versions without a phone, here and in CI:
 | our QML compiled with that release's Qt and Silica | no (no 5.2 target yet) | yes | yes |
 | run on a phone | yes | no | no |
 
-In CI each version has a workflow of its own, `.github/workflows/sailfish-VERSION.yml`, which calls
-`sailfish.yml` with the version and its SDK target: `make check-hook VERSION=…` and `make qml-check TARGET=…`. So
-each version has a status badge of its own, in the README's Compatibility table. A new version needs its line in
-`patchmanager/versions`, its workflow and its row; `tests/test_repo.py` checks that they agree.
+In CI the `sailfish` job of `.github/workflows/ci.yml` has a matrix leg for each version, with its SDK target:
+`make check-hook VERSION=…` and `make qml-check TARGET=…`. Each leg is a check run named *Sailfish OS VERSION*, and
+the README's Compatibility table shows its status with Shields.io's check-runs badge, filtered by that name. A new
+version needs its line in `patchmanager/versions`, its matrix leg and its row; `tests/test_repo.py` checks that they
+agree.
 
 So `patch.json` lists the 5.2 versions only. Each release also carries a testers' package for 5.1 and 5.0
 (`-0.preview1`, built with `CHANNEL=preview`), whose `patch.json` lists those versions too. A version moves from

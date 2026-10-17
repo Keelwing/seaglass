@@ -102,9 +102,8 @@ class RepoTest(unittest.TestCase):
         ci = (REPO / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
         for target in ("make test", "make lint", "make rpm", "make site"):
             self.assertIn(f"run: {target}", ci)
-        sailfish = (REPO / ".github" / "workflows" / "sailfish.yml").read_text(encoding="utf-8")
         for target in ('make check-hook VERSION="$SAILFISH_VERSION"', 'make qml-check TARGET="$SDK_TARGET"'):
-            self.assertIn(f"run: {target}", sailfish)
+            self.assertIn(f"run: {target}", ci)
         pages = (REPO / ".github" / "workflows" / "pages.yml").read_text(encoding="utf-8")
         self.assertIn("run: make site", pages)
         self.assertIn("path: out/site", pages)
@@ -114,28 +113,27 @@ class RepoTest(unittest.TestCase):
             self.assertIn(step, release)
 
     def test_every_version_has_its_ci_and_its_readme_row(self):
-        # each Sailfish OS version of patchmanager/versions: a workflow of its own (for its badge), and a row of the
-        # README's Compatibility table with that badge; the README's shield lists the release versions
+        # each Sailfish OS version of patchmanager/versions: a leg of ci.yml's sailfish matrix (a check run named
+        # "Sailfish OS VERSION"), and a row of the README's Compatibility table with that check run's badge; the
+        # README's shield lists the release versions
         versions = {}
         for line in (REPO / "patchmanager" / "versions").read_text(encoding="utf-8").splitlines():
             words = line.split("#")[0].split()
             if words:
                 versions[words[0]] = words[1]
-        workflows = REPO / ".github" / "workflows"
-        self.assertEqual(sorted(p.name for p in workflows.glob("sailfish-*.yml")),
-                         sorted(f"sailfish-{v}.yml" for v in versions))
+        ci = (REPO / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
+        self.assertIn("    name: Sailfish OS ${{ matrix.version }}\n", ci)
+        legs = dict(re.findall(r'(?m)^ {10}- version: "([\d.]+)"\n(?: {12}sdk-target: "([\d.]+)"\n)?', ci))
+        self.assertEqual(sorted(legs), sorted(versions))
         readme = (REPO / "README.md").read_text(encoding="utf-8")
         for version, channel in versions.items():
-            text = (workflows / f"sailfish-{version}.yml").read_text(encoding="utf-8")
-            self.assertIn(f"name: Sailfish OS {version}\n", text)
-            self.assertIn("uses: ./.github/workflows/sailfish.yml", text)
-            self.assertIn(f'version: "{version}"', text)
             # the older series have an SDK target, which compiles our QML
-            self.assertEqual("sdk-target:" in text, not version.startswith("5.2."), version)
+            self.assertEqual(legs[version] != "", not version.startswith("5.2."), version)
             row = re.search(r"(?m)^\| %s \| (release|testers') \|.*$" % re.escape(version), readme)
             self.assertTrue(row, f"README.md: no Compatibility row for {version}")
             self.assertEqual(row.group(1), "release" if channel == "release" else "testers'", version)
-            self.assertIn(f"actions/workflows/sailfish-{version}.yml/badge.svg", row.group(0))
+            self.assertIn("github/check-runs/D31m05z/seaglass/main?nameFilter=Sailfish%%20OS%%20%s&" % version,
+                          row.group(0))
         meta = json.loads((REPO / "patchmanager" / "patch.json").read_text(encoding="utf-8"))
         shield = "%20%7C%20".join(meta["compatible"])
         self.assertIn(f"img.shields.io/badge/Sailfish%20OS-{shield}-", readme)

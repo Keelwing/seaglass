@@ -1,8 +1,11 @@
-# Checks on every push and pull request, with the same make targets as on a development machine: the unit tests,
-# the static checks (qmllint, shellcheck, actionlint, the Python byte compiler, glslangValidator for the shaders),
-# the package, and the site (its links checked; pages.yml publishes it from main). Each Sailfish OS version is
-# checked by a workflow of its own (sailfish-VERSION.yml, steps in sailfish.yml), for a badge of its own in
-# README.md. The harness and the phone's own check (make check-hook) need a phone, and run only there.
+# Checks on every push and pull request, with the same make targets as on a development machine. The check job: the
+# unit tests, the static checks (qmllint, shellcheck, actionlint, the Python byte compiler, glslangValidator for the
+# shaders), the package, and the site (its links checked; pages.yml publishes it from main). The sailfish job, one
+# leg per version of patchmanager/versions: the hook against that release's stock home screen, downloaded from Jolla
+# and never uploaded, and where Jolla publishes an SDK build target for the series, our QML compiled with that
+# release's own Qt and Silica. Each leg is a check run named "Sailfish OS VERSION", which the README's Compatibility
+# table shows as a badge of its own. The harness and the phone's own check (make check-hook) need a phone, and run
+# only there.
 name: ci
 
 on:
@@ -36,3 +39,35 @@ jobs:
           name: seaglass-rpm
           path: out/rpm/*.noarch.rpm
           if-no-files-found: error
+
+  sailfish:
+    name: Sailfish OS ${{ matrix.version }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # release (patch.json); Jolla publishes no SDK target for 5.2, so its QML is checked on a phone
+          - version: "5.2.0.20"
+          - version: "5.2.0.18"
+          # the testers' package: the hook, and our QML with the series' SDK target
+          - version: "5.1.0.11"
+            sdk-target: "5.1.0.11"
+          - version: "5.0.0.78"
+            sdk-target: "5.0.0.62"
+    env:
+      SAILFISH_VERSION: ${{ matrix.version }}
+      SDK_TARGET: ${{ matrix.sdk-target }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: The hook against the stock home screen
+        run: make check-hook VERSION="$SAILFISH_VERSION"
+      - uses: actions/cache@v6
+        if: matrix.sdk-target != ''
+        with:
+          path: out/sdk/${{ matrix.sdk-target }}
+          key: sdk-target-${{ matrix.sdk-target }}-${{ hashFiles('scripts/qml-check.sh') }}
+      - name: Our QML with that release's Qt and Silica
+        if: matrix.sdk-target != ''
+        run: make qml-check TARGET="$SDK_TARGET"
