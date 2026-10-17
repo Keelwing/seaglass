@@ -1,8 +1,8 @@
 // The settings scene: the patch's settings in Patchmanager (patchmanager/main.qml, copied by scripts/harness.sh as
 // SettingsPage.qml with the pages of this tree), or one of its pages, with the live previews running. The pages read
 // the real dconf settings; outside a page stack they are made visible by hand.
-// Argument: "[PAGE] [SCROLL]": a page of qml/settings (Folders, Glass, Search, Badges, Switcher, Widgets, About,
-// WhatsNew; by default the first page), and how far to scroll it down in pixels (e.g. "settings Glass 900").
+// Argument: "[PAGE] [SCROLL]": a page of qml/settings (Folders, Glass, Search, Badges, Switcher, Animations, Widgets,
+// About, WhatsNew; by default the first page), and how far to scroll it down in pixels (e.g. "settings Glass 900").
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 
