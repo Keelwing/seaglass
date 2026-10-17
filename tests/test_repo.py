@@ -175,12 +175,66 @@ class RepoTest(unittest.TestCase):
         self.assertIn('import "../badges"', (REPO / "qml" / "settings" / "BadgesPage.qml").read_text(encoding="utf-8"))
 
     def test_harness_settings_copy_never_shows_the_phones_wallpaper(self):
-        # scripts/harness.sh rewrites these lines of the glass page's copy: they must be there as written
-        page = (REPO / "qml" / "settings" / "GlassPage.qml").read_text(encoding="utf-8")
+        # scripts/harness.sh rewrites these lines of the previewing pages' copies: they must be there as written
         harness = (REPO / "scripts" / "harness.sh").read_text(encoding="utf-8")
-        for line in ("property string ambienceFile: ambiencePicture.value", "property bool persistentGlass: true"):
-            self.assertIn(line, page)
-            self.assertIn(f"s|{line}|", harness)
+        lines = {"GlassPage": ("property string ambienceFile: ambiencePicture.value",
+                               "property bool persistentGlass: true"),
+                 "AnimationsPage": ("property string ambienceFile: ambiencePicture.value",)}
+        for name, rewritten in lines.items():
+            page = (REPO / "qml" / "settings" / f"{name}.qml").read_text(encoding="utf-8")
+            self.assertIn(f"~/$dir/qml/settings/{name}.qml", harness)
+            for line in rewritten:
+                self.assertIn(line, page)
+                self.assertIn(f"s|{line}|", harness)
+
+    def test_every_settings_group_is_reset_and_backed_up(self):
+        # SettingsHub resets each group from a copy at /apps/seaglass/defaults/…, AboutPage saves and restores it
+        hub = (REPO / "qml" / "settings" / "SettingsHub.qml").read_text(encoding="utf-8")
+        about = (REPO / "qml" / "settings" / "AboutPage.qml").read_text(encoding="utf-8")
+        pairs = re.search(r"var pairs = \[(.*?)\]\n", hub, re.S).group(1)
+        groups = re.search(r"readonly property var groups: \(\{(.*?)\}\)", about, re.S).group(1)
+        for path in sorted((REPO / "qml" / "settings").glob("*Settings.qml")):
+            kind = path.stem
+            live = re.search(r"^    %s \{ id: (\w+) \}$" % kind, hub, re.M)
+            defaults = re.search(r"^    %s \{ id: (\w+); path: \"/apps/seaglass/defaults[\w/]*\" \}$" % kind, hub,
+                                 re.M)
+            self.assertTrue(live and defaults, f"SettingsHub.qml: {kind} and its defaults")
+            self.assertIn(f"[{live.group(1)}, {defaults.group(1)}]", pairs, kind)
+            kept = re.search(r"^    %s \{\s*id: (\w+)" % kind, about, re.M)
+            self.assertTrue(kept, f"AboutPage.qml: {kind}")
+            self.assertRegex(groups, r'"\w+": %s\b' % kept.group(1), kind)
+
+    def test_animation_settings_keys(self):
+        # every setting of the group is reset and backed up: the keys list is its properties
+        text = (REPO / "qml" / "settings" / "AnimationSettings.qml").read_text(encoding="utf-8")
+        keys = re.findall(r'"(\w+)"', re.search(r"keys: \[(.*?)\]", text, re.S).group(1))
+        properties = re.findall(r"^    property \w+ (\w+)", text, re.M)
+        self.assertEqual(keys, properties)
+        self.assertEqual(keys, ["enabled", "style", "open", "loading", "close", "surprise", "speed", "ambience",
+                                "covers"])
+
+    def test_animations_page(self):
+        # the page of docs/ANIMATIONS.md, its row on the first page (after the task switcher), and a preview drawn
+        # by the home screen's own effect files, none of which may need Lipstick (the settings are not the compositor)
+        page = (REPO / "qml" / "settings" / "AnimationsPage.qml").read_text(encoding="utf-8")
+        for text in ("App animations", "Surprise me", "Same as style", "Opening", "Loading", "Closing", "Speed",
+                     "Relaxed", "Normal", "Quick", "Ambience colours", "Covers too", '"Open"', '"Close"'):
+            self.assertIn(f'qsTr("{text.strip(chr(34))}")', page, text)
+        for setting in ("enabled", "style", "surprise", "speed", "ambience", "covers"):
+            self.assertRegex(page, r"settings\.%s = " % setting, setting)
+        self.assertIn("page.setMoment(momentBox.settingKey", page)
+        self.assertIn('import "../animations"', page)
+        for kind in ("Effect {", "Shards {", "NoiseTile {", "Styles.choose(settings"):
+            self.assertIn(kind, page)
+        self.assertNotIn("OpenGLInfo", page)
+        hub = (REPO / "qml" / "settings" / "SettingsHub.qml").read_text(encoding="utf-8")
+        order = [hub.index(f'hub.open("{name}")') for name in ("SwitcherPage", "AnimationsPage", "WidgetsPage")]
+        self.assertEqual(order, sorted(order))
+        for name in ("AnimationsPage.qml", "../animations/Effect.qml", "../animations/Shards.qml",
+                     "../animations/NoiseTile.qml", "../animations/styles.js", "../animations/shaders.js"):
+            text = (REPO / "qml" / "settings" / name).read_text(encoding="utf-8")
+            self.assertNotRegex(text, r"(?m)^import (org\.nemomobile\.lipstick|Sailfish\.Lipstick)", name)
+            self.assertNotIn("Lipstick.", text, name)
 
     def test_badges_log_no_notification_texts(self):
         # the probe logs who a notification is from, never what it says
