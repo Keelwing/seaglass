@@ -18,7 +18,9 @@
 //   flickClose  in the card row, a card flicked up closes its app (the stock close)
 //   recent      the recently closed apps (RecentApps.qml), recentCount of them, remembered in recentApps
 //   pinch       a pinch switches the layout (docs/SWITCHER.md): in for the grid, out for the cards
-// Closing stays stock: the housekeeping mode, the ×, Close all; flicking a card up calls the stock close too.
+// Closing stays stock: the housekeeping mode, the ×, Close all; flicking a card up calls the stock close too. The
+// hook tells coverClosing(cover) first: in the grid, the closing effect of the animations plays over the cover
+// (animations/CoverClosing.qml, docs/ANIMATIONS.md) when they play on covers.
 import QtQuick 2.6
 import QtQml 2.2
 import Sailfish.Silica 1.0
@@ -28,7 +30,10 @@ import org.nemomobile.lipstick 0.1
 import com.jolla.coveractions 0.1
 import "../settings"
 import "../glass"
+import "../animations"
 import "../core/motion.js" as Motion
+import "../animations/styles.js" as Styles
+import "../animations/shaders.js" as Shaders
 
 Item {
     id: controller
@@ -227,10 +232,15 @@ Item {
     }
 
     Component.onCompleted: {
+        Motion.setSwitcher(controller)
         loadRecent()
         // the other way of a pinch gives a little, around the fingers
         if (pinchArea)
             pinchArea.transform = [stretchScale]
+    }
+    Component.onDestruction: {
+        if (Motion.switcher === controller)
+            Motion.setSwitcher(null)
     }
 
     RecentApps {
@@ -845,6 +855,68 @@ Item {
                 return r
         }
         return 0
+    }
+
+    // A cover is being closed (the stock close, hooked): the closing effect over it, frozen where it is
+    function coverClosing(stock) {
+        if (cards || morphing || !stock || !stock.contentItem)
+            return
+        // the app closed itself with its own close gesture: the effect played on its window
+        if (Motion.windowJustClosed(stock.windowId)) {
+            debugLog("cover closing: with its window")
+            return
+        }
+        var style = Styles.choose(animationSettings, "close")
+        if (!animationSettings.covers || style === "stock")
+            return
+        // only with its shaders loaded (AnimationController.qml reads them all): the cover hides at once
+        var base = Qt.resolvedUrl("../animations/shaders/")
+        var loaded = Styles.has(style, "shards")
+                ? Shaders.fileReady(base + "shards.vert") && Shaders.fileReady(base + "shards.frag")
+                : Shaders.ready(style + "-close")
+        if (!loaded) {
+            debugLog("cover closing: stock,", style, "is not loaded yet")
+            return
+        }
+        // over the drawn covers (this item itself is hidden)
+        var layer = covers ? covers : wrapper
+        var drawn = stock.contentItem
+        var place = drawn.mapToItem(layer, 0, 0)
+        coverClosingComponent.createObject(layer, {
+            "cover": drawn, "style": style, "x": place.x, "y": place.y, "width": drawn.width,
+            "height": drawn.height, "radius": Theme.paddingMedium,
+            "duration": Math.round(Styles.duration(style, "close", animationSettings.speed) * 0.85),
+            "tint": Qt.vector3d(Theme.highlightColor.r, Theme.highlightColor.g, Theme.highlightColor.b),
+            "useTint": animationSettings.ambience ? 1 : 0
+        })
+        debugLog("cover closing:", style)
+    }
+
+    AnimationSettings {
+        id: animationSettings
+    }
+
+    Component {
+        id: coverClosingComponent
+
+        CoverClosing {}
+    }
+
+    // The cover of a window in scene coordinates ({x, y, width, height}), for the opening effect
+    // (animations/AnimationController.qml); null when it has none
+    function coverRectFor(windowId) {
+        for (var i = 0; coverRepeater && windowId && i < coverRepeater.count; i++) {
+            var stock = coverRepeater.itemAt(i)
+            // a cover still launching has no window yet: the stock matches it by its app (Switcher.checkMinimized)
+            if (!stock || (stock.windowId !== windowId
+                           && (stock.running || !stock.launcherItem || !switcher
+                               || !switcher.isWindowIdFor(windowId, stock.launcherItem))))
+                continue
+            var drawn = stock.contentItem
+            var corner = drawn.mapToItem(null, 0, 0)
+            return { "x": corner.x, "y": corner.y, "width": drawn.width, "height": drawn.height }
+        }
+        return null
     }
 
     // The cover under the fingers (in the pinch area), or the nearest one: its index in the stock model

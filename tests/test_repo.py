@@ -222,6 +222,23 @@ class RepoTest(unittest.TestCase):
                 if Path(target).name in files:
                     self.assertTrue((path.parent / target).is_file(), f"{path.relative_to(REPO)}: {target}")
 
+    def test_every_style_has_its_shaders(self):
+        # a style's moment without its shader would stay stock without a word (docs/ANIMATIONS.md)
+        shaders = REPO / "qml" / "animations" / "shaders"
+        styles = (REPO / "qml" / "animations" / "styles.js").read_text(encoding="utf-8")
+        found = re.findall(r'\{ "id": "(\w+)"(.*?)\}', styles, re.S)
+        self.assertEqual(len(found), 9)
+        for style, rest in found:
+            moments = ["load"] if '"shards": true' in rest else ["open", "close", "load"]
+            for moment in moments:
+                self.assertTrue((shaders / f"{style}-{moment}.frag").is_file(), f"{style}-{moment}.frag")
+            for lib in re.findall(r'"(\w+)"', re.search(r'"libs": \[(.*?)\]', rest).group(1)):
+                self.assertTrue((shaders / f"{lib}.glsl").is_file(), f"{lib}.glsl")
+        self.assertTrue((shaders / "shards.vert").is_file())
+        # the noise tile is made when the package is built, never committed
+        self.assertIn("scripts/noise.py", (REPO / "rpm" / "build.sh").read_text(encoding="utf-8"))
+        self.assertIn("qml/animations/noise.png", (REPO / ".gitignore").read_text(encoding="utf-8"))
+
     def test_qtquick_import_fits_qt_56(self):
         for path in QML:
             for version in re.findall(r"^import QtQuick (\d+\.\d+)", path.read_text(encoding="utf-8"), re.M):

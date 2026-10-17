@@ -1,0 +1,22 @@
+// The opening, loading and closing effects of apps (docs/ANIMATIONS.md)
+import QtQuick 2.6
+import Nemo.Configuration 1.0
+
+ConfigurationGroup {
+    path: "/apps/seaglass/animations"
+
+    readonly property var keys: ["enabled", "style", "open", "loading", "close", "surprise", "speed", "ambience",
+                                 "covers"]
+
+    property bool enabled: false
+    property string style: "seaglass"
+    // a moment's own style: "" the style above, "stock", or a style
+    property string open: ""
+    property string loading: ""
+    property string close: ""
+    property bool surprise: false
+    // 0 relaxed, 1 normal, 2 quick
+    property int speed: 1
+    property bool ambience: false
+    property bool covers: true
+}

@@ -182,6 +182,23 @@ Item {
             grid.setEditMode(true)
     }
 
+    // An app of the grid is launched: its icon in scene coordinates, for the opening effect
+    // (animations/AnimationController.qml)
+    function noteAppOrigin(index) {
+        var children = grid ? grid.contentItem.children : []
+        for (var i = 0; index >= 0 && i < children.length; i++) {
+            var delegate = children[i]
+            if (delegate.modelIndex !== index || delegate.contentItem === undefined)
+                continue
+            var item = delegate.contentItem
+            var size = Theme.iconSizeLauncher
+            var icon = item.mapToItem(null, (item.width - size) / 2,
+                                      delegate.iconOffset !== undefined ? delegate.iconOffset : 0)
+            Motion.setAppOrigin({ "x": icon.x, "y": icon.y, "width": size, "height": size })
+            return
+        }
+    }
+
     // A folder is about to open: its icon, or its widget tile, in scene coordinates, for FolderMotion.qml
     function noteOrigin(folder) {
         Motion.setOrigin(null)
@@ -410,8 +427,10 @@ Item {
         }
         // a tap on an app: the stock press made it the current item just before
         onItemLaunched: {
-            if (!controller.ownLaunch && controller.grid.currentIndex !== undefined && controller.model)
+            if (!controller.ownLaunch && controller.grid.currentIndex !== undefined && controller.model) {
                 controller.noteLaunch(controller.model.get(controller.grid.currentIndex))
+                controller.noteAppOrigin(controller.grid.currentIndex)
+            }
         }
         onContentYChanged: controller.pinGrid()
         onOriginYChanged: controller.pinGrid()

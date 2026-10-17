@@ -4,5 +4,8 @@ out/
 # macOS
 .DS_Store
 
+# made when the package is built (scripts/noise.py)
+qml/animations/noise.png
+
 # Python bytecode
 __pycache__/
