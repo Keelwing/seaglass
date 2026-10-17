@@ -22,6 +22,7 @@ Page {
     SearchSettings { id: search }
     BadgeSettings { id: badges }
     SwitcherSettings { id: switcher }
+    AnimationSettings { id: animations }
     WidgetSettings { id: widgets }
 
     ConfigurationValue {
@@ -33,7 +34,8 @@ Page {
 
     // the groups a backup holds, by name
     readonly property var groups: ({ "general": seaglassSettings, "motion": motion, "glass": glass, "search": search,
-                                     "badges": badges, "switcher": switcher, "widgets": widgets })
+                                     "badges": badges, "switcher": switcher, "animations": animations,
+                                     "widgets": widgets })
     property bool includeUsage
     property string backupResult
 
