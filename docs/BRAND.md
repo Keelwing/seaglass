@@ -1,7 +1,6 @@
 # Seaglass
 
-Home Plus becomes Seaglass before its first public release. This note covers the name, the colours, the motif, the
-icon, the Patchmanager glyph, and what the rename touches.
+This note covers Seaglass's name, its colours, the motif, the icon and the Patchmanager glyph.
 
 ## The name
 
@@ -65,51 +64,8 @@ draws them with Qt's SVG renderer, which has no masks and no filters. So the cut
 ## The site and the README
 
 - **README.** The title becomes *Seaglass*, with the icon at its top right.
-- **Site.** The tokens move from the cyan and indigo of the old icon to this palette: a cobalt to deep teal
-  background, teal and aqua for links and focus, and ember for the download button. The first screen keeps its phone,
+- **Site.** This palette: a cobalt to deep teal background, teal and aqua for links and focus, and ember for the
+  download button. The first screen keeps its phone,
   with a glass card lifting out of it as in the icon.
 - **GitHub preview.** The icon, the name and the description over the background gradient, 1280 × 640.
   `make icons` renders it to `out/icons/seaglass-social.png`, to upload by hand in the repository's settings.
-
-## The rename
-
-| | Now | Then |
-|---|---|---|
-| Name shown | Home Plus | Seaglass |
-| Package and Patchmanager patch | `sfos-home-plus` | `seaglass` |
-| QML | `/usr/share/sfos-home-plus/qml/` | `/usr/share/seaglass/qml/` |
-| Patch folder | `/usr/share/patchmanager/patches/sfos-home-plus/` | `/usr/share/patchmanager/patches/seaglass/` |
-| Settings | dconf `/apps/sfos-home-plus/` | dconf `/apps/seaglass/` |
-| Journal lines | `sfos-home-plus: …` | `seaglass: …` |
-| The hook's ids in the stock files | `homePlus`, `homePlusGrid`, `homePlusSwitcher`, … | `seaglass`, `seaglassGrid`, `seaglassSwitcher`, … |
-| Backup | `~/Documents/home-plus-DATE.json`, `"app": "sfos-home-plus"` | `seaglass-DATE.json`, `"app": "seaglass"` |
-| Icon | `icons/sfos-home-plus.svg` | `icons/seaglass.svg` |
-| Release files | `sfos-home-plus-VERSION-1.noarch.rpm`, `sfos-home-plus-200.png` | `seaglass-…` |
-| Repository and site | `github.com/D31m05z/sfos-home-plus` | `github.com/D31m05z/seaglass`, `d31m05z.github.io/seaglass` |
-| Development | `SFHP_SSH`, `SFHP_REMOTE_DIR`, `~/sfos-home-plus` on the phone, the `sfos-home-plus-tools` image, the spec's `sfhp_*` macros | `SEAGLASS_SSH`, `SEAGLASS_REMOTE_DIR`, `~/seaglass`, `seaglass-tools`, `seaglass_*` |
-
-The version stays 1.0.0, since nothing has been released.
-
-The code points at the new repository from the start. Until the final push, the work goes on in the private
-`sfos-home-plus` repository, where CI runs as before. The local folder keeps its name.
-
-There is no migration code. Nobody but the development phone has run Home Plus. On that phone, once:
-
-```bash
-devel-su rpm -e sfos-home-plus
-dconf dump /apps/sfos-home-plus/ | dconf load /apps/seaglass/
-dconf reset -f /apps/sfos-home-plus/
-devel-su pkcon install-local seaglass-1.0.0-1.noarch.rpm
-```
-
-Then activate *Seaglass* in Patchmanager. Removing the old package takes its patch out first.
-
-## Order of work
-
-1. The icon, the glyph and the GitHub preview, with `make icons`.
-2. The rename, file by file as in the table, with the tests and the hook's diffs regenerated (`make check-hooks`).
-3. The site's palette and first screen, and the README.
-4. The screenshots that show the name (the settings), again with `make screenshots`.
-5. A test on the phone, after the steps above.
-
-Once the rename is done, its section leaves this note, which keeps the name, the colours, the motif and the icons.
