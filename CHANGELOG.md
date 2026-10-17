@@ -21,6 +21,10 @@ The first public release.
   card pulled up closes its app, and a pinch between the grid and the cards.
 - Data widgets: a clock, the battery and connections, what is playing, the next events and the weather, added from
   the edit mode. A fresh install starts with the clock and the status, and a hint shows once how to edit the grid.
+- App animations: apps open from the icon or cover you tapped, load on their new cover and close with the swipe from
+  the top in one of nine styles, from calm glass, water and light to fire, lightning, ice and loud ones that shatter
+  or swallow the app. A style per moment, or a surprise each time, set up on a page with a live preview. Off by
+  default.
 - Settings: a first page that says whether Seaglass runs, and if not, why and what to do; a page per feature with
   live previews; a reset; and a backup of the settings, widgets and folder types to Documents.
 - Sailfish OS 5.2.0.18 and 5.2.0.20. Each release also has a testers' package for 5.1 and 5.0, which CI checks but

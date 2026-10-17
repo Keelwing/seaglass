@@ -1,7 +1,7 @@
 # Architecture
 
 Seaglass extends the stock Sailfish OS home screen (`lipstick-jolla-home-qt5`) without changing its files on
-disk. A Patchmanager patch adds `Loader`s to six stock QML files. Each `Loader` loads a file of our QML module,
+disk. A Patchmanager patch adds `Loader`s to eight stock QML files. Each `Loader` loads a file of our QML module,
 which the package installs as root in `/usr/share/seaglass/qml/`. When our file does not load, that part
 of the home screen stays stock.
 
@@ -24,8 +24,12 @@ lipstick-jolla-home-qt5 (stock QML, unchanged on disk)
        │    └─ background     Loader → glass/LauncherWallpaper.qml     failed → the stock blurred background
        ├─ switcher/Switcher.qml
        │    └─ switcher       Loader → switcher/SwitcherController.qml  failed → the stock switcher
-       └─ switcher/SwitcherItem.qml
-            └─ cover          Loader → switcher/SwitcherChip.qml        failed → no chip
+       ├─ switcher/SwitcherItem.qml
+       │    ├─ cover          Loader → switcher/SwitcherChip.qml        failed → no chip
+       │    └─ loading cover  Loader → animations/CoverLoading.qml      failed → the stock busy indicator
+       ├─ compositor.qml
+       │    └─ app layer      Loader → animations/AnimationController.qml  failed → the stock opening and closing
+       └─ layers/StackLayer.qml   asks for an opening effect before its fade (stock without the controller)
 ```
 
 - **A small hook, and our own module.** The hook adds `Loader`s. It changes stock behaviour only through what they
@@ -77,6 +81,7 @@ checks that every type and file used across folders is imported and exists.
 | `widgets/group/` | Folders shown as widgets: `GroupWidget.qml` (the tile), `WidgetTile.qml` (the hook's wrapper), the folder type store, its chooser and its selector, `WidgetBadge.qml` (the folder-to-card toggle). |
 | `widgets/data/` | Data widgets: `DataWidgets.qml` (the store), `DataWidget.qml` (a widget's block in the grid), `DataSources.qml` (the sources, loaded on demand), the gallery, and `faces.js`. |
 | `widgets/data/<kind>/` | One folder per kind (`clock`, `status`, `player`, `event`, `weather`). Each has a `*Source.qml` that reads the data and a `*Face.qml` that draws it in every size, plus the face's parts. |
+| `animations/` | The app animations ([ANIMATIONS.md](ANIMATIONS.md)): `AnimationController.qml` (opening and closing), `Effect.qml` (one style's shader for a moment), `Shards.qml`, the covers' `CoverLoading.qml` and `CoverClosing.qml`, `styles.js`, `shaders.js` and the shaders. |
 | `settings/` | The settings: `SettingsHub.qml` (the first page), one page per feature, *What's new*, and one file per group of dconf keys (`GlassSettings.qml` and so on), which the home screen uses too. |
 
 The page Patchmanager opens, `patchmanager/main.qml`, only holds `settings/SettingsHub.qml`, imported by its

@@ -4,8 +4,8 @@
 
 Home screen extensions for Sailfish OS. They are safe to try and easy to take back.
 
-Seaglass adds widgets, glass, search, notification badges and a richer task switcher to the stock Sailfish home
-screen. Everything is a setting, and everything can be switched off. The home screen's own files are never changed
+Seaglass adds widgets, glass, search, notification badges, a richer task switcher and app animations to the stock
+Sailfish home screen. Everything is a setting, and everything can be switched off. The home screen's own files are never changed
 on disk: a Patchmanager patch of a few lines loads our QML, and the stock home screen stays whenever it cannot.
 
 Tested on a Jolla Phone with Sailfish OS 5.2.0.20 (`lipstick-jolla-home-qt5` 1.27.18.1).
@@ -89,6 +89,19 @@ previews of each size. More: [docs/WIDGETS.md](docs/WIDGETS.md).
   <img src="docs/images/widget-resize.webp" width="250" alt="The size pill turns the clock from a card into a shelf, and back">
 </p>
 
+**App animations.** Apps open from the icon or cover you tapped, show a loading effect on their new cover while they
+start, and close with the swipe from the top, in one of nine styles: *Seaglass*, *Tide* and *Northern lights* (calm,
+made of glass, water and light), *Ember*, *Volt* and *Frost* (fire, lightning and ice), and *Shatter*, *Singularity*
+and *Dust* (loud on purpose). Each moment can have a style of its own, or *Surprise me* picks one each time; a page
+with a live preview sets them up. The effects are shaders on a copy of the window, so Sailfish never waits for them.
+They are off by default. More: [docs/ANIMATIONS.md](docs/ANIMATIONS.md).
+
+<p align="center">
+  <img src="docs/images/animations-sailfish.webp" width="250" alt="Notes opening from its icon and closing in the Seaglass, Tide and Northern lights styles">
+  <img src="docs/images/animations-elements.webp" width="250" alt="Notes opening from its icon and closing in the Ember, Volt and Frost styles">
+  <img src="docs/images/animations-extreme.webp" width="250" alt="Notes opening from its icon and closing in the Shatter, Singularity and Dust styles">
+</p>
+
 What changed in each version: [CHANGELOG.md](CHANGELOG.md).
 
 ## Install
@@ -168,7 +181,7 @@ The switch takes effect at once. Read the lines with `devel-su journalctl -b | g
 
 ```
 lipstick-jolla-home-qt5 (stock QML, unchanged on disk)
-  └─ Patchmanager applies the hook in memory, in six stock files
+  └─ Patchmanager applies the hook in memory, in eight stock files
        └─ each hook is a Loader of a file from /usr/share/seaglass/qml/
             failed to load → that part of the home screen stays stock
 ```
