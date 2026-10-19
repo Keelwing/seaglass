@@ -118,7 +118,7 @@ Page {
         }
     }
 
-    readonly property string repository: "https://github.com/D31m05z/seaglass"
+    readonly property string repository: "https://github.com/Keelwing/seaglass"
     // the developer's Ko-fi page (README.md, .github/FUNDING.yml and the site link the same)
     readonly property string support: "https://ko-fi.com/D31m05z"
     // the installed version, from the installed patch.json

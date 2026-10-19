@@ -18,7 +18,7 @@ import markdown
 REPO = Path(sys.argv[1]).resolve()
 OUT = Path(sys.argv[2]).resolve()
 SITE = REPO / "site"
-GITHUB = "https://github.com/D31m05z/seaglass"
+GITHUB = "https://github.com/Keelwing/seaglass"
 VERSION = (REPO / "VERSION").read_text().strip()
 COMPATIBLE = " or ".join(json.loads((REPO / "patchmanager" / "patch.json").read_text())["compatible"])
 RPM_URL = f"{GITHUB}/releases/download/v{VERSION}/seaglass-{VERSION}-1.noarch.rpm"

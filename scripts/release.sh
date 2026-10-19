@@ -79,7 +79,7 @@ compatible=$(python3 -I -c 'import json, sys; print(" or ".join(json.load(open(s
         on { if (started) while (blank-- > 0) print ""; blank = 0; started = 1; print }
     ' "$REPO_ROOT/CHANGELOG.md"
     echo
-    echo "All changes: [CHANGELOG.md](https://github.com/D31m05z/seaglass/blob/$tag/CHANGELOG.md)."
+    echo "All changes: [CHANGELOG.md](https://github.com/Keelwing/seaglass/blob/$tag/CHANGELOG.md)."
     echo
     echo "## Install"
     echo

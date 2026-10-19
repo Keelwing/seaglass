@@ -5,7 +5,7 @@ Version:    %{seaglass_version}
 Release:    %{?seaglass_release}%{!?seaglass_release:1}
 Summary:    Home screen extensions for Sailfish OS: widgets, glass, search, badges and a richer switcher
 License:    GPL-3.0-or-later
-URL:        https://github.com/D31m05z/seaglass
+URL:        https://github.com/Keelwing/seaglass
 BuildArch:  noarch
 
 # Only the Sailfish packages it uses; no dependencies from the build host

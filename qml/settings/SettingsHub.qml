@@ -23,7 +23,7 @@ SilicaFlickable {
     // whether Patchmanager has applied the patch: -1 not known (yet)
     property int applied: -1
 
-    readonly property string repository: "https://github.com/D31m05z/seaglass"
+    readonly property string repository: "https://github.com/Keelwing/seaglass"
     // the developer's Ko-fi page (README.md, .github/FUNDING.yml and the site link the same)
     readonly property string support: "https://ko-fi.com/D31m05z"
     readonly property string problem: {

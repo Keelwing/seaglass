@@ -132,7 +132,7 @@ class RepoTest(unittest.TestCase):
             row = re.search(r"(?m)^\| %s \| (release|testers') \|.*$" % re.escape(version), readme)
             self.assertTrue(row, f"README.md: no Compatibility row for {version}")
             self.assertEqual(row.group(1), "release" if channel == "release" else "testers'", version)
-            self.assertIn("github/check-runs/D31m05z/seaglass/main?nameFilter=Sailfish%%20OS%%20%s&" % version,
+            self.assertIn("github/check-runs/Keelwing/seaglass/main?nameFilter=Sailfish%%20OS%%20%s&" % version,
                           row.group(0))
         meta = json.loads((REPO / "patchmanager" / "patch.json").read_text(encoding="utf-8"))
         shield = "%20%7C%20".join(meta["compatible"])
