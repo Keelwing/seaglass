@@ -259,7 +259,7 @@ from the package runs in the home screen. Details are in [docs/ARCHITECTURE.md](
 Seaglass is noarch QML, built and checked on Linux or macOS with Docker and Python 3; no Sailfish SDK is needed.
 
 ```bash
-make test         # unit tests: the hook, the layout and search engines, repository consistency
+make test         # unit tests: the hook, the layout and search engines, the widget store, repository consistency
 make lint         # qmllint, shellcheck, actionlint, the shaders with glslangValidator
 make rpm          # out/rpm/seaglass-VERSION-1.noarch.rpm (CHANNEL=preview: the testers' package)
 make check-hooks  # the hook against every Sailfish OS version, downloaded from Jolla

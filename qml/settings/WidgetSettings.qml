@@ -1,6 +1,7 @@
 // The data widgets' options (the widgets themselves are DataWidgets.qml's list)
 import QtQuick 2.6
 import Nemo.Configuration 1.0
+import "../widgets/data/store.js" as Store
 
 ConfigurationGroup {
     path: "/apps/seaglass/widgets"
@@ -24,27 +25,11 @@ ConfigurationGroup {
     // the widgets on the grid (DataWidgets.qml): empty until the first ones are placed, "[]" once emptied
     property string list: ""
 
-    // the starter widgets that are not on the grid, added (as DataWidgets.addStarter on the home screen)
+    // the starter widgets that are not on the grid, added as on a fresh install (store.js); the others keep their
+    // neighbours
     function restoreStarter() {
-        var entries = []
-        try {
-            entries = JSON.parse(list || "[]") || []
-        } catch (e) {
-        }
-        var starter = [{ "kind": "clock", "size": "card", "at": 0 }, { "kind": "status", "size": "shelf", "at": 7 }]
-        var n = 0
-        for (var i = 0; i < entries.length; i++) {
-            var m = /^w(\d+)$/.exec(entries[i].id)
-            if (m)
-                n = Math.max(n, parseInt(m[1], 10))
-        }
-        for (var s = 0; s < starter.length; s++) {
-            var there = false
-            for (var j = 0; j < entries.length; j++)
-                there = there || entries[j].kind === starter[s].kind
-            if (!there)
-                entries.push({ "id": "w" + (++n), "kind": starter[s].kind, "size": starter[s].size, "at": starter[s].at })
-        }
+        var entries = Store.parse(list || "[]")
+        Store.addStarters(entries)
         list = JSON.stringify(entries)
     }
 }

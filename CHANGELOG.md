@@ -11,6 +11,8 @@ Each version was checked on a Jolla Phone with Sailfish OS 5.2.0.20. How each fe
   square blocks.
 - All nine styles were reworked to look more like what they are made of, and none of them ends early or jumps at its
   start or end.
+- Removing a data widget, restoring the starter widgets or going back to an older Seaglass no longer moves the other
+  widgets away from their apps.
 
 ## 1.0.0 (2026-10-17)
 

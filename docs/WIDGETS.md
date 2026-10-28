@@ -102,9 +102,9 @@ out, a hint says "Hold a widget or an icon to edit the grid. Add widget is at th
 | Weather: Feels like | `weatherFeels` | `true`, `false` |
 
 *Restore starter widgets* adds the clock card and the status shelf at their starter places, each unless a widget of
-its kind is already there. *Remove all widgets* empties the list, after a remorse timer. *Reset settings*, in the
-pulley menu of the settings' first page, resets the options and keeps the widgets. A backup, made in the *About*
-page, includes the list.
+its kind is already there, and the other widgets stay between the same apps. *Remove all widgets* empties the list,
+after a remorse timer. *Reset settings*, in the pulley menu of the settings' first page, resets the options and keeps
+the widgets. A backup, made in the *About* page, includes the list.
 
 ## How it works
 
@@ -116,10 +116,12 @@ widgets spliced in. In `[Phone, Messages, Clock card, Camera, …]` the clock's 
 [grid.js](../qml/core/grid.js) lays out this combined order as it lays out the icons: each item at the first free
 place where its block fits, so icons after a card fill the cells beside it.
 
-Model changes leave the slots alone: a new app (added at the end) or a removed app leaves the widget where it is, and
-the icons flow around it. When an app before a widget is removed, the first icon after the widget comes before it. A
-slot past the end puts the widget at the end. When a drag or an add writes the slots, they become the widgets' actual
-positions in the new order. Slots count items, not cells, so in landscape the same order fills a wider grid.
+Slots count items, not cells, so a widget keeps its neighbours, not its cell, and in landscape the same order fills a
+wider grid. Whatever is done to the widgets keeps the others' neighbours: a drag, an add, a removal and *Restore
+starter widgets* write the slots of every widget, as their positions in the new order. The apps are the launcher's,
+and their changes leave the slots alone: a new app (added at the end) leaves the widget where it is, and when an app
+before a widget is removed, the first icon after the widget comes before it. A slot past the end puts the widget at
+the end.
 
 The stock drag of an icon speaks in model indexes, and "before Camera" cannot tell whether the icon goes before or
 after the clock card. So the controller decides from what the drag aims at. The stock delegate asks `itemAt()`,
@@ -143,8 +145,9 @@ The widgets are one dconf key, `/apps/seaglass/widgets/list`, a JSON list:
 ```
 
 An id is `w` and a number, one above the highest in the list. The key's default is the empty string, which means
-"never written" and brings the starter widgets; an emptied list is `[]`. Entries of a kind this version does not
-know are kept but not shown, so that an older version never drops a newer one's widgets. Two more keys belong to the
+"never written" and brings the starter widgets; an emptied list is `[]`. Entries of a kind or a size this version does
+not know are kept but not shown, so that an older version never drops a newer one's widgets. They keep their slots in
+the order, with no cells, so the widgets around them stay where the newer version put them. Two more keys belong to the
 widgets: `/apps/seaglass/widgets/lastPlayer`, the desktop entry name of the last MPRIS player, for the idle
 play button, and `/apps/seaglass/editHint`, the hint's state (`pending`, then `done`).
 
@@ -229,8 +232,8 @@ closes the sheet only. Both come back when it closes, as their `enabled` and `in
 ## Limits
 
 - The sources rest per grid, not per page: a widget on a page that is not shown keeps ticking while the grid is.
-- A widget keeps its neighbours, not its cell. A backup restored on a phone with another app order puts the widgets
-  at the same slots, next to other apps, because the app order is Lipstick's and the backup leaves it out.
+- A backup restored on a phone with another app order puts the widgets at the same slots, next to other apps,
+  because the app order is Lipstick's and the backup leaves it out.
 - Now playing follows one player at a time, and only the panel switches players.
 - Weather shows only the Weather app's current place.
 - The modules belong to other packages: the Weather app, the Calendar and the media support. When one changes, its
@@ -238,8 +241,9 @@ closes the sheet only. Both come back when it closes, as their `enabled` and `in
 
 ## The code
 
-- [DataWidgets.qml](../qml/widgets/data/DataWidgets.qml): the list in dconf, add, remove, resize, the slots, the
-  starter widgets.
+- [DataWidgets.qml](../qml/widgets/data/DataWidgets.qml): the list in dconf. [store.js](../qml/widgets/data/store.js):
+  the kinds and their sizes, the starter widgets, and what an add, a removal, a resize or a move does to the list,
+  tested by [test_store.py](../tests/test_store.py).
 - [DataWidget.qml](../qml/widgets/data/DataWidget.qml): a widget on the grid: the glass, its face, the size pill,
   the touches and the drag.
 - [DataSources.qml](../qml/widgets/data/DataSources.qml): the sources, loaded on demand, with `live` and `demo`.

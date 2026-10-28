@@ -56,6 +56,11 @@ function layout(spans, columns, pageRows, reserved, reservedEnd) {
     }
 
     for (var i = 0; i < spans.length; i++) {
+        // a block of no cells: an entry that keeps its place in the order but is not drawn
+        if (spans[i].w <= 0 || spans[i].h <= 0) {
+            cells.push({ "col": first % columns, "row": Math.floor(first / columns), "w": 0, "h": 0 })
+            continue
+        }
         var w = Math.max(1, Math.min(columns, spans[i].w))
         var h = Math.max(1, Math.min(pageRows, spans[i].h))
         var cell = first
@@ -113,7 +118,8 @@ function bestIndex(spans, index, row, col, columns, pageRows, reserved, reserved
 // A data widget has no folder, so it has no place in the model. It holds a slot instead: its index in the grid's
 // order, which is the model's order with the data widgets spliced in. An entry of an order is {"m": model index}
 // or {"x": data widget id}; extras are [{id, at}] (at: the slot). Model changes leave the slots alone, so a data
-// widget keeps its place and the icons flow around it.
+// widget keeps its place and the icons flow around it. A widget this version does not draw (a later version's kind)
+// is in the order too, with a block of no cells, so that the others keep their places around it.
 
 // The order of `count` model items with the data widgets at their slots; a slot past the end puts the widget at
 // the end, two widgets on one slot keep the list's order

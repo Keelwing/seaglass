@@ -257,6 +257,22 @@ class DataWidgetOrderTest(unittest.TestCase):
         self.assertEqual(call("modelIndexAt", moved, position), 0)
         self.assertEqual(call("slotsOf", moved), {"s": 0})
 
+    def test_a_widget_not_drawn_keeps_its_place(self):
+        # a later version's widget at slot 3: no cells, but the clock at 7 stays between apps 5 and 6
+        order = call("compose", 10, [{"id": "later", "at": 3}, {"id": "clock", "at": 7}])
+        self.assertEqual(keys(order), [0, 1, 2, "later", 3, 4, 5, "clock", 6, 7, 8, 9])
+        result = call("layoutOrder", order, spans(icons(10)), {"later": {"w": 0, "h": 0}, "clock": SPAN["card"]},
+                      5, 9, 0, 0)
+        self.assertEqual((result["extra"]["later"]["w"], result["extra"]["later"]["h"]), (0, 0))
+        self.assertEqual((result["cells"][3]["row"], result["cells"][3]["col"]), (0, 3))
+        self.assertEqual(result["extra"]["clock"], {"col": 1, "row": 1, "w": 2, "h": 2})
+        self.assertEqual(result["rows"], 3)
+        # dragged and put back, the clock keeps its slot, and the other one its own
+        block = result["extra"]["clock"]
+        moved = call("bestOrder", order, spans(icons(10)), {"later": {"w": 0, "h": 0}, "clock": SPAN["card"]}, 7,
+                     block["row"], block["col"], 5, 9, 0, 0)
+        self.assertEqual(call("slotsOf", moved), {"later": 3, "clock": 7})
+
     def test_staying_put_is_stable(self):
         order = call("compose", 20, [{"id": "w", "at": 7}])
         block = call("layoutOrder", order, spans(icons(20)), {"w": SPAN["card"]}, 5, 9, 0, 0)["extra"]["w"]

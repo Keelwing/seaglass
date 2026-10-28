@@ -3,26 +3,19 @@
 // spliced in (grid.js compose).
 //
 // Stored in dconf (/apps/seaglass/widgets/list) as a JSON list: [{"id": "w3", "kind": "clock",
-// "size": "card", "at": 7}]. With persistent: false (the harness) the list lives in memory only.
+// "size": "card", "at": 7}]. With persistent: false (the harness) the list lives in memory only. What a change does
+// to the list is in store.js.
 import QtQuick 2.6
 import Nemo.Configuration 1.0
+import "store.js" as Store
 
 QtObject {
     id: store
 
     property bool persistent: true
     property var memory: []
-    readonly property var list: persistent ? parse(setting.value) : memory
-
-    // the kinds and the sizes each one has, the first being the default
-    readonly property var kinds: ({
-        "clock": ["card", "shelf"],
-        "status": ["card", "shelf", "panel"],
-        "player": ["card", "shelf", "panel"],
-        "event": ["card", "shelf", "panel"],
-        "weather": ["card", "shelf", "panel"]
-    })
-    readonly property var kindOrder: ["clock", "status", "player", "event", "weather"]
+    readonly property var list: persistent ? Store.parse(setting.value) : memory
+    readonly property var kindOrder: Store.KIND_ORDER
 
     property ConfigurationValue setting: ConfigurationValue {
         // in memory mode an unused key, only read, never written
@@ -33,49 +26,14 @@ QtObject {
 
     readonly property bool fresh: persistent && setting.value === ""
 
-    // The starter widgets: a clock card at the start of the grid, the status as a shelf below it
-    readonly property var starter: [{ "kind": "clock", "size": "card", "at": 0 },
-                                    { "kind": "status", "size": "shelf", "at": 7 }]
-
-    // the starter widgets that are not on the grid, added (the settings' Restore starter widgets uses the same rule)
-    function addStarter() {
-        var entries = copy()
-        for (var s = 0; s < starter.length; s++) {
-            var there = false
-            for (var i = 0; i < entries.length; i++)
-                there = there || entries[i].kind === starter[s].kind
-            if (!there)
-                entries.push({ "id": nextId(entries), "kind": starter[s].kind, "size": starter[s].size,
-                               "at": starter[s].at })
-        }
-        write(entries)
-    }
-
+    // the kind's sizes, the first being the default
     function sizesOf(kind) {
-        return kinds[kind] || []
+        return Store.sizesOf(kind)
     }
 
-    function known(kind) {
-        return kinds[kind] !== undefined
-    }
-
-    // the entries that make sense (a later version may add kinds: they are kept, but not shown)
-    function parse(text) {
-        var entries = []
-        try {
-            var value = JSON.parse(text)
-            if (value && value.length !== undefined) {
-                for (var i = 0; i < value.length; i++) {
-                    var entry = value[i]
-                    if (entry && typeof entry.id === "string" && typeof entry.kind === "string"
-                            && (entry.size === "card" || entry.size === "shelf" || entry.size === "panel")
-                            && typeof entry.at === "number" && entry.at >= 0)
-                        entries.push(entry)
-                }
-            }
-        } catch (e) {
-        }
-        return entries
+    // an entry this version draws (a later version's kinds and sizes are kept, but not shown)
+    function shown(entry) {
+        return Store.shown(entry)
     }
 
     function write(entries) {
@@ -86,76 +44,42 @@ QtObject {
     }
 
     function copy() {
-        return parse(JSON.stringify(list))
+        return Store.parse(JSON.stringify(list))
     }
 
-    function entryOf(id) {
-        for (var i = 0; i < list.length; i++) {
-            if (list[i].id === id)
-                return list[i]
-        }
-        return null
-    }
-
-    function nextId(entries) {
-        var n = 0
-        for (var i = 0; i < entries.length; i++) {
-            var m = /^w(\d+)$/.exec(entries[i].id)
-            if (m)
-                n = Math.max(n, parseInt(m[1], 10))
-        }
-        return "w" + (n + 1)
+    // the starter widgets that are not on the grid, added (the settings' Restore starter widgets does the same)
+    function addStarter() {
+        var entries = copy()
+        Store.addStarters(entries)
+        write(entries)
     }
 
     // A new widget: slots ({id: at}, grid.js slotsOf) holds its slot under "new", and the others' slots, which its
     // place may shift; one write. Returns its id.
     function add(kind, size, slots) {
         var entries = copy()
-        var id = nextId(entries)
-        var sizes = sizesOf(kind)
-        for (var i = 0; i < entries.length; i++) {
-            if (slots[entries[i].id] !== undefined)
-                entries[i].at = slots[entries[i].id]
-        }
-        entries.push({ "id": id, "kind": kind, "size": sizes.indexOf(size) >= 0 ? size : sizes[0],
-                       "at": slots["new"] !== undefined ? slots["new"] : 1e6 })
+        var id = Store.add(entries, kind, size, slots)
         write(entries)
         return id
     }
 
+    // the others keep their neighbours
     function remove(id) {
         var entries = copy()
-        for (var i = 0; i < entries.length; i++) {
-            if (entries[i].id === id) {
-                entries.splice(i, 1)
-                write(entries)
-                return
-            }
-        }
+        if (Store.remove(entries, id))
+            write(entries)
     }
 
     function resize(id, size) {
         var entries = copy()
-        for (var i = 0; i < entries.length; i++) {
-            if (entries[i].id === id && sizesOf(entries[i].kind).indexOf(size) >= 0 && entries[i].size !== size) {
-                entries[i].size = size
-                write(entries)
-                return
-            }
-        }
+        if (Store.resize(entries, id, size))
+            write(entries)
     }
 
     // The slots after a move ({id: at}, grid.js slotsOf): written only when one changed
     function setSlots(slots) {
         var entries = copy()
-        var changed = false
-        for (var i = 0; i < entries.length; i++) {
-            var at = slots[entries[i].id]
-            if (at !== undefined && entries[i].at !== at) {
-                entries[i].at = at
-                changed = true
-            }
-        }
+        var changed = Store.setSlots(entries, slots)
         if (changed)
             write(entries)
         return changed

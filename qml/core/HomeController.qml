@@ -346,10 +346,11 @@ Item {
         }
         reserved = (grid.reserveFirstRow ? 1 : 0) + (searchShown && !searchAtBottom ? 1 : 0)
         reservedEnd = searchShown && searchAtBottom ? 1 : 0
-        // the data widgets at their slots; while one is dragged, the order planned for it
+        // the data widgets at their slots (one not shown has no cells); while one is dragged, the order planned for it
         var xspans = {}
-        for (var d = 0; d < dataList.length; d++)
-            xspans[dataList[d].id] = Grid.spanOf(dataList[d].size, columns)
+        for (var d = 0; d < dataEntries.length; d++)
+            xspans[dataEntries[d].id] = dataStore.shown(dataEntries[d]) ? Grid.spanOf(dataEntries[d].size, columns)
+                                                                       : { "w": 0, "h": 0 }
         var extras = dataExtras()
         // a widget being dragged out of the gallery: "new", at the end until it is planned
         if (ghost) {
@@ -927,13 +928,14 @@ Item {
     property bool displayOn: true
     // the app grid is on screen: the sources tick only then
     readonly property bool dataLive: grid !== null && grid.visible && displayOn
-    // the widgets shown: the store's, of the kinds this version knows, unless they are switched off
+    // the widgets in the grid's order: the store's, unless they are switched off
+    readonly property var dataEntries: widgetSettings.show ? dataStore.list : []
+    // the widgets shown: those of a kind and size this version knows (the others keep their slots, undrawn)
     readonly property var dataList: {
-        var all = dataStore.list
         var shown = []
-        for (var i = 0; widgetSettings.show && i < all.length; i++) {
-            if (dataStore.known(all[i].kind))
-                shown.push(all[i])
+        for (var i = 0; i < dataEntries.length; i++) {
+            if (dataStore.shown(dataEntries[i]))
+                shown.push(dataEntries[i])
         }
         return shown
     }
@@ -994,8 +996,8 @@ Item {
 
     function dataExtras() {
         var extras = []
-        for (var i = 0; i < dataList.length; i++)
-            extras.push({ "id": dataList[i].id, "at": dataList[i].at })
+        for (var i = 0; i < dataEntries.length; i++)
+            extras.push({ "id": dataEntries[i].id, "at": dataEntries[i].at })
         return extras
     }
 
@@ -1027,7 +1029,7 @@ Item {
     function planCrossing(index, target, next) {
         crossPlan = { "object": model ? model.get(index) : null, "target": target, "order": next }
         crossTimer.stop()
-        if (target === index && dataList.length > 0)
+        if (target === index && dataEntries.length > 0)
             crossTimer.restart()
     }
 
@@ -1046,7 +1048,7 @@ Item {
     function modelMoved(start, row) {
         var to = row > start ? row - 1 : row
         crossTimer.stop()
-        if (model && dataList.length > 0 && start >= 0 && row >= 0) {
+        if (model && dataEntries.length > 0 && start >= 0 && row >= 0) {
             var movedItem = model.get(to)
             var itemCount = model.itemCount
             var slots = null

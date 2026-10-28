@@ -8,8 +8,8 @@ QML. The scripts behind the make targets (`scripts/`) reach the phone over SSH. 
 - **Docker.** It runs the tool image (`docker/Dockerfile`), which has rpmbuild, GNU patch, qmllint for Qt 5,
   shellcheck and ImageMagick. The image is built on first use, and again only when the Dockerfile changes.
 - **Python 3**, for the hook generator and the tests.
-- **Node.js** (optional): `tests/test_grid.py` and `tests/test_search.py` run the layout and search engines with
-  Node, and skip without it.
+- **Node.js** (optional): `tests/test_grid.py`, `tests/test_search.py` and `tests/test_store.py` run the layout and
+  search engines and the widget store with Node, and skip without it.
 - **SSH key login to the phone as the device user** (developer mode). The scripts use the host `jolla`; set
   `SEAGLASS_SSH` to another `~/.ssh/config` alias. They share one connection (`ControlMaster`, socket `/tmp/seaglass-*`,
   kept for ten minutes).
@@ -19,7 +19,7 @@ QML. The scripts behind the make targets (`scripts/`) reach the phone over SSH. 
 ## Build and install
 
 ```bash
-make test         # unit tests: the hook on stand-in files, layout, search, repository consistency
+make test         # unit tests: the hook on stand-in files, layout, search, widget store, repository consistency
 make lint         # qmllint (Qt 5), shellcheck, actionlint, the Python byte compiler, the shaders (glslang)
 make rpm          # out/rpm/seaglass-VERSION-1.noarch.rpm
 make deploy       # copy it to the phone (~/seaglass) and check it with rpm -U --test

@@ -79,7 +79,7 @@ checks that every type and file used across folders is imported and exists.
 | `switcher/` | `SwitcherController.qml` and its parts: chips, the card row, hints, the pinch and its morph layer, cover stills, recently closed apps. |
 | `widgets/` | `SizeBar.qml`, the size control shared by both kinds of widget. |
 | `widgets/group/` | Folders shown as widgets: `GroupWidget.qml` (the tile), `WidgetTile.qml` (the hook's wrapper), the folder type store, its chooser and its selector, `WidgetBadge.qml` (the folder-to-card toggle). |
-| `widgets/data/` | Data widgets: `DataWidgets.qml` (the store), `DataWidget.qml` (a widget's block in the grid), `DataSources.qml` (the sources, loaded on demand), the gallery, and `faces.js`. |
+| `widgets/data/` | Data widgets: `DataWidgets.qml` (the list in dconf), `store.js` (the kinds, and what a change does to the list), `DataWidget.qml` (a widget's block in the grid), `DataSources.qml` (the sources, loaded on demand), the gallery, and `faces.js`. |
 | `widgets/data/<kind>/` | One folder per kind (`clock`, `status`, `player`, `event`, `weather`). Each has a `*Source.qml` that reads the data and a `*Face.qml` that draws it in every size, plus the face's parts. |
 | `animations/` | The app animations ([ANIMATIONS.md](ANIMATIONS.md)): `AnimationController.qml` (opening and closing), `Effect.qml` (one style's shader for a moment), `Shards.qml`, the covers' `CoverLoading.qml` and `CoverClosing.qml`, `styles.js`, `shaders.js` and the shaders. |
 | `settings/` | The settings: `SettingsHub.qml` (the first page), one page per feature, *What's new*, and one file per group of dconf keys (`GlassSettings.qml` and so on), which the home screen uses too. |
@@ -155,7 +155,7 @@ icons are round, so the preview uses that 70 % area:
 | `.github/workflows/` | CI (`ci.yml`), the release on a pushed tag (`release.yml`), the site (`pages.yml`) |
 | `site/`, `scripts/site.py` | the GitHub Pages site: the landing page, and the docs rendered from this repository's Markdown |
 | `harness/` | the development harness: scenes run with `qmlscene` on the phone (not packaged) |
-| `tests/` | unit tests: the hook on stand-in files, the layout and search engines, repository consistency; `qml-check/`, the QML check on older releases |
+| `tests/` | unit tests: the hook on stand-in files, the layout and search engines, the widget store, repository consistency; `qml-check/`, the QML check on older releases |
 | `docs/` | how each feature works (`FOLDERS.md`, `GLASS.md`, `SEARCH.md`, `BADGES.md`, `SWITCHER.md`, `WIDGETS.md`), this file, and `DEVELOPMENT.md` |
 | `docs/images/` | the screenshots (`make screenshots`) |
 | `VERSION` | the package version (also in `patch.json`) |
