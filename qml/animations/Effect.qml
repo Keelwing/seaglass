@@ -58,8 +58,12 @@ ShaderEffect {
         })
     }
 
-    // the heaviest styles (the grains) are drawn at half the resolution and scaled up
-    readonly property bool half: Styles.has(style, "half")
+    // the heaviest moments (the grains) are drawn at half the resolution and scaled up (styles.js half). A split
+    // moment draws its picture here, at full resolution, and only its flying grains at half, in the pass below: the
+    // shader draws what part asks for (0 all of it, 1 the picture, 2 the grains)
+    readonly property bool split: Styles.split(style, moment)
+    readonly property bool half: Styles.half(style, moment) && !split
+    readonly property real part: split ? 1 : 0
     layer.enabled: half
     layer.smooth: true
     layer.textureSize: Qt.size(Math.ceil(width / 2), Math.ceil(height / 2))
@@ -77,4 +81,30 @@ ShaderEffect {
         load()
     }
     Component.onDestruction: gone = true
+
+    // a split moment's flying grains: the same shader at half the resolution, over the picture
+    ShaderEffect {
+        readonly property variant source: effect.source
+        readonly property variant noiseTex: effect.noiseTex
+        readonly property real progress: effect.progress
+        readonly property real time: effect.time
+        readonly property point origin: effect.origin
+        readonly property rect originRect: effect.originRect
+        readonly property real aspect: effect.aspect
+        readonly property size resolution: effect.resolution
+        readonly property vector3d tint: effect.tint
+        readonly property real useTint: effect.useTint
+        readonly property real radiusPx: effect.radiusPx
+        readonly property real clipTop: effect.clipTop
+        readonly property real part: 2
+
+        anchors.fill: parent
+        visible: effect.split
+        blending: true
+        vertexShader: effect.vertexShader
+        fragmentShader: effect.fragmentShader
+        layer.enabled: effect.split
+        layer.smooth: true
+        layer.textureSize: Qt.size(Math.ceil(width / 2), Math.ceil(height / 2))
+    }
 }

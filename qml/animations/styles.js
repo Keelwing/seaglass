@@ -1,9 +1,10 @@
 // The animation styles (docs/ANIMATIONS.md): their names and groups, the length of their opening and closing
 // effects in ms at the normal speed, the shader libraries they use (shaders/NAME.glsl, after common.glsl), whether
-// they blur their source (blur: it needs mipmaps) and whether they are drawn at half the resolution (half: the
-// grains, the heaviest shaders). A
-// style plays a moment only with its shader there (shaders/STYLE-MOMENT.frag); without it, that moment stays stock.
-// Shatter opens and closes with its shards (Shards.qml), not with one shader.
+// they blur their source (blur: it needs mipmaps), and the moments ("open", "close", "load") drawn at half the
+// resolution and scaled up (half: the grains, the heaviest shaders, and these styles' loading). Of those, a split
+// moment draws its picture at full resolution and only its flying grains at half (split, Effect.qml). A style plays
+// a moment only with its shader there (shaders/STYLE-MOMENT.frag); without it, that moment stays stock. Shatter
+// opens and closes with its shards (Shards.qml), not with one shader.
 .pragma library
 
 var STYLES = [
@@ -13,12 +14,12 @@ var STYLES = [
     { "id": "ember", "name": "Ember", "group": "Elements", "open": 620, "close": 880, "libs": ["ember"] },
     { "id": "volt", "name": "Volt", "group": "Elements", "open": 620, "close": 700, "libs": ["volt"] },
     { "id": "frost", "name": "Frost", "group": "Elements", "open": 700, "close": 950, "libs": ["grains", "frost"],
-      "blur": true, "half": true },
+      "blur": true, "half": ["close", "load"] },
     { "id": "shatter", "name": "Shatter", "group": "Extreme", "open": 720, "close": 1000, "libs": [],
       "shards": true },
     { "id": "singularity", "name": "Singularity", "group": "Extreme", "open": 660, "close": 950, "libs": [] },
     { "id": "dust", "name": "Dust", "group": "Extreme", "open": 800, "close": 1050, "libs": ["grains"],
-      "half": true }
+      "half": ["open", "close", "load"] }
 ]
 
 // the speed setting (0 relaxed, 1 normal, 2 quick) as a factor of the durations
@@ -45,10 +46,25 @@ function libs(id) {
     return style ? style.libs : []
 }
 
-// a flag of a style ("blur", "half", "shards")
+// a flag of a style ("blur", "shards")
 function has(id, flag) {
     var style = find(id)
     return style !== null && style[flag] === true
+}
+
+// whether a style draws a moment ("open", "close" or "load") at half the resolution
+function half(id, moment) {
+    return listed(id, "half", moment)
+}
+
+// whether a style draws a moment's picture at full resolution and only its grains at half
+function split(id, moment) {
+    return listed(id, "split", moment)
+}
+
+function listed(id, key, moment) {
+    var style = find(id)
+    return style !== null && style[key] !== undefined && style[key].indexOf(moment) >= 0
 }
 
 // the shaders of every style: [{style, moment}], Shatter's opening and closing left out (its shards)

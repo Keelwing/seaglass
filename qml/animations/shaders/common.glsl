@@ -38,6 +38,9 @@ uniform float useTint;
 uniform float radiusPx;
 // closing: the window's top edge, as far as the swipe has wiped it (0 to 1); nothing of the source above it
 uniform float clipTop;
+// a split moment (styles.js split) is drawn twice: part 1 its picture, at full resolution, then part 2 its flying
+// grains over it, at half the resolution; 0 all of it at once
+uniform float part;
 
 #define PI 3.14159265
 
