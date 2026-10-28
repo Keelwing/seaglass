@@ -96,10 +96,10 @@ Three rules hold for every effect:
 - **Sailfish is never kept waiting.** The window is shown, focused and closed at the stock moment. The effect plays on
   a copy of it, over or in place of the stock layer, and touch goes to the app as soon as the stock would let it.
 - **One shader per effect.** Each effect is a `ShaderEffect` with one fragment shader and the same inputs: the layer
-  as a texture, a 256 × 256 noise tile, `progress` from 0 to 1, `time` in seconds, the origin point and rectangle,
-  the aspect ratio, the size in pixels, the ambience's highlight colour and whether to use it. While an app opens
-  or closes, `time` is the effect's own (its progress times its length), so it follows the speed; a loading effect
-  has a clock that runs on. Shatter is the exception (below).
+  as a texture, a 256 × 256 noise tile, `progress` from 0 to 1, `time` in seconds, the origin point, rectangle and
+  corner radius, the aspect ratio, the size in pixels, the ambience's highlight colour and whether to use it. While
+  an app opens or closes, `time` is the effect's own (its progress times its length), so it follows the speed; a
+  loading effect has a clock that runs on. Shatter is the exception (below).
 - **Stock when anything fails.** No controller, a shader not loaded yet, a style that does not load: the stock fade,
   indicator and slide run as before. The hook changes stock values only through what our files return.
 
@@ -133,7 +133,9 @@ restarts the animation while the window is not mapped, with `retries` above 0). 
 1. picks the style for *Opening*, or answers `false` (off, stock, or its shader not loaded yet);
 2. takes the origin: the icon that `HomeController.qml` noted when it launched an app, within the last 3 s and
    while the app grid is still out, else the cover the app has in the switcher (`SwitcherController.coverRectFor`,
-   which also finds a cover that is still loading, by its app), else the middle of the screen;
+   which also finds a cover that is still loading, by its app), else the middle of the screen. Its corner radius
+   goes with it: half the icon's width (launcher icons are round), the cover's corners as the switcher draws them,
+   or none from the middle;
 3. puts a live `ShaderEffectSource` on the app layer (`hideSource`, so that the layer is not drawn twice) under the
    effect, and runs `progress` from 0 to 1;
 4. lets the layer show again when done.

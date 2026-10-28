@@ -91,6 +91,7 @@ Item {
             effect.moment = phase
             effect.style = shards ? "" : style
             effect.originRect = phase === "close" ? Qt.rect(0, 0, 1, 1) : iconRect
+            effect.radiusPx = phase === "close" ? 0 : Theme.iconSizeLauncher / 2
             effect.origin = point
             if (shards) {
                 pieces.assemble = phase === "open"

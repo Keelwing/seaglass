@@ -366,6 +366,17 @@ class RepoTest(unittest.TestCase):
         closing = (REPO / "qml" / "animations" / "CoverClosing.qml").read_text(encoding="utf-8")
         self.assertIn("time: closing.progress * closing.duration / 1000", closing)
 
+    def test_an_opening_knows_the_corners_it_opens_from(self):
+        # an icon is round, a cover has the switcher's corners, the middle of the screen none
+        controller = (REPO / "qml" / "animations" / "AnimationController.qml").read_text(encoding="utf-8")
+        self.assertIn('kind === "icon" ? from.width / 2 : kind === "cover" ? from.radius : 0', controller)
+        self.assertIn("openEffect.radiusPx = from.radius", controller)
+        switcher = (REPO / "qml" / "switcher" / "SwitcherController.qml").read_text(encoding="utf-8")
+        cover = switcher[switcher.index("function coverRectFor"):]
+        self.assertIn('"radius": Theme.paddingMedium', cover[:cover.index("return null")])
+        page = (REPO / "qml" / "settings" / "AnimationsPage.qml").read_text(encoding="utf-8")
+        self.assertIn("effect.radiusPx = ", page)
+
     def test_qtquick_import_fits_qt_56(self):
         for path in QML:
             for version in re.findall(r"^import QtQuick (\d+\.\d+)", path.read_text(encoding="utf-8"), re.M):

@@ -902,8 +902,8 @@ Item {
         CoverClosing {}
     }
 
-    // The cover of a window in scene coordinates ({x, y, width, height}), for the opening effect
-    // (animations/AnimationController.qml); null when it has none
+    // The cover of a window in scene coordinates ({x, y, width, height}, and radius, its corners as drawn), for the
+    // opening effect (animations/AnimationController.qml); null when it has none
     function coverRectFor(windowId) {
         for (var i = 0; coverRepeater && windowId && i < coverRepeater.count; i++) {
             var stock = coverRepeater.itemAt(i)
@@ -914,7 +914,8 @@ Item {
                 continue
             var drawn = stock.contentItem
             var corner = drawn.mapToItem(null, 0, 0)
-            return { "x": corner.x, "y": corner.y, "width": drawn.width, "height": drawn.height }
+            return { "x": corner.x, "y": corner.y, "width": drawn.width, "height": drawn.height,
+                     "radius": Theme.paddingMedium }
         }
         return null
     }

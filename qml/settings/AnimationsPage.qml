@@ -173,6 +173,9 @@ Page {
             effect.style = chosen !== "stock" && !shards ? chosen : ""
             effect.originRect = rect
             effect.origin = point
+            // the corners of what it opens from, in the preview's pixels: the round icon, or the cover
+            effect.radiusPx = phase === "close" ? 0 : fromCover ? Theme.paddingMedium * screen.k
+                                                                : Theme.iconSizeLauncher * screen.k / 2
             pieces.assemble = phase === "open"
             pieces.impact = point
             var drawn = chosen !== "stock" && (shards ? pieces.ready : effect.ready)

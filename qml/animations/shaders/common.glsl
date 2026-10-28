@@ -33,7 +33,8 @@ uniform vec2 resolution;
 // the ambience's highlight colour, and whether fire, water and light take it (1) or keep their own (0)
 uniform vec3 tint;
 uniform float useTint;
-// the corner radius of a cover, in pixels
+// the corner radius in pixels: of the cover a loading plays on or a cover closing, or of what an app opens from
+// (an icon is round; 0 from the middle of the screen)
 uniform float radiusPx;
 // closing: the window's top edge, as far as the swipe has wiped it (0 to 1); nothing of the source above it
 uniform float clipTop;

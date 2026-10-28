@@ -27,6 +27,8 @@ ShaderEffect {
     property size resolution: Qt.size(width, height)
     property vector3d tint: Qt.vector3d(1, 1, 1)
     property real useTint
+    // the corners, in pixels: of the cover a loading plays on, of the cover closing, or of what an app opens from
+    // (an icon is round; 0 from the middle of the screen)
     property real radiusPx
     // closing: the window's top edge as the swipe left it (0 to 1)
     property real clipTop

@@ -54,9 +54,10 @@ Item {
                                     || (settings.surprise && settings[moment] !== "stock"))
     }
 
-    // where an app opens from, in this item's coordinates (0 to 1): the icon tapped while the app grid is still
-    // there (within the last 3 s), else its cover on the home screen, else the middle of the screen
-    function openingRect(layer) {
+    // where an app opens from: the icon tapped while the app grid is still there (within the last 3 s), else its
+    // cover on the home screen, else the middle of the screen. {rect: in this item's coordinates (0 to 1), radius:
+    // its corners in pixels} (launcher icons are round)
+    function openingFrom(layer) {
         var tapped = Motion.takeAppOrigin(3000)
         var launcher = Lipstick.compositor.launcherLayer
         var from = tapped && launcher && launcher.exposed ? tapped : null
@@ -66,13 +67,15 @@ Item {
             if (from)
                 kind = "cover"
         }
-        debugLog("open from the", kind, "(an icon tapped:", tapped !== null, "app grid:", launcher ? launcher.exposed : "-",
-                 "switcher:", Motion.switcher !== null, ")")
+        var radius = kind === "icon" ? from.width / 2 : kind === "cover" ? from.radius : 0
+        debugLog("open from the", kind, "radius", Math.round(radius), "(an icon tapped:", tapped !== null, "app grid:",
+                 launcher ? launcher.exposed : "-", "switcher:", Motion.switcher !== null, ")")
         if (from && width > 0 && height > 0) {
             var corner = controller.mapFromItem(null, from.x, from.y)
-            return Qt.rect(corner.x / width, corner.y / height, from.width / width, from.height / height)
+            return { "rect": Qt.rect(corner.x / width, corner.y / height, from.width / width, from.height / height),
+                     "radius": radius }
         }
-        return Qt.rect(0.35, 0.4, 0.3, 0.2)
+        return { "rect": Qt.rect(0.35, 0.4, 0.3, 0.2), "radius": 0 }
     }
 
     function opening(layer) {
@@ -86,8 +89,10 @@ Item {
             debugLog("open: stock,", style, "is not loaded yet")
             return false
         }
-        var rect = openingRect(layer)
+        var from = openingFrom(layer)
+        var rect = from.rect
         openEffect.originRect = rect
+        openEffect.radiusPx = from.radius
         openEffect.origin = Qt.point(rect.x + rect.width / 2, rect.y + rect.height / 2)
         openEffect.progress = 0
         openShardsOn = shards
