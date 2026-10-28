@@ -29,6 +29,19 @@ def code_lines(path):
         yield number, line
 
 
+def qml_blocks(text, kind):
+    """the blocks of a QML type in a file, from "Kind {" to its closing brace"""
+    blocks = []
+    for match in re.finditer(r"(?m)^[ \t]*%s \{" % kind, text):
+        depth = 0
+        for end in range(match.end() - 1, len(text)):
+            depth += {"{": 1, "}": -1}.get(text[end], 0)
+            if depth == 0:
+                blocks.append(text[match.start():end + 1])
+                break
+    return blocks
+
+
 class RepoTest(unittest.TestCase):
     def test_patch_json(self):
         meta = json.loads((REPO / "patchmanager" / "patch.json").read_text(encoding="utf-8"))
@@ -336,6 +349,22 @@ class RepoTest(unittest.TestCase):
         # the noise tile is made when the package is built, never committed
         self.assertIn("scripts/noise.py", (REPO / "rpm" / "build.sh").read_text(encoding="utf-8"))
         self.assertIn("qml/animations/noise.png", (REPO / ".gitignore").read_text(encoding="utf-8"))
+
+    def test_every_effect_runs_its_clock(self):
+        # an effect whose time is never set stands still in all that moves with it (flames, sparks, stars, arcs):
+        # openings and closings run on their own seconds, which follow the speed; only the warm-up, a pixel nearly
+        # clear, has none
+        for path in sorted(REPO.glob("qml/**/*.qml")):
+            text = path.read_text(encoding="utf-8")
+            for block in qml_blocks(text, "Effect"):
+                if "id: warmEffect" in block:
+                    continue
+                self.assertRegex(block, r"\n\s*time: ", f"{path.relative_to(REPO)}: an Effect without time")
+        controller = (REPO / "qml" / "animations" / "AnimationController.qml").read_text(encoding="utf-8")
+        self.assertIn("time: openEffect.progress * openRun.duration / 1000", controller)
+        self.assertIn("time: closeEffect.progress * closeRun.duration / 1000", controller)
+        closing = (REPO / "qml" / "animations" / "CoverClosing.qml").read_text(encoding="utf-8")
+        self.assertIn("time: closing.progress * closing.duration / 1000", closing)
 
     def test_qtquick_import_fits_qt_56(self):
         for path in QML:

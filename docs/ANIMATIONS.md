@@ -96,8 +96,10 @@ Three rules hold for every effect:
 - **Sailfish is never kept waiting.** The window is shown, focused and closed at the stock moment. The effect plays on
   a copy of it, over or in place of the stock layer, and touch goes to the app as soon as the stock would let it.
 - **One shader per effect.** Each effect is a `ShaderEffect` with one fragment shader and the same inputs: the layer
-  as a texture, a 256 × 256 noise tile, `progress` from 0 to 1, `time`, the origin point and rectangle, the aspect
-  ratio, the size in pixels, the ambience's highlight colour and whether to use it. Shatter is the exception (below).
+  as a texture, a 256 × 256 noise tile, `progress` from 0 to 1, `time` in seconds, the origin point and rectangle,
+  the aspect ratio, the size in pixels, the ambience's highlight colour and whether to use it. While an app opens
+  or closes, `time` is the effect's own (its progress times its length), so it follows the speed; a loading effect
+  has a clock that runs on. Shatter is the exception (below).
 - **Stock when anything fails.** No controller, a shader not loaded yet, a style that does not load: the stock fade,
   indicator and slide run as before. The hook changes stock values only through what our files return.
 

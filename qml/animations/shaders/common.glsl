@@ -20,7 +20,8 @@ uniform float qt_Opacity;
 // the layer, cover or icon drawn, and the noise tile (R smooth, G fractal, B Voronoi edge distance; it repeats)
 uniform sampler2D source;
 uniform sampler2D noiseTex;
-// 0 to 1 over the effect, and seconds for the loops
+// 0 to 1 over the effect, and seconds: of the effect for an opening or closing (they follow the speed), a running
+// clock for a loading
 uniform float progress;
 uniform float time;
 // where it opens from or closes at, in the item's own coordinates (0 to 1, y down): a point and a rectangle

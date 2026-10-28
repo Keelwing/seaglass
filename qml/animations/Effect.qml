@@ -17,6 +17,8 @@ ShaderEffect {
     property variant source
     property variant noiseTex
     property real progress
+    // seconds: of the effect itself for an opening or closing (its progress times its length), a running clock for
+    // a loading
     property real time
     // in the effect's own coordinates, 0 to 1 with y down
     property point origin: Qt.point(0.5, 0.5)

@@ -297,6 +297,8 @@ Item {
         moment: "open"
         source: liveLayer
         noiseTex: noise
+        // the effect's own seconds, which follow the speed
+        time: openEffect.progress * openRun.duration / 1000
         tint: controller.tint
         useTint: settings.ambience ? 1 : 0
         onGlMajorChanged: controller.prepare()
@@ -333,6 +335,7 @@ Item {
         moment: "close"
         source: frozenLayer
         noiseTex: noise
+        time: closeEffect.progress * closeRun.duration / 1000
         tint: controller.tint
         useTint: settings.ambience ? 1 : 0
         clipTop: cameFrom.top

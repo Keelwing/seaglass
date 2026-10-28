@@ -519,6 +519,8 @@ Page {
                         source: appTexture
                         noiseTex: noise
                         progress: page.t
+                        // the effect's own seconds, as on the home screen
+                        time: page.stepMs / 1000
                         tint: page.tint
                         useTint: settings.ambience ? 1 : 0
                         onGlMajorChanged: page.preload()

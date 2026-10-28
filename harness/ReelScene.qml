@@ -200,6 +200,8 @@ Item {
         source: appTexture
         noiseTex: noise
         progress: scene.t
+        // the effect's own seconds at the normal speed, however slowed down
+        time: scene.t * Styles.duration(scene.style, scene.phase, 1) / 1000
         tint: Qt.vector3d(Theme.highlightColor.r, Theme.highlightColor.g, Theme.highlightColor.b)
     }
 

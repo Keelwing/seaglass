@@ -85,6 +85,7 @@ Item {
         source: closing.copied ? kept : frozen
         noiseTex: noise
         progress: closing.progress
+        time: closing.progress * closing.duration / 1000
         origin: Qt.point(0.5, 0.45)
         originRect: Qt.rect(0, 0, 1, 1)
         radiusPx: closing.radius
