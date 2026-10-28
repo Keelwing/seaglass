@@ -41,8 +41,8 @@ Nine styles in three groups, and the stock one. The lengths are at the normal sp
 | **Northern lights** | A thin ray rises from the icon, and curtains of aurora sweep down and leave the app behind them, 780 ms | An aurora over dark hills and a still lake that mirrors it | Melts upward into rays of light that rise and fade, 850 ms |
 | *Elements: fire, lightning and ice* | | | |
 | **Ember** | A ring of fire spreads from the icon, sparks flying ahead of it, 620 ms | The cover smoulders: coals, low flames, rising sparks | Burns away from the bottom up: charring, a glowing edge, flames and heat haze, 880 ms |
-| **Volt** | Lightning strikes the icon, the screen flashes, and an electric ring opens the app, 620 ms | Arcs run around the cover's edge, and now and then a bolt strikes the icon | Arcs crawl over the window, then it switches off like an old TV, 700 ms |
-| **Frost** | The screen starts frozen, and the ice melts from the icon outward, 700 ms | Frost grows over the cover from its edges and thaws again | Freezes from the edges, cracks, and falls apart as snow, 950 ms |
+| **Volt** | Lightning strikes the icon and lights up the screen around it, then an electric ring opens the app, 620 ms | Arcs run around the cover's edge, and now and then a bolt strikes the icon | Arcs crawl over the window, then it switches off like an old TV, 700 ms |
+| **Frost** | Frost forms over the screen and melts away from the icon outward, 700 ms | Frost grows over the cover from its edges and thaws again | Freezes from the edges, cracks from where the finger let go, and falls apart as snow, 950 ms |
 | *Extreme: loud on purpose* | | | |
 | **Shatter** | Shards fly in and fit together; the seams glow and vanish, 720 ms | Cracks run through the cover and fill with gold | Breaks where the finger let go; the shards fall, turning and catching the light, 1000 ms |
 | **Singularity** | The app bursts out of a white hole at the icon, 660 ms | A small black hole spins in the cover, bending the icon around it | Pulled into a black hole with a glowing disk, which then winks out, 950 ms |

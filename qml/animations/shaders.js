@@ -53,8 +53,7 @@ function loadFile(url, done) {
 }
 
 // calls done(text) with the shader NAME from the folder base (a URL ending in "/"), behind common.glsl and the
-// libraries libs (["grains", "frost"]: grains.glsl, frost.glsl), as GLSL ES 3.00 when es3; at once when it is
-// loaded already
+// libraries libs (["frost"]: frost.glsl), as GLSL ES 3.00 when es3; at once when it is loaded already
 function load(base, name, libs, es3, done) {
     var key = name + (es3 ? " es3" : "")
     if (texts[key] !== undefined) {
