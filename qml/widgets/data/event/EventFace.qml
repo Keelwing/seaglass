@@ -28,6 +28,8 @@ Item {
     readonly property var events: source ? source.events : []
     readonly property date todayStart: new Date(now.getFullYear(), now.getMonth(), now.getDate())
     readonly property date tomorrowStart: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1)
+    // by the calendar, as tomorrowStart, not 24 hours on: a day can have 23 or 25 hours
+    readonly property date dayAfterStart: new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2)
     // the events still to come today, and the first one at all
     readonly property var todays: {
         var list = []
@@ -56,7 +58,7 @@ Item {
 
     function dayLabel(date) {
         return date < tomorrowStart ? qsTr("Today")
-             : date < new Date(tomorrowStart.getTime() + 24 * 3600 * 1000) ? qsTr("Tomorrow")
+             : date < dayAfterStart ? qsTr("Tomorrow")
              : weekdayOf(date)
     }
 

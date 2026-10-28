@@ -18,6 +18,7 @@ Each version was checked on a Jolla Phone with Sailfish OS 5.2.0.20. How each fe
 - Now playing no longer says "Nothing playing" for a paused player that just appeared, or after a track change.
 - Weather: today's high and low and the "Today" column stay right after midnight. With *By size*, the hourly forecast
   is fetched only while a weather shelf is on the grid or in the gallery.
+- Next event: "Tomorrow" is right on the days the clocks change.
 
 ## 1.0.0 (2026-10-17)
 
