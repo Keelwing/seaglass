@@ -4,6 +4,8 @@ Each version was checked on a Jolla Phone with Sailfish OS 5.2.0.20. How each fe
 
 ## Unreleased
 
+- App animations are on out of the box: apps open in Ember, load in Dust and close in Northern lights, at the quick
+  speed and in the ambience's colours.
 - A style tile sets all three moments, and Surprise me covers every moment that is not set to Stock.
 
 ## 1.0.0 (2026-10-17)

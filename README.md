@@ -77,8 +77,9 @@ Apps open from the icon or cover you tapped, show a loading effect on their new 
 with the swipe from the top, in one of nine styles: *Seaglass*, *Tide* and *Northern lights* (calm, made of glass,
 water and light), *Ember*, *Volt* and *Frost* (fire, lightning and ice), and *Shatter*, *Singularity* and *Dust*
 (loud on purpose). Each moment can have a style of its own, or *Surprise me* picks one each time, on a settings page
-with a live preview. The effects are shaders on a copy of the window, so Sailfish never waits for them. They are off
-by default. More: [docs/ANIMATIONS.md](docs/ANIMATIONS.md).
+with a live preview. The effects are shaders on a copy of the window, so Sailfish never waits for them. Out of the
+box, apps open in *Ember*, load in *Dust* and close in *Northern lights*. More:
+[docs/ANIMATIONS.md](docs/ANIMATIONS.md).
 
 <p align="center">
   <img src="docs/images/animations-sailfish.webp" width="250" alt="Notes opening from its icon and closing in the Seaglass, Tide and Northern lights styles">

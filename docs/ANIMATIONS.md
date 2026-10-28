@@ -3,7 +3,8 @@
 Sailfish OS opens an app with a fade, shows a busy indicator on its cover while it starts, and closes it with a slide
 and a fade. Seaglass adds styles for these three moments, from calm ones made of the ambience's glass, water and
 light to loud ones that burn, shatter or swallow the app. Each effect is a shader on the GPU, played on a copy of the
-window, so Sailfish never waits for it. The animations are off until you turn them on.
+window, so Sailfish never waits for it. Out of the box, apps open in *Ember*, load in *Dust* and close in
+*Northern lights*.
 
 <p align="center">
   <img src="images/animations-sailfish.webp" width="220" alt="Notes opening from its icon and closing in the Seaglass, Tide and Northern lights styles">
@@ -47,8 +48,8 @@ Nine styles in three groups, and the stock one. The lengths are at the normal sp
 | **Singularity** | The app bursts out of a white hole at the icon, 660 ms | A small black hole spins in the cover, bending the icon around it | Pulled into a black hole with a glowing disk, which then winks out, 950 ms |
 | **Dust** | Sand blows in and settles into the app, 800 ms | Sand pours through the cover into a heap | Crumbles into dust that the wind takes, 1050 ms |
 
-Fire, water, ice and light have their natural colours. With *Ambience colours* on they take the ambience's highlight
-colour instead: a blue ambience burns blue. Seaglass is always in the ambience's colour.
+With *Ambience colours* on (the default), fire, water, ice and light take the ambience's highlight colour: a blue
+ambience burns blue. Off, they have their natural colours. Seaglass is always in the ambience's colour.
 
 ### The settings
 
@@ -67,9 +68,9 @@ colour instead: a blue ambience burns blue. Seaglass is always in the ambience's
   A tap picks the style for all three moments, turns the animations on, and plays a round of it in the preview.
 - **Surprise me.** A different style each time an app opens, loads or closes (never *Stock*). A moment set to
   *Stock* stays stock.
-- **Moments.** *Opening*, *Loading* and *Closing*, each *Same as style* (the default), *Stock* or any style: the calm
-  opening of *Seaglass* can go with an *Ember* close.
-- **Speed.** *Relaxed* (×1.35), *Normal* or *Quick* (×0.72).
+- **Moments.** *Opening*, *Loading* and *Closing*, each *Same as style*, *Stock* or any style: the calm opening of
+  *Seaglass* can go with an *Ember* close. By default *Ember* opens, *Dust* loads and *Northern lights* closes.
+- **Speed.** *Relaxed* (×1.35), *Normal* or *Quick* (×0.72, the default).
 - **Ambience colours.** As above.
 - **Covers too.** Closing a cover in the switcher, or all of them, plays the closing effect on the covers. Off, they
   close the stock way.
@@ -78,12 +79,12 @@ The settings are in dconf under `/apps/seaglass/animations`, and the home screen
 
 | Setting | Key | Default | Values |
 |---|---|---|---|
-| App animations | `enabled` | false | |
-| Style | `style` | `seaglass` | `seaglass`, `tide`, `aurora`, `ember`, `volt`, `frost`, `shatter`, `singularity`, `dust`, `stock` |
-| Opening, Loading, Closing | `open`, `loading`, `close` | `""` (same as style) | `""`, `stock` or a style |
+| App animations | `enabled` | true | |
+| Style | `style` | `ember` | `seaglass`, `tide`, `aurora`, `ember`, `volt`, `frost`, `shatter`, `singularity`, `dust`, `stock` |
+| Opening, Loading, Closing | `open`, `loading`, `close` | `ember`, `dust`, `aurora` | `""` (same as style), `stock` or a style |
 | Surprise me | `surprise` | false | |
-| Speed | `speed` | 1 | 0 relaxed, 1 normal, 2 quick |
-| Ambience colours | `ambience` | false | |
+| Speed | `speed` | 2 | 0 relaxed, 1 normal, 2 quick |
+| Ambience colours | `ambience` | true | |
 | Covers too | `covers` | true | |
 
 Reset, backup and restore cover the group like the others.

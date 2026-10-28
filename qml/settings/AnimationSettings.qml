@@ -8,15 +8,15 @@ ConfigurationGroup {
     readonly property var keys: ["enabled", "style", "open", "loading", "close", "surprise", "speed", "ambience",
                                  "covers"]
 
-    property bool enabled: false
-    property string style: "seaglass"
+    property bool enabled: true
+    property string style: "ember"
     // a moment's own style: "" the style above, "stock", or a style
-    property string open: ""
-    property string loading: ""
-    property string close: ""
+    property string open: "ember"
+    property string loading: "dust"
+    property string close: "aurora"
     property bool surprise: false
     // 0 relaxed, 1 normal, 2 quick
-    property int speed: 1
-    property bool ambience: false
+    property int speed: 2
+    property bool ambience: true
     property bool covers: true
 }
