@@ -195,11 +195,11 @@ network's name and a Bluetooth device's name. Anyone who sees the app grid sees 
 *Hide event details* covers the calendar.
 
 The development harness ([DEVELOPMENT.md](DEVELOPMENT.md)) must never read the phone's own data, so it runs the
-sources in demo mode, with made-up tracks, events and places. The weather and calendar models are not even made: no
-saved place is read, no request is sent and no event is queried. A source learns that it is in demo mode only after
-its `Loader` made it, so these two wait one event-loop turn before making their models. In demo mode nothing is
-written. The `widgets` scene's sample states and setting words are listed in
-[WidgetsScene.qml](../harness/WidgetsScene.qml).
+sources in demo mode, with made-up tracks, events, networks and places. The objects that would read the phone's data
+are not even made: no MPRIS controller, Connman or Bluetooth object, alarm list or calendar model, and no weather
+model, so no saved place is read and no request is sent. A source learns that it is in demo mode only after its
+`Loader` made it, so each waits one event-loop turn before making them. In demo mode nothing is written. The
+`widgets` scene's sample states and setting words are listed in [WidgetsScene.qml](../harness/WidgetsScene.qml).
 
 ### How it plugs in
 

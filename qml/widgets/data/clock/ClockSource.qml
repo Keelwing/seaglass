@@ -19,6 +19,11 @@ Item {
     // the next enabled alarm as a Date, or null
     readonly property var nextAlarm: demo ? new Date(2026, 9, 16, 6, 30) : upcoming
     property var upcoming: null
+    // the phone's enabled alarms (the Instantiator's object below), never made in the harness: no one's alarms in a
+    // sample
+    property QtObject alarms: null
+    // a turn after loading: DataSources.qml sets demo once the source is made, so the models wait for it
+    property bool started
 
     visible: false
 
@@ -36,21 +41,40 @@ Item {
         key: "/sailfish/i18n/lc_timeformat24h"
     }
 
-    AlarmsModel {
-        id: alarms
+    Timer {
+        interval: 0
+        running: true
+        onTriggered: source.started = true
     }
 
-    EnabledAlarmsProxyModel {
-        id: enabledAlarms
+    Instantiator {
+        model: source.started && !source.demo ? 1 : 0
 
-        model: alarms
+        QtObject {
+            readonly property QtObject enabledOnes: enabledAlarms
+
+            property list<QtObject> models: [
+                AlarmsModel {
+                    id: allAlarms
+                },
+
+                EnabledAlarmsProxyModel {
+                    id: enabledAlarms
+
+                    model: allAlarms
+                }
+            ]
+        }
+
+        onObjectAdded: source.alarms = object.enabledOnes
+        onObjectRemoved: source.alarms = null
     }
 
     // the model has no count: its alarms are read through an Instantiator
     Instantiator {
         id: alarmObjects
 
-        model: source.demo ? null : enabledAlarms
+        model: source.alarms
 
         QtObject {
             readonly property QtObject alarm: model.alarm

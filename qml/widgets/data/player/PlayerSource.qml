@@ -21,8 +21,8 @@ Item {
     property string demoState
 
     // a player is on the bus
-    readonly property bool present: demo ? demoState.indexOf("idle") < 0 : mpris.currentService !== ""
-    readonly property bool playing: demo ? demoPlaying && present : mpris.playbackStatus === Mpris.Playing
+    readonly property bool present: demo ? demoState.indexOf("idle") < 0 : !!mpris && mpris.currentService !== ""
+    readonly property bool playing: demo ? demoPlaying && present : !!mpris && mpris.playbackStatus === Mpris.Playing
     // nothing to show: no player, a player without a track, or paused for 30 minutes (as on the lock screen)
     readonly property bool idle: !present || expired || (title === "" && artist === "")
     readonly property string title: demo ? (present ? "Northern Lights" : "") : text(meta ? meta.title : "")
@@ -39,24 +39,29 @@ Item {
         var at = positionBase + (playing ? (now - positionAt) * rate : 0)
         return Math.max(0, length > 0 ? Math.min(length, at) : at)
     }
-    readonly property string identity: demo ? "Media" : mpris.identity
-    readonly property string desktopEntry: demo ? "jolla-mediaplayer" : mpris.desktopEntry
+    readonly property string identity: demo ? "Media" : mpris ? mpris.identity : ""
+    readonly property string desktopEntry: demo ? "jolla-mediaplayer" : mpris ? mpris.desktopEntry : ""
     // the player's app icon (its desktop entry's), for the art's corner
     readonly property string appIcon: app.iconId
     readonly property var players: demo ? (present ? ["org.mpris.MediaPlayer2.jolla-mediaplayer"] : [])
-                                        : mpris.availableServices
-    readonly property string currentService: demo ? (present ? players[0] : "") : mpris.currentService
-    readonly property bool canGoNext: demo ? present : mpris.canGoNext
-    readonly property bool canGoPrevious: demo ? present : mpris.canGoPrevious
-    readonly property bool canPlay: demo ? present : mpris.canPlay
-    readonly property bool canPause: demo ? present : mpris.canPause
+                                        : mpris ? mpris.availableServices : []
+    readonly property string currentService: demo ? (present ? players[0] : "") : mpris ? mpris.currentService : ""
+    readonly property bool canGoNext: demo ? present : !!mpris && mpris.canGoNext
+    readonly property bool canGoPrevious: demo ? present : !!mpris && mpris.canGoPrevious
+    readonly property bool canPlay: demo ? present : !!mpris && mpris.canPlay
+    readonly property bool canPause: demo ? present : !!mpris && mpris.canPause
 
     // the last control used (the harness checks it)
     property string lastAction
     property bool demoPlaying: true
     property bool expired
-    readonly property QtObject meta: demo ? null : mpris.metaData
-    readonly property real rate: demo ? 1 : (mpris.rate > 0 ? mpris.rate : 1)
+    // the phone's MprisController (the Instantiator's object below), never made in the harness: no one's music in a
+    // sample
+    property QtObject mpris: null
+    // a turn after loading: DataSources.qml sets demo once the source is made, so the controller waits for it
+    property bool started
+    readonly property QtObject meta: demo || !mpris ? null : mpris.metaData
+    readonly property real rate: demo || !mpris ? 1 : (mpris.rate > 0 ? mpris.rate : 1)
     property real positionBase
     property double positionAt: new Date().getTime()
     property double now: positionAt
@@ -81,7 +86,7 @@ Item {
             return
         positionAt = new Date().getTime()
         now = positionAt
-        positionBase = mpris.currentService !== "" ? Math.max(0, Number(mpris.position) || 0) : 0
+        positionBase = mpris && mpris.currentService !== "" ? Math.max(0, Number(mpris.position) || 0) : 0
     }
 
     function heard(position) {
@@ -96,32 +101,32 @@ Item {
             demoPlaying = !demoPlaying
             return
         }
-        if (playing ? mpris.canPause : mpris.canPlay)
+        if (playing ? canPause : canPlay)
             mpris.playPause()
     }
 
     function next() {
         lastAction = "next"
-        if (!demo && mpris.canGoNext)
+        if (!demo && canGoNext)
             mpris.next()
     }
 
     function previous() {
         lastAction = "previous"
-        if (!demo && mpris.canGoPrevious)
+        if (!demo && canGoPrevious)
             mpris.previous()
     }
 
     function raise() {
         lastAction = "raise"
-        if (!demo && mpris.canRaise)
+        if (!demo && mpris && mpris.canRaise)
             mpris.raise()
     }
 
     // the next player on the bus, with several
     function switchPlayer() {
         lastAction = "switch"
-        if (demo || players.length < 2)
+        if (demo || !mpris || players.length < 2)
             return
         var index = players.indexOf(mpris.currentService)
         mpris.currentService = players[(index + 1) % players.length]
@@ -138,23 +143,31 @@ Item {
     }
     onLiveChanged: if (live) readPosition()
     onPresentChanged: if (!present) expired = false
-    // a turn after loading: DataSources.qml sets demo and live once the source is made
+
     Timer {
         interval: 0
         running: true
         onTriggered: {
-            source.readPosition()
+            source.started = true
             if (!source.playing)
                 expiry.restart()
         }
     }
 
-    MprisController {
-        id: mpris
+    Instantiator {
+        model: source.started && !source.demo ? 1 : 0
 
-        onCurrentServiceChanged: source.readPosition()
-        onSeeked: source.heard(position)
-        onPositionChanged: source.heard(position)
+        MprisController {
+            onCurrentServiceChanged: source.readPosition()
+            onSeeked: source.heard(position)
+            onPositionChanged: source.heard(position)
+        }
+
+        onObjectAdded: {
+            source.mpris = object
+            source.readPosition()
+        }
+        onObjectRemoved: source.mpris = null
     }
 
     Connections {

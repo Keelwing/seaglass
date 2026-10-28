@@ -1,7 +1,7 @@
 // The status widget's source (docs/WIDGETS.md): the battery and the connections, from the objects the status bar and
 // the top menu's switches use (BatteryStatus, McePowerSaveMode, Connman's technologies and manager, BluetoothStatus).
 // Loaded by DataSources.qml; when a module is missing, the status widget is not offered.
-//   demo   sample values (the harness)
+//   demo   sample values (the harness): a made-up network, never the phone's
 // Switching follows the top menu's switches (/usr/share/jolla-settings/pages/*/EnableSwitch.qml, WlanSwitch.qml,
 // flight/FlightMode.qml): the device policy first, then the same property. A switch that cannot be made here returns
 // false, and the widget opens the settings page instead.
@@ -25,15 +25,23 @@ Item {
                                                 || battery.status === BatteryStatus.Empty)
     readonly property bool powerSave: demo ? false : powerSaveMode.active
 
-    readonly property bool wifiOn: demo ? true : wifi.powered
-    readonly property bool wifiConnected: demo ? true : wifi.connected
-    readonly property string wifiName: demo ? "Home" : (manager.connectedWifi ? manager.connectedWifi.name : "")
-    readonly property bool mobileOn: demo ? true : cellular.powered
-    readonly property bool mobileConnected: demo ? false : cellular.connected
-    readonly property bool bluetoothOn: demo ? true : (bluetoothTechnology.powered && bluetooth.powered)
-    readonly property bool bluetoothConnected: demo ? false : bluetooth.connected
-    readonly property var bluetoothDevices: demo ? [] : (bluetooth.connectedDeviceNames || [])
-    readonly property bool flight: demo ? false : manager.offlineMode
+    readonly property bool wifiOn: demo ? true : !!network && network.wifi.powered
+    readonly property bool wifiConnected: demo ? true : !!network && network.wifi.connected
+    readonly property string wifiName: demo ? "Home" : network && network.manager.connectedWifi
+                                                       ? network.manager.connectedWifi.name : ""
+    readonly property bool mobileOn: demo ? true : !!network && network.cellular.powered
+    readonly property bool mobileConnected: demo ? false : !!network && network.cellular.connected
+    readonly property bool bluetoothOn: demo ? true : !!network && network.bluetoothPower.powered
+                                                      && network.bluetooth.powered
+    readonly property bool bluetoothConnected: demo ? false : !!network && network.bluetooth.connected
+    readonly property var bluetoothDevices: demo || !network ? [] : (network.bluetooth.connectedDeviceNames || [])
+    readonly property bool flight: demo ? false : !!network && network.manager.offlineMode
+
+    // Connman's and Bluetooth's objects (the Instantiator's object below), never made in the harness: no one's
+    // networks or devices in a sample
+    property QtObject network: null
+    // a turn after loading: DataSources.qml sets demo once the source is made, so the objects wait for it
+    property bool started
 
     visible: false
 
@@ -45,50 +53,73 @@ Item {
         id: powerSaveMode
     }
 
-    NetworkManager {
-        id: manager
+    Timer {
+        interval: 0
+        running: true
+        onTriggered: source.started = true
     }
 
-    NetworkTechnology {
-        id: wifi
+    Instantiator {
+        model: source.started && !source.demo ? 1 : 0
 
-        path: Connman.wifiTechnologyPath
-    }
+        QtObject {
+            readonly property QtObject manager: networkManager
+            readonly property QtObject wifi: wifiTechnology
+            readonly property QtObject cellular: cellularTechnology
+            readonly property QtObject bluetoothPower: bluetoothTechnology
+            readonly property QtObject bluetooth: bluetoothStatus
 
-    NetworkTechnology {
-        id: cellular
+            property list<QtObject> objects: [
+                NetworkManager {
+                    id: networkManager
+                },
 
-        path: Connman.cellularTechnologyPath
-    }
+                NetworkTechnology {
+                    id: wifiTechnology
 
-    NetworkTechnology {
-        id: bluetoothTechnology
+                    path: Connman.wifiTechnologyPath
+                },
 
-        path: Connman.bluetoothTechnologyPath
-    }
+                NetworkTechnology {
+                    id: cellularTechnology
 
-    BluetoothStatus {
-        id: bluetooth
+                    path: Connman.cellularTechnologyPath
+                },
+
+                NetworkTechnology {
+                    id: bluetoothTechnology
+
+                    path: Connman.bluetoothTechnologyPath
+                },
+
+                BluetoothStatus {
+                    id: bluetoothStatus
+                }
+            ]
+        }
+
+        onObjectAdded: source.network = object
+        onObjectRemoved: source.network = null
     }
 
     function switchWifi() {
-        if (demo || !AccessPolicy.wlanToggleEnabled || wifi.tethering)
+        if (demo || !network || !AccessPolicy.wlanToggleEnabled || network.wifi.tethering)
             return false
-        wifi.powered = !wifi.powered
+        network.wifi.powered = !network.wifi.powered
         return true
     }
 
     function switchBluetooth() {
-        if (demo || !AccessPolicy.bluetoothToggleEnabled)
+        if (demo || !network || !AccessPolicy.bluetoothToggleEnabled)
             return false
-        bluetoothTechnology.powered = !bluetoothTechnology.powered
+        network.bluetoothPower.powered = !network.bluetoothPower.powered
         return true
     }
 
     function switchFlight() {
-        if (demo || !AccessPolicy.flightModeToggleEnabled)
+        if (demo || !network || !AccessPolicy.flightModeToggleEnabled)
             return false
-        manager.offlineMode = !manager.offlineMode
+        network.manager.offlineMode = !network.manager.offlineMode
         return true
     }
 }
