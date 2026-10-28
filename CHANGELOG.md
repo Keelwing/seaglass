@@ -15,6 +15,7 @@ Each version was checked on a Jolla Phone with Sailfish OS 5.2.0.20. How each fe
   widgets away from their apps.
 - After a backup is restored, every widget shows the kind it was saved with.
 - A widget whose kind is missing on the phone shows only "Not available on this phone", in the gallery too.
+- Now playing no longer says "Nothing playing" for a paused player that just appeared, or after a track change.
 
 ## 1.0.0 (2026-10-17)
 

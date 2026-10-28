@@ -57,9 +57,9 @@ tethering. A tap beside the chips opens the battery settings.
 **Now playing** (card, shelf, panel). The album art with the player's icon on its corner, the title and the artist,
 a progress line, and previous, play/pause and next. The panel adds the album and the times, and with several players
 a chip that switches between them. The art, blurred and dimmed, can fill the glass. A tap on the art or the title
-brings the player up. With no player, or after 30 minutes paused (as on the lock screen), the widget says *Nothing
-playing*. Its play button resumes a paused player, or starts the last one again, or the Media player before any
-player has run.
+brings the player up. With no player, or after 30 minutes paused on the same track (as on the lock screen), the widget
+says *Nothing playing*. Its play button resumes a paused player, or starts the last one again, or the Media player
+before any player has run.
 
 **Next event** (card, shelf, panel). The weekday and a large day number, and the coming events with their calendars'
 colours. A time reads "14:00–15:00", "All day", "in 25 min" within the hour, or "Now – 15:00". Cancelled events are
@@ -167,17 +167,19 @@ screen already reads, and all but Now playing read it the way that part does:
 - Status: `BatteryStatus`, `McePowerSaveMode`, Connman's `NetworkTechnology` and `NetworkManager` as the status bar
   uses them, `BluetoothStatus`, and `AccessPolicy` for the switches. A switch sets `powered` or `offlineMode` on the
   same Connman objects, after the policy check that the top menu's switches make.
-- Now playing: `Amber.Mpris` `MprisController`, as the lock screen's controls, and the player's icon from its
-  desktop entry.
+- Now playing: `Amber.Mpris` `MprisController`, and the player's icon from its desktop entry.
 - Next event: `org.nemomobile.calendar.lightweight` `CalendarEventsModel`, set up as the Events view's (past events
   left out, at most six), and `com.jolla.calendar.ui` over D-Bus to open an event or a day.
 - Weather: `Sailfish.Weather`, as the Events view's weather banner uses it: `SavedWeathersModel` (the Weather app's
   current place), `WeatherModel`, an hourly and a daily `WeatherForecastModel`, and `TemperatureConverter`.
 
-Now playing never uses `Sailfish.Media`'s `MprisPlayerControls`: its `MprisManagerControls` also takes the headset
-buttons, and a second copy in the home screen would toggle play twice on one press. MPRIS does not signal the
-position as it moves, and reading it is a D-Bus call to the player. So the source reads it only when the track, the
-player or the playing state changes, on `Seeked` and when the grid comes up, and reckons it from there.
+The lock screen's controls are `Sailfish.Media`'s `MprisPlayerControls`, but Now playing never uses them: their
+`MprisManagerControls` also takes the headset buttons, and a second copy in the home screen would toggle play twice
+on one press. The lock screen hides its controls after 30 minutes paused, with a timer restarted when playing starts
+or stops. The widget counts the 30 minutes only while a player is there and paused, and again from a new player or
+track. MPRIS does not signal the position as it moves, and reading it is a D-Bus call to the player. So the source
+reads it only when the track, the player or the playing state changes, on `Seeked` and when the grid comes up, and
+reckons it from there.
 
 The calendar model covers today and up to six days ahead, so that no weekday name comes twice. It moves on at
 midnight and when its answer expires (the stock rule), not each time the grid shows.

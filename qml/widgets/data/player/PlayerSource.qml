@@ -1,6 +1,6 @@
-// The Now playing widget's source (docs/WIDGETS.md): the current MPRIS player, through Amber.Mpris's MprisController,
-// as the lock screen's controls. Never Sailfish.Media's MprisPlayerControls: its MprisManagerControls also takes the
-// headset buttons, and a second copy in the home screen would toggle play twice on one press. Loaded by
+// The Now playing widget's source (docs/WIDGETS.md): the current MPRIS player, through Amber.Mpris's MprisController.
+// The lock screen's controls are Sailfish.Media's MprisPlayerControls, which we never use: its MprisManagerControls
+// also takes the headset buttons, and a second copy in the home screen would toggle play twice on one press. Loaded by
 // DataSources.qml; when Amber.Mpris is missing, Now playing is not offered.
 //   live       the app grid is on screen: the progress ticks only then, and only while a track plays
 //   demo       sample values (the harness): a made-up track, never the phone's music
@@ -50,6 +50,8 @@ Item {
     readonly property bool canGoPrevious: demo ? present : !!mpris && mpris.canGoPrevious
     readonly property bool canPlay: demo ? present : !!mpris && mpris.canPlay
     readonly property bool canPause: demo ? present : !!mpris && mpris.canPause
+    // the player and the track: a change starts the 30 minutes paused again
+    readonly property string track: currentService + "\n" + title + "\n" + artist
 
     // the last control used (the harness checks it)
     property string lastAction
@@ -132,26 +134,28 @@ Item {
         mpris.currentService = players[(index + 1) % players.length]
     }
 
+    // The 30 minutes are counted only while a player is present and paused: from the pause, as the lock screen's
+    // timer, and again from a new player or track
+    function restartExpiry() {
+        expired = false
+        if (present && !playing)
+            expiry.restart()
+        else
+            expiry.stop()
+    }
+
     onPlayingChanged: {
         readPosition()
-        if (playing) {
-            expiry.stop()
-            expired = false
-        } else {
-            expiry.restart()
-        }
+        restartExpiry()
     }
+    onPresentChanged: restartExpiry()
+    onTrackChanged: restartExpiry()
     onLiveChanged: if (live) readPosition()
-    onPresentChanged: if (!present) expired = false
 
     Timer {
         interval: 0
         running: true
-        onTriggered: {
-            source.started = true
-            if (!source.playing)
-                expiry.restart()
-        }
+        onTriggered: source.started = true
     }
 
     Instantiator {
