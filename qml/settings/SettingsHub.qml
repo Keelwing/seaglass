@@ -307,8 +307,16 @@ SilicaFlickable {
                     return qsTr("Off")
                 if (animations.surprise)
                     return qsTr("Surprise me")
-                var style = Styles.find(animations.style)
-                return style ? style.name : qsTr("Stock")
+                // the style of each moment, once: "Ember, Dust, Northern lights"
+                var names = []
+                var moments = ["open", "loading", "close"]
+                for (var i = 0; i < moments.length; i++) {
+                    var style = Styles.find(Styles.setting(animations, moments[i]))
+                    var name = style ? style.name : qsTr("Stock")
+                    if (names.indexOf(name) < 0)
+                        names.push(name)
+                }
+                return names.join(", ")
             }
             onClicked: hub.open("AnimationsPage")
         }

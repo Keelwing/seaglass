@@ -2,6 +2,10 @@
 
 Each version was checked on a Jolla Phone with Sailfish OS 5.2.0.20. How each feature works is in [docs/](docs/).
 
+## Unreleased
+
+- A style tile sets all three moments, and Surprise me covers every moment that is not set to Stock.
+
 ## 1.0.0 (2026-10-17)
 
 The first public release.

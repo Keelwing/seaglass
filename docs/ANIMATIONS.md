@@ -52,8 +52,8 @@ colour instead: a blue ambience burns blue. Seaglass is always in the ambience's
 
 ### The settings
 
-*Settings → Patchmanager → Seaglass → Animations*. The row on the first page shows the chosen style, *Surprise me*
-or *Off*.
+*Settings → Patchmanager → Seaglass → Animations*. The row on the first page shows the style of each moment,
+*Surprise me* or *Off*.
 
 <p align="center"><img src="images/settings-animations.jpg" width="250" alt="The animations settings: a live preview, and the styles as tiles with their loading effects"></p>
 
@@ -64,9 +64,9 @@ or *Off*.
   files, on a made-up app and stock icons.
 - **App animations.** On or off. Off is the stock behaviour.
 - **Style.** The ten styles as tiles, three to a row under their group's name, each showing its loading effect live.
-  A tap picks the style for every moment that has none of its own, turns the animations on, and plays a round of it
-  in the preview.
-- **Surprise me.** A different style each time an app opens, loads or closes (never *Stock*).
+  A tap picks the style for all three moments, turns the animations on, and plays a round of it in the preview.
+- **Surprise me.** A different style each time an app opens, loads or closes (never *Stock*). A moment set to
+  *Stock* stays stock.
 - **Moments.** *Opening*, *Loading* and *Closing*, each *Same as style* (the default), *Stock* or any style: the calm
   opening of *Seaglass* can go with an *Ember* close.
 - **Speed.** *Relaxed* (×1.35), *Normal* or *Quick* (×0.72).

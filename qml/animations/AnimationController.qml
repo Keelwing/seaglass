@@ -50,8 +50,8 @@ Item {
 
     // whether a moment may be Shatter's (the shard items are made only then)
     function mayShatter(moment) {
-        return settings.enabled && (settings[moment] === "shatter"
-                                    || (settings[moment] === "" && (settings.surprise || settings.style === "shatter")))
+        return settings.enabled && (Styles.setting(settings, moment) === "shatter"
+                                    || (settings.surprise && settings[moment] !== "stock"))
     }
 
     // where an app opens from, in this item's coordinates (0 to 1): the icon tapped while the app grid is still

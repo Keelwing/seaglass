@@ -62,14 +62,19 @@ function shaders() {
     return list
 }
 
-// the style of a moment ("open", "loading", "close") under the settings (AnimationSettings.qml): "stock" or a style
+// the style set for a moment ("open", "loading", "close"), Surprise me aside: "stock" or a style
+function setting(settings, moment) {
+    var chosen = settings[moment] !== "" ? settings[moment] : settings.style
+    return find(chosen) ? chosen : "stock"
+}
+
+// the style of a moment under the settings (AnimationSettings.qml): "stock" or a style. Surprise me picks another
+// style for every moment not set to Stock.
 function choose(settings, moment) {
     if (!settings.enabled)
         return "stock"
-    var chosen = settings[moment]
-    if (chosen === "")
-        chosen = settings.surprise ? random(settings.style) : settings.style
-    return find(chosen) ? chosen : "stock"
+    var chosen = setting(settings, moment)
+    return settings.surprise && settings[moment] !== "stock" ? random(chosen) : chosen
 }
 
 // a style other than the given one, for Surprise me

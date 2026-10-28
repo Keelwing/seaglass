@@ -196,9 +196,17 @@ Page {
         begin(index, index === 3 ? 450 : 0)
     }
 
-    // a tile: the style for every moment that has none of its own, and a round of it in the preview
+    // whether every moment is set to the style (its tile is marked)
+    function everyMoment(id) {
+        return ["open", "loading", "close"].every(function (moment) { return Styles.setting(settings, moment) === id })
+    }
+
+    // a tile: the style for every moment, and a round of it in the preview
     function pick(id) {
         settings.style = id
+        settings.open = ""
+        settings.loading = ""
+        settings.close = ""
         if (id !== "stock")
             settings.enabled = true
         forced = id
@@ -604,7 +612,7 @@ Page {
                                 id: tile
 
                                 readonly property string styleId: modelData
-                                readonly property bool chosen: settings.style === styleId
+                                readonly property bool chosen: page.everyMoment(styleId)
                                 // each tile's loop a little after the one before
                                 readonly property real offset: page.momentIndex(styleId) * 1.3
 
