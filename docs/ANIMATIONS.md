@@ -200,8 +200,10 @@ inputs, noise, easing, rounded rectangles, the blur, the tint) and the style's l
 files) and keeps it for the QML engine. They are GLSL ES 1.00. Where the GPU has OpenGL ES 3 (the Jolla Phone's
 Mali-G610 does), `Effect.qml` runs them as GLSL ES 3.00 with a vertex shader of its own: `shaders.js` puts
 `#version 300 es` and `#define ES3` in front, and the styles that blur read a mipmap level of the window's copy
-(`textureLod`), which has mipmaps for them only. The noise tile holds smooth noise, fractal noise, the distance to the nearest Voronoi edge and
-white noise in its four channels. `scripts/noise.py` makes it when the package is built.
+(`textureLod`), which has mipmaps for them only. The blur's taps are turned by an angle of each pixel's own, so the
+level's texels never line up into squares; what is left is a fine grain, as on frosted glass. The noise tile holds
+smooth noise, fractal noise, the distance to the nearest Voronoi edge and white noise in its four channels.
+`scripts/noise.py` makes it when the package is built.
 
 ## Costs
 
@@ -220,6 +222,8 @@ white noise in its four channels. `scripts/noise.py` makes it when the package i
 - `ShaderEffect.status` cannot tell whether a shader works: on Sailfish OS 5.2 it reads `Error` for shaders that
   compiled and draw. A shader that does not compile draws nothing, and Qt says so in the log
   (`QOpenGLShader::compile`). `make lint` compiles every shader with `glslangValidator`, as GLSL ES 1.00 and 3.00.
+- Without OpenGL ES 3 the blur has no mipmaps: it takes nine texels of the full-size copy, and under thick frost
+  (*Seaglass*, *Frost*) text can show double. The Jolla Phone has OpenGL ES 3.
 - With *Cards* as the switcher's layout, covers close the stock way.
 - The busy indicator on an app grid icon (shown in a rare case, when the app grid stays open while an app starts)
   keeps its stock look.

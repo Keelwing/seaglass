@@ -91,18 +91,23 @@ float sdRoundRect(vec2 p, vec2 b, float r)
 vec4 blurSrc(vec2 uv, float rpx)
 {
 #ifdef ES3
-    // nine taps of a level a little finer than the blur: a coarse level alone shows its squares
-    float lod = max(log2(max(rpx, 1.0)) - 1.5, 0.0);
-    vec2 s = rpx * 0.75 / resolution;
+    // nine taps of a level finer than the blur. The same taps at every pixel show that level's texels as squares:
+    // each pixel turns them by an angle of its own and spreads them a little wider or narrower, which leaves a fine
+    // grain instead, as on frosted glass
+    float r = rpx * (0.7 + 0.6 * hash(gl_FragCoord.xy));
+    float lod = max(log2(max(r, 1.0)) - 2.0, 0.0);
+    float a = hash(gl_FragCoord.yx + 57.0) * 2.0 * PI;
+    mat2 turn = mat2(cos(a), sin(a), -sin(a), cos(a));
+    vec2 s = r * 0.75 / resolution;
     vec4 m = textureLod(source, clamp(uv, 0.0, 1.0), lod) * 0.2;
-    m += textureLod(source, clamp(uv + s * vec2( 0.53,  0.12), 0.0, 1.0), lod) * 0.1;
-    m += textureLod(source, clamp(uv + s * vec2(-0.41,  0.48), 0.0, 1.0), lod) * 0.1;
-    m += textureLod(source, clamp(uv + s * vec2(-0.15, -0.62), 0.0, 1.0), lod) * 0.1;
-    m += textureLod(source, clamp(uv + s * vec2( 0.72, -0.55), 0.0, 1.0), lod) * 0.1;
-    m += textureLod(source, clamp(uv + s * vec2(-0.86, -0.12), 0.0, 1.0), lod) * 0.1;
-    m += textureLod(source, clamp(uv + s * vec2( 0.18,  0.93), 0.0, 1.0), lod) * 0.1;
-    m += textureLod(source, clamp(uv + s * vec2( 0.95,  0.40), 0.0, 1.0), lod) * 0.1;
-    m += textureLod(source, clamp(uv + s * vec2(-0.60, -0.92), 0.0, 1.0), lod) * 0.1;
+    m += textureLod(source, clamp(uv + s * (turn * vec2( 0.53,  0.12)), 0.0, 1.0), lod) * 0.1;
+    m += textureLod(source, clamp(uv + s * (turn * vec2(-0.41,  0.48)), 0.0, 1.0), lod) * 0.1;
+    m += textureLod(source, clamp(uv + s * (turn * vec2(-0.15, -0.62)), 0.0, 1.0), lod) * 0.1;
+    m += textureLod(source, clamp(uv + s * (turn * vec2( 0.72, -0.55)), 0.0, 1.0), lod) * 0.1;
+    m += textureLod(source, clamp(uv + s * (turn * vec2(-0.86, -0.12)), 0.0, 1.0), lod) * 0.1;
+    m += textureLod(source, clamp(uv + s * (turn * vec2( 0.18,  0.93)), 0.0, 1.0), lod) * 0.1;
+    m += textureLod(source, clamp(uv + s * (turn * vec2( 0.95,  0.40)), 0.0, 1.0), lod) * 0.1;
+    m += textureLod(source, clamp(uv + s * (turn * vec2(-0.60, -0.92)), 0.0, 1.0), lod) * 0.1;
     return m * clipMask(clamp(uv, 0.0, 1.0));
 #else
     vec2 s = rpx / resolution;
