@@ -1297,10 +1297,16 @@ Item {
                 if (dataModel.get(m).wid === list[n].id)
                     found = m
             }
-            if (found < 0)
-                dataModel.append({ "wid": list[n].id, "kind": list[n].kind, "size": list[n].size })
-            else if (dataModel.get(found).size !== list[n].size)
+            var row = { "wid": list[n].id, "kind": list[n].kind, "size": list[n].size }
+            if (found < 0) {
+                dataModel.append(row)
+            } else if (dataModel.get(found).kind !== list[n].kind) {
+                // an id used again for another kind (a backup restored): a new widget, with its own face and sizes
+                dataModel.remove(found)
+                dataModel.insert(found, row)
+            } else if (dataModel.get(found).size !== list[n].size) {
                 dataModel.setProperty(found, "size", list[n].size)
+            }
         }
     }
 

@@ -13,6 +13,7 @@ Each version was checked on a Jolla Phone with Sailfish OS 5.2.0.20. How each fe
   start or end.
 - Removing a data widget, restoring the starter widgets or going back to an older Seaglass no longer moves the other
   widgets away from their apps.
+- After a backup is restored, every widget shows the kind it was saved with.
 
 ## 1.0.0 (2026-10-17)
 
