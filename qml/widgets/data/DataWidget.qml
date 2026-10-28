@@ -269,6 +269,9 @@ Item {
                 id: face
 
                 anchors.fill: parent
+                // hidden while its kind is unavailable: without a source it would draw its own empty state under the
+                // line below
+                visible: !widget.unavailable
                 // in edit mode the face steps back behind the size pill: the widget is moved and sized, not used
                 opacity: widget.editMode && !widget.preview && !widget.floating ? 0.3 : 1.0
                 Behavior on opacity { FadeAnimation {} }
@@ -305,7 +308,7 @@ Item {
                 }
             }
 
-            // the kind's source could not be loaded on this phone
+            // the kind's source could not be loaded on this phone: this line in place of the face
             Label {
                 visible: widget.unavailable
                 anchors.centerIn: parent

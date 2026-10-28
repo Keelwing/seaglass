@@ -159,8 +159,8 @@ grid is the stock grid with nothing left over. When the QML is back, so are the 
 Each kind has one source, shared by all its widgets, in a file of its own.
 [DataSources.qml](../qml/widgets/data/DataSources.qml) loads it with a `Loader` only while a widget of its kind is on
 the grid or the gallery is open. A module that is missing or fails to load makes only its kind unavailable, and its
-widgets say *Not available on this phone*. Every source reads what a stock part of the home screen already reads,
-the way that part reads it:
+widgets say *Not available on this phone* in place of their face. Every source reads what a stock part of the home
+screen already reads, and all but Now playing read it the way that part does:
 - Clock: `Nemo.Time` `WallClock`, once a minute; `Nemo.Alarms` `AlarmsModel` through `EnabledAlarmsProxyModel`,
   read with an `Instantiator` because the model has no `count`; the stock clock's 12/24 hour key,
   `/sailfish/i18n/lc_timeformat24h`.
