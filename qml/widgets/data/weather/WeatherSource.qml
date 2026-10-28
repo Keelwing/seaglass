@@ -40,7 +40,7 @@ Item {
     readonly property date now: demo ? new Date(2026, 9, 15, 9, 41) : wallClock.time
     // the 12 or 24 hour clock, as the stock clock (for the forecast's hours)
     readonly property bool twentyFour: demo ? true : timeFormat.value === "24"
-    // [{time, weatherType, temperature}] and [{time, weatherType, high, low}], the first being now and today
+    // [{time, weatherType, temperature}] and [{time, weatherType, high, low}], from the time and the day of the fetch
     readonly property var hours: demo ? demoHours() : hourlyList
     readonly property var daysAhead: demo ? demoDays() : dailyList
     readonly property bool hasFeelsLike: feelsLike !== undefined && feelsLike !== null && feelsLike !== ""

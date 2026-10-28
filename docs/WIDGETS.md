@@ -185,10 +185,12 @@ The calendar model covers today and up to six days ahead, so that no weekday nam
 midnight and when its answer expires (the stock rule), not each time the grid shows.
 
 The weather models are active only while the grid is shown, and the stock models request the weather now and the
-hours at most every 30 minutes, the days every 3 hours. Requests go through the stock provider and its cache, which
-the Events view shares in the same process. The Weather app and the Events view write the same saved file, and
-`SavedWeathersModel` follows it. What the widget fetched is saved when the grid goes away, only after a fetch, as the
-banner does.
+hours at most every 30 minutes, the days every 3 hours. The days are always asked for, for today's high and low, and
+read by their dates, so a forecast fetched before midnight never shows yesterday as today. The hours are asked for
+only when a widget shows them: with *By size*, while a weather shelf is on the grid or the gallery is open. Requests go
+through the stock provider and its cache, which the Events view shares in the same process. The Weather app and the
+Events view write the same saved file, and `SavedWeathersModel` follows it. What the widget fetched is saved when the
+grid goes away, only after a fetch, as the banner does.
 
 ### Privacy and sample data
 

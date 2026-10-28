@@ -970,7 +970,16 @@ Item {
         demo: controller.demoData
         eventDays: widgetSettings.eventDays
         eventAllDay: widgetSettings.eventAllDay
-        weatherHourly: widgetSettings.weatherForecast !== "daily"
+        // by size, the hours are only on a shelf: fetched while one is on the grid, or the gallery shows one
+        weatherHourly: {
+            if (widgetSettings.weatherForecast !== "auto")
+                return widgetSettings.weatherForecast === "hourly"
+            for (var i = 0; i < controller.dataList.length; i++) {
+                if (controller.dataList[i].kind === "weather" && controller.dataList[i].size === "shelf")
+                    return true
+            }
+            return controller.galleryOpen
+        }
         onPlayerChanged: controller.keepLastPlayer()
         wanted: {
             var kinds = {}

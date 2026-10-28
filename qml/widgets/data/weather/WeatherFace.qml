@@ -22,20 +22,35 @@ Item {
     readonly property bool ready: source !== null && source.ready
     readonly property real pad: Theme.paddingLarge
     readonly property bool hourly: forecast === "hourly" || (forecast === "auto" && size === "shelf")
+    readonly property date todayStart: source ? new Date(source.now.getFullYear(), source.now.getMonth(),
+                                                         source.now.getDate()) : new Date(NaN)
+    readonly property date tomorrowStart: new Date(todayStart.getFullYear(), todayStart.getMonth(),
+                                                   todayStart.getDate() + 1)
+    // the days from today: a forecast fetched before midnight still starts with yesterday
+    readonly property var days: {
+        var list = []
+        for (var i = 0; source && i < source.daysAhead.length; i++) {
+            if (source.daysAhead[i].time >= todayStart)
+                list.push(source.daysAhead[i])
+        }
+        return list
+    }
     // the next five hours (from the coming one) or days (from today)
     readonly property var columns: {
         if (!source)
             return []
+        if (!hourly)
+            return days.slice(0, 5)
         var list = []
-        var all = hourly ? source.hours : source.daysAhead
         var from = source.now.getTime() - 30 * 60 * 1000
-        for (var i = 0; i < all.length && list.length < 5; i++) {
-            if (!hourly || all[i].time.getTime() > from)
-                list.push(all[i])
+        for (var i = 0; i < source.hours.length && list.length < 5; i++) {
+            if (source.hours[i].time.getTime() > from)
+                list.push(source.hours[i])
         }
         return list
     }
-    readonly property var today: source && source.daysAhead.length > 0 ? source.daysAhead[0] : null
+    // today's row, for the high and the low
+    readonly property var today: days.length > 0 && days[0].time < tomorrowStart ? days[0] : null
     readonly property string temperature: ready ? source.format(source.temperature) : ""
     readonly property string feels: ready && showFeels && source.hasFeelsLike
                                     ? qsTr("Feels like %1").arg(source.format(source.feelsLike)) : ""
@@ -53,15 +68,15 @@ Item {
         return type ? "image://theme/" + (large ? "graphic-weather-" : "icon-m-weather-") + type : ""
     }
 
-    // an hour short ("14:00", "2 PM"), a day by its short name ("Today" first)
-    function columnLabel(entry, index) {
+    // an hour short ("14:00", "2 PM"), a day by its short name, or Today
+    function columnLabel(entry) {
         if (hourly) {
             if (!source || source.twentyFour)
                 return Format.formatDate(entry.time, Formatter.TimeValueTwentyFourHours)
             var hours = entry.time.getHours()
             return (hours % 12 === 0 ? 12 : hours % 12) + " " + (hours < 12 ? Qt.locale().amText : Qt.locale().pmText)
         }
-        return index === 0 ? qsTr("Today") : Qt.formatDate(entry.time, "ddd")
+        return entry.time >= todayStart && entry.time < tomorrowStart ? qsTr("Today") : Qt.formatDate(entry.time, "ddd")
     }
 
     function activate() {
@@ -308,7 +323,7 @@ Item {
                         truncationMode: TruncationMode.Fade
                         font.pixelSize: Theme.fontSizeTiny
                         color: Theme.secondaryColor
-                        text: face.columnLabel(modelData, index)
+                        text: face.columnLabel(modelData)
                     }
 
                     Image {
