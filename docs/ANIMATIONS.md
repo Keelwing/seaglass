@@ -36,9 +36,9 @@ Nine styles in three groups, and the stock one. The lengths are at the normal sp
 |---|---|---|---|
 | **Stock** | Fades in, 300 ms | A busy indicator on the new cover | Slides on and fades out, 300 ms |
 | *Sailfish: calm, made of glass, water and light* | | | |
-| **Seaglass** | Rises from the icon as frosted glass in the ambience's colour and clears as it lands, 480 ms | A glass cover in the ambience's colour; a glint crosses it and the icon breathes | Frosts over, rounds into a pebble and sinks; a ring spreads where it went in, 560 ms |
-| **Tide** | A drop falls on the icon and the app spreads in its ripple, the edge refracting, 650 ms | Water rises in the cover over the icon, with caustics and bubbles | A wave washes it away from the bottom, with foam and spray, 720 ms |
-| **Northern lights** | Curtains of aurora sweep down and leave the app behind them, 780 ms | An aurora over a night sky in the cover | Melts upward into rays of light that rise and fade, 850 ms |
+| **Seaglass** | Rises from the icon as frosted glass in the ambience's colour and clears as it lands, 480 ms | A glass cover in the ambience's colour; a light runs round its edge, a glint crosses it and the icon breathes | Frosts over, rounds into a pebble and sinks; a ring spreads where it went in, 560 ms |
+| **Tide** | A drop lands on the icon and throws a crown of droplets; the app spreads in its ripple, 650 ms | Water rises in the cover over the icon, with caustics and bubbles | A wave rolls up from the bottom and washes it away under a lip of foam, 720 ms |
+| **Northern lights** | A thin ray rises from the icon, and curtains of aurora sweep down and leave the app behind them, 780 ms | An aurora over dark hills and a still lake that mirrors it | Melts upward into rays of light that rise and fade, 850 ms |
 | *Elements: fire, lightning and ice* | | | |
 | **Ember** | A ring of fire spreads from the icon, sparks flying ahead of it, 620 ms | The cover smoulders: coals, low flames, rising sparks | Burns away from the bottom up: charring, a glowing edge, flames and heat haze, 880 ms |
 | **Volt** | Lightning strikes the icon, the screen flashes, and an electric ring opens the app, 620 ms | Arcs run around the cover's edge, and now and then a bolt strikes the icon | Arcs crawl over the window, then it switches off like an old TV, 700 ms |
@@ -49,7 +49,8 @@ Nine styles in three groups, and the stock one. The lengths are at the normal sp
 | **Dust** | Sand blows in and settles into the app, 800 ms | Sand pours through the cover into a heap | Crumbles into dust that the wind takes, 1050 ms |
 
 With *Ambience colours* on (the default), fire, water, ice and light take the ambience's highlight colour: a blue
-ambience burns blue. Off, they have their natural colours. Seaglass is always in the ambience's colour.
+ambience burns blue. Off, they have their natural colours. Tide's water keeps its own deep colour either way, and only
+its light takes the ambience's. Seaglass is always in the ambience's colour.
 
 ### The settings
 
