@@ -19,7 +19,7 @@ var STYLES = [
       "shards": true },
     { "id": "singularity", "name": "Singularity", "group": "Extreme", "open": 660, "close": 950, "libs": [] },
     { "id": "dust", "name": "Dust", "group": "Extreme", "open": 800, "close": 1050, "libs": ["grains"],
-      "half": ["open", "close", "load"] }
+      "half": ["open", "close", "load"], "split": ["open", "close"] }
 ]
 
 // the speed setting (0 relaxed, 1 normal, 2 quick) as a factor of the durations

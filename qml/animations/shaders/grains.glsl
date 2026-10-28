@@ -1,12 +1,18 @@
-// Grains (Dust, Frost): a picture falling apart into grains that fly off. Each pixel steps back along the
+// Grains (Dust): a picture falling apart into grains that fly off. Each pixel steps back along the
 // paths of four speed classes to find the grain that covers it now
+// when a grain starts to fly (in k): a sweep along sw.xy (scaled by sw.z), or with sw.z below 0 a ring that closes
+// in on the point sw.xy (height units), from sw.w and with noise of about jit; never at 0, so that at k 0 the
+// picture is whole
 float grainStart(vec2 C, float gp, vec4 sw, float jit)
 {
     vec2 cp = asp((C + 0.5) * gp / resolution);
-    return dot(cp, sw.xy) * sw.z + sw.w + (fbm(cp * 1.3) - 0.5) * 0.22 + hash(C) * jit;
+    float ramp = sw.z < 0.0 ? length(cp - sw.xy) * sw.z : dot(cp, sw.xy) * sw.z;
+    return max(0.005, ramp + sw.w + (fbm(cp * 1.3) - 0.5) * jit * 1.8 + hash(C) * jit);
 }
 vec2 grainDisp(float a, float v, vec2 drift, vec2 grav){ return (drift * v * a * 0.35 + 0.5 * grav * a * a) * resolution.y; }
-vec4 grains(vec2 uv, float k, float gp, vec4 sw, float jit, vec2 drift, vec2 grav, float life, vec3 tone, float toneMin)
+// a grain flies for life and fades out over its last part, from fade (a share of life) on
+vec4 grains(vec2 uv, float k, float gp, vec4 sw, float jit, vec2 drift, vec2 grav, float life, vec3 tone, float toneMin,
+            float fade)
 {
     vec2 P = uv * resolution;
     float a0 = max(0.0, k - grainStart(floor(P / gp), gp, sw, jit));
@@ -30,7 +36,7 @@ vec4 grains(vec2 uv, float k, float gp, vec4 sw, float jit, vec2 drift, vec2 gra
             vec2 cu = (C + 0.5) * gp / resolution;
             vec4 c = srcClamp(cu) * inRect(cu);
             c.rgb = mix(c.rgb, tone * c.a, mix(toneMin, 1.0, clamp(a / life, 0.0, 1.0)) * 0.6);
-            return c * (1.0 - smoothstep(life * 0.45, life, a));
+            return c * (1.0 - smoothstep(life * fade, life, a));
         }
     }
     return vec4(0.0);

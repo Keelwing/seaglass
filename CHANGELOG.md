@@ -9,6 +9,8 @@ Each version was checked on a Jolla Phone with Sailfish OS 5.2.0.20. How each fe
 - A style tile sets all three moments, and Surprise me covers every moment that is not set to Stock.
 - Fire, sparks, stars and lightning move while an app opens or closes, and frosted glass has a fine grain instead of
   square blocks.
+- All nine styles were reworked to look more like what they are made of, and none of them ends early or jumps at its
+  start or end.
 
 ## 1.0.0 (2026-10-17)
 

@@ -1,25 +1,57 @@
-// Shatter, loading: cracks run through the cover and fill with gold.
+// Shatter, loading: the cover cracks from a point on the icon, the cracks fill with gold and heal.
+// a crack w pixels wide, d pixels away, with a pixel of soft edge
+float crackAt(float d, float w) { return 1.0 - smoothstep(w * 0.5, w * 0.5 + 1.0, d); }
 void main()
 {
     vec2 uv = qt_TexCoord0;
-    vec2 p = asp(uv);
     float d;
     float inside = cardInside(d);
     float cyc = 2.6;
     float ph = fract(time / cyc);
     float sd = floor(time / cyc);
-    vec2 o = vec2(aspect * (0.25 + 0.5 * hash(vec2(sd, 1.0))), 0.25 + 0.5 * hash(vec2(sd, 2.0)));
-    float e = cells(p * 0.9 + vec2(sd * 0.37, sd * 0.71));
-    float line = 1.0 - smoothstep(0.0, 0.035, e);
-    float reach = smoothstep(0.0, 0.45, ph) * 0.9;
-    float on = 1.0 - smoothstep(reach - 0.05, reach, length(p - o));
-    float heal = 1.0 - smoothstep(0.7, 1.0, ph);
-    vec3 gold = mix(vec3(1.0, 0.78, 0.36), tint, 0.25 + 0.5 * useTint);
-    vec4 icon = iconAt(vec2(0.5, 0.46), 0.46 * resolution.x, vec2(0.0));
+    float unit = resolution.x;
+    vec2 o = resolution * vec2(0.5, 0.46) + (vec2(hash(vec2(sd, 1.0)), hash(vec2(sd, 2.0))) - 0.5) * 0.16 * unit;
+    vec2 v = (uv * resolution - o) / unit;
+    float r = length(v);
+    float N = 9.0;
+    float s = atan(v.y, v.x) * N / (2.0 * PI) + hash(vec2(sd, 3.0));
+    // the rays: nearly straight lines with a slight kink every 1/9 of the width (white noise), straight at the point
+    // of impact. A ray's and a sector's numbers wrap round (mod N): s jumps by N where atan does, to the left of the
+    // point, and a ray or arc there would change halfway
+    float k = mod(floor(s + 0.5), N);
+    float seg = r * 9.0;
+    float i0 = floor(seg);
+    float wob = mix(hash(vec2(i0, k + sd * 13.0)), hash(vec2(i0 + 1.0, k + sd * 13.0)), fract(seg)) - 0.5;
+    float dRay = abs(s - floor(s + 0.5) + wob * 0.16 * min(1.0, r * 5.0)) * 2.0 * PI / N * r * unit;
+    float grow = easeOutCubic(clamp(ph / 0.3, 0.0, 1.0));
+    float reach = (0.35 + 0.6 * hash(vec2(k, sd + 5.0))) * grow;
+    float reachArc = 0.4 * grow;
+    // a few arcs between the rays
+    float j = mod(floor(s), N);
+    float q = r / 0.12 + (hash(vec2(j, sd + 9.0)) - 0.5) * 0.4;
+    float n = floor(q + 0.5);
+    float arcOn = step(0.6, hash(vec2(j * 7.0 + n, sd + 11.0))) * step(0.5, n) * step(n, 3.5) * step(r, reachArc);
+    float fillR = 1.1 * smoothstep(0.18, 0.62, ph);
+    float isGold = step(r, fillR);
+    float w = mix(1.3, 2.6, isGold);
+    // the rays start a little way out, round a small crushed spot, so they do not run together at the point
+    float ray = crackAt(dRay, w) * step(r, reach) * smoothstep(0.012, 0.025, r);
+    float arc = crackAt(abs(q - n) * 0.12 * unit, w * 0.8) * arcOn;
+    float spot = (1.0 - smoothstep(0.008, 0.016, r)) * grow;
+    float crack = max(max(ray, arc), spot) * (1.0 - smoothstep(0.78, 1.0, ph));
+    // the pieces of the icon shift apart while it is cracked, and close as the gold sets
+    float split = grow * (1.0 - smoothstep(0.5, 0.75, ph)) * step(0.03, r);
+    vec2 off = (vec2(hash(vec2(j, sd + 20.0)), hash(vec2(j, sd + 21.0))) - 0.5) * 0.035 * split;
+    vec4 icon = iconAt(vec2(0.5, 0.46), 0.46 * resolution.x, off);
     vec4 col = icon + vec4(vec3(0.04, 0.05, 0.07) * 0.7, 0.7) * (1.0 - icon.a);
-    float seam = line * on * heal;
-    float shimmer = 0.6 + 0.4 * sin(time * 5.0 + (p.x + p.y) * 20.0);
-    col.rgb = mix(col.rgb, gold * col.a, seam * 0.85) + gold * seam * shimmer * 0.5;
-    col.a = max(col.a, seam);
+    vec3 gold = mix(vec3(1.0, 0.78, 0.36), tint, 0.25 + 0.5 * useTint);
+    float shimmer = 0.8 + 0.35 * sin(time * 5.0 - r * 30.0);
+    vec3 line = mix(vec3(0.75, 0.82, 0.9), gold * shimmer, isGold);
+    col = mix(col, vec4(mix(line, line * 0.45, icon.a), 1.0), crack);
+    float glow = exp(-dRay * dRay / 30.0) * step(r, reach) * isGold * (1.0 - smoothstep(0.7, 1.0, ph)) * 0.18;
+    // the blow: a flash at the point as the round starts
+    float flash = exp(-r * r / 0.0012) * sin(PI * clamp(ph / 0.1, 0.0, 1.0));
+    col.rgb += gold * glow * col.a + vec3(1.0, 0.97, 0.92) * flash * 0.8;
+    col.a = max(col.a, flash * 0.8);
     FRAG_COLOR = col * inside * qt_Opacity;
 }

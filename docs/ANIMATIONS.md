@@ -44,9 +44,9 @@ Nine styles in three groups, and the stock one. The lengths are at the normal sp
 | **Volt** | Lightning strikes the icon and lights up the screen around it, then an electric ring opens the app, 620 ms | Arcs run around the cover's edge, and now and then a bolt strikes the icon | Arcs crawl over the window, then it switches off like an old TV, 700 ms |
 | **Frost** | Frost forms over the screen and melts away from the icon outward, 700 ms | Frost grows over the cover from its edges and thaws again | Freezes from the edges, cracks from where the finger let go, and falls apart as snow, 950 ms |
 | *Extreme: loud on purpose* | | | |
-| **Shatter** | Shards fly in and fit together; the seams glow and vanish, 720 ms | Cracks run through the cover and fill with gold | Breaks where the finger let go; the shards fall, turning and catching the light, 1000 ms |
+| **Shatter** | Shards burst out of the icon and fit together into the app; the seams glow and vanish, 720 ms | The cover cracks from a point on the icon; the cracks fill with gold and heal | Breaks where the finger let go; the shards fall, turning and catching the light, 1000 ms |
 | **Singularity** | The app bursts out of a white hole at the icon, 660 ms | A small black hole spins in the cover, bending the icon around it | Pulled into a black hole with a glowing disk, which then winks out, 950 ms |
-| **Dust** | Sand blows in and settles into the app, 800 ms | Sand pours through the cover into a heap | Crumbles into dust that the wind takes, 1050 ms |
+| **Dust** | Sand blows in and settles into the app, from the icon outward, 800 ms | Sand pours through the cover into a heap | Crumbles from the top down into dust that the wind takes, 1050 ms |
 
 With *Ambience colours* on (the default), fire, water, ice and light take the ambience's highlight colour: a blue
 ambience burns blue. Off, they have their natural colours. Tide's water keeps its own deep colour either way, and only
@@ -180,18 +180,28 @@ with its own swipe has played its effect already, so its cover closes the stock 
 ### Shatter
 
 A pane broken at a point: 11 rays from it and rings at 0.05 to 1.5 screen heights, every cell split into two
-triangles, about 130 shards, each with its own delay (by its distance from the point), throw, gravity and turn about a
-random axis, drawn in perspective with a glint where it faces the light. Qt 5.6's `ShaderEffect` has no custom meshes,
-so each shard is its own small `ShaderEffect` over its triangle's bounding box: `shaders/shards.vert` turns and moves
-it, `shaders/shards.frag` cuts the triangle out. The shard items are made once; a new break only lays them out again
-(`Shards.qml`, `build()`). A cover breaks into 9 rays and 5 rings, about 60 shards.
+triangles, about 100 shards, each with its own delay (by its distance from the point), throw, gravity and turn about a
+random axis, drawn in perspective with a glint where it faces the light. Each triangle knows how its edges broke, so
+the cracks out from the point are drawn brightest and the cuts that split a cell faintest. Qt 5.6's `ShaderEffect` has
+no custom meshes, so each shard is its own small `ShaderEffect` over its triangle's bounding box:
+`shaders/shards.vert` turns and moves it, `shaders/shards.frag` cuts the triangle out. The shard items are made once;
+a new break only lays them out again (`Shards.qml`, `build()`). A cover breaks into 9 rays and 5 rings, about 60
+shards. An app opens the other way: each shard leaves the icon small and turning and lands in its place, the near
+ones first.
 
 ### Grains: Dust and Frost
 
 The grains are not separate items. Each pixel asks which grain covers it now: for four speed classes it steps back
 along the grain's path (its start from the sweep and the noise, then drift and gravity), checks that the grain there
-belongs to that class and has started, and draws it if it lands on the pixel. That is about 20 texture reads a pixel,
-so these two styles draw at half the resolution (`layer.textureSize`) and are scaled up, which grains do not mind.
+belongs to that class and has started, and draws it if it lands on the pixel (`grains.glsl`; Frost's snow finds its
+flakes the same way, in `frost.glsl`). That is about 20 texture reads a pixel, so the moments with grains or snow
+draw them at half the resolution (`layer.textureSize`) and scale them up, which grains do not mind: Dust's opening
+and closing, and Frost's closing (`half` in `styles.js`, per moment; the two styles' loading effects are drawn at
+half too). Through the half-size layer the window would also look soft at the start of a close, and the app at the
+end of an open would sharpen at once when the effect ended. So these three moments are split (`split`): `Effect.qml`
+draws the picture at full resolution and only the grains at half, in a second pass of the same shader over it, and
+the shader reads `part` to know which of the two it draws. Frost's opening has no grains and draws at full
+resolution.
 
 ### The shaders
 
@@ -215,7 +225,9 @@ smooth noise, fractal noise, the distance to the nearest Voronoi edge and white 
   style's with *Surprise me*, else the chosen ones. It starts again when the settings change. Until a shader is read,
   its moment plays the stock way.
 - **Budget.** One full-screen pass for the effect and one capture of the layer: live while opening, once when closing.
-  The grains and the fire are the heaviest; Dust and Frost draw at half the resolution.
+  A split moment adds a second pass at half the resolution for its grains. The grains, the fire and Frost's opening
+  are the heaviest: the grains draw at half the resolution, and Frost's opening reads about 20 textures a pixel at
+  full resolution while the whole screen is iced, fewer as it melts.
 - **The display going off** (`displayAboutToBeOff`) ends every effect at once, as the stock does with its transitions.
 
 ## Limits

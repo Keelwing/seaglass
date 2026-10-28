@@ -1,8 +1,8 @@
-// Shatter's shards (docs/ANIMATIONS.md): a pane broken at a point into about 130 triangles, which fall (closing) or
-// fly in and fit together (opening, assemble). Qt 5.6's ShaderEffect has no custom meshes, so each shard is a small
-// ShaderEffect over its triangle's bounding box: shaders/shards.vert turns and moves it, shaders/shards.frag cuts the
-// triangle out. The shard items are made once; build() lays them out for a new break, at impact (0 to 1 over the
-// pane). Show it only when ready.
+// Shatter's shards (docs/ANIMATIONS.md): a pane broken at a point into about 100 triangles, which fall (closing) or
+// burst out of the impact and fit together (opening, assemble). Qt 5.6's ShaderEffect has no custom meshes, so each
+// shard is a small ShaderEffect over its triangle's bounding box: shaders/shards.vert turns and moves it,
+// shaders/shards.frag cuts the triangle out. The shard items are made once; build() lays them out for a new break, at
+// impact (0 to 1 over the pane). Show it only when ready.
 import QtQuick 2.6
 import "shaders.js" as Shaders
 
@@ -27,7 +27,9 @@ Item {
     readonly property bool ready: active && vertexText !== "" && fragmentText !== ""
                                   && shardRepeater.count === capacity
 
-    // a radial break: 11 cracks from the impact, rings of them further out, every cell split in two
+    // a radial break: 11 cracks from the impact, rings of them further out, every cell split in two. Each triangle
+    // keeps how its edges broke (shards.frag draws the cracks out from the impact brightest, the cuts that split a
+    // cell faintest), in the order of the edges bc, ca, ab
     function build() {
         var side = Math.max(1, height)
         var aspect = width / side
@@ -49,16 +51,17 @@ Item {
             var length = rings[ring] * jitter[r][ring]
             return [centre[0] + Math.cos(angles[r]) * length, centre[1] + Math.sin(angles[r]) * length]
         }
+        var radial = 1, round = 0.6, cut = 0.15
         var triangles = []
         for (k = 0; k < rays; k++)
-            triangles.push([centre, corner(k, 0), corner(k + 1, 0)])
+            triangles.push([centre, corner(k, 0), corner(k + 1, 0), [round, radial, radial]])
         for (m = 0; m < rings.length - 1; m++) {
             for (k = 0; k < rays; k++) {
                 var p = corner(k, m), q = corner(k + 1, m), r2 = corner(k + 1, m + 1), s = corner(k, m + 1)
                 if (Math.random() < 0.5)
-                    triangles.push([p, q, r2], [p, r2, s])
+                    triangles.push([p, q, r2, [radial, cut, round]], [p, r2, s, [round, radial, cut]])
                 else
-                    triangles.push([p, q, s], [q, r2, s])
+                    triangles.push([p, q, s, [cut, radial, round]], [q, r2, s, [round, cut, radial]])
             }
         }
         var used = 0
@@ -76,6 +79,7 @@ Item {
             shard.a = Qt.point(t[0][0], t[0][1])
             shard.b = Qt.point(t[1][0], t[1][1])
             shard.c = Qt.point(t[2][0], t[2][1])
+            shard.kinds = Qt.vector3d(t[3][0], t[3][1], t[3][2])
             shard.centroid = Qt.point((t[0][0] + t[1][0] + t[2][0]) / 3, (t[0][1] + t[1][1] + t[2][1]) / 3)
             shard.rnd = Qt.vector4d(Math.random(), Math.random(), Math.random(), Math.random())
             shard.visible = true
@@ -100,6 +104,7 @@ Item {
             property point a
             property point b
             property point c
+            property vector3d kinds
             property point centroid
             property vector4d rnd
             property vector3d tint: pane.tint
