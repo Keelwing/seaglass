@@ -75,7 +75,7 @@ diff. Two checks cover those versions without a phone, here and in CI:
   `Sailfish.Weather`, which comes with the Weather app from the Store. `qmlscene` aborts at the end, because it has
   no OpenGL for its window, so the script reads the check's own lines.
 
-| | 5.2.0.18, 5.2.0.20 | 5.1.0.11 | 5.0.0.78 |
+| | 5.2.0.18 to 5.2.0.22 | 5.1.0.11 | 5.0.0.78 |
 |---|---|---|---|
 | the hook checked against the stock files | yes | yes | yes |
 | our QML compiled with that release's Qt and Silica | no (no 5.2 target yet) | yes | yes |

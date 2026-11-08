@@ -10,7 +10,7 @@ screen.
 [![Release](https://img.shields.io/github/v/release/Keelwing/seaglass?color=14a39a)](https://github.com/Keelwing/seaglass/releases/latest)
 [![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-14a39a)](LICENSE)
 [![Docs](https://img.shields.io/badge/docs-keelwing.github.io%2Fseaglass-14a39a)](https://keelwing.github.io/seaglass/)
-[![Sailfish OS 5.2.0.20 | 5.2.0.18](https://img.shields.io/badge/Sailfish%20OS-5.2.0.20%20%7C%205.2.0.18-0b4a52)](#compatibility)
+[![Sailfish OS 5.2.0.22 | 5.2.0.20 | 5.2.0.18](https://img.shields.io/badge/Sailfish%20OS-5.2.0.22%20%7C%205.2.0.20%20%7C%205.2.0.18-0b4a52)](#compatibility)
 [![Patchmanager 3.2+](https://img.shields.io/badge/Patchmanager-3.2%2B-0b4a52)](https://github.com/sailfishos-patches/patchmanager)
 <!-- /github-only -->
 
@@ -145,6 +145,7 @@ Patchmanager applies the patch only to the versions listed in the package's `pat
 
 | Sailfish OS | Package | Checked by CI | On a phone | Status |
 |---|---|---|---|---|
+| 5.2.0.22 | release | the hook | Jolla Phone (`lipstick-jolla-home-qt5` 1.27.18.2) | [![Sailfish OS 5.2.0.22 in CI](https://img.shields.io/github/check-runs/Keelwing/seaglass/main?nameFilter=Sailfish%20OS%205.2.0.22&label=CI)](https://github.com/Keelwing/seaglass/actions/workflows/ci.yml) |
 | 5.2.0.20 | release | the hook | Jolla Phone (`lipstick-jolla-home-qt5` 1.27.18.1) | [![Sailfish OS 5.2.0.20 in CI](https://img.shields.io/github/check-runs/Keelwing/seaglass/main?nameFilter=Sailfish%20OS%205.2.0.20&label=CI)](https://github.com/Keelwing/seaglass/actions/workflows/ci.yml) |
 | 5.2.0.18 | release | the hook | Jolla Phone | [![Sailfish OS 5.2.0.18 in CI](https://img.shields.io/github/check-runs/Keelwing/seaglass/main?nameFilter=Sailfish%20OS%205.2.0.18&label=CI)](https://github.com/Keelwing/seaglass/actions/workflows/ci.yml) |
 | 5.1.0.11 | testers' | the hook; the QML with the 5.1.0.11 SDK target | not yet | [![Sailfish OS 5.1.0.11 in CI](https://img.shields.io/github/check-runs/Keelwing/seaglass/main?nameFilter=Sailfish%20OS%205.1.0.11&label=CI)](https://github.com/Keelwing/seaglass/actions/workflows/ci.yml) |
@@ -168,7 +169,7 @@ Patchmanager applies the patch only to the versions listed in the package's `pat
 
 You need:
 
-- Sailfish OS 5.2.0.20 or 5.2.0.18 (see [Compatibility](#compatibility));
+- Sailfish OS 5.2.0.22, 5.2.0.20 or 5.2.0.18 (see [Compatibility](#compatibility));
 - Patchmanager 3.2 or newer, from OpenRepos or Chum.
 
 The package also needs `lipstick-jolla-home-qt5`, `sailfishsilica-qt5` and `qt5-qtdeclarative-import-folderlistmodel`,

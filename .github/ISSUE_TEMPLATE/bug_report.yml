@@ -14,7 +14,7 @@ body:
     attributes:
       label: Sailfish OS version
       description: Settings → About product
-      placeholder: 5.2.0.20
+      placeholder: 5.2.0.22
     validations:
       required: true
   - type: input
