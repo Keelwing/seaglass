@@ -7,11 +7,16 @@ Each version was checked on a Jolla Phone with the newest Sailfish OS it lists. 
 
 - App animations are on out of the box: apps open in Ember, load in Dust and close in Northern lights, at the quick
   speed and in the ambience's colours.
-- A style tile sets all three moments, and Surprise me covers every moment that is not set to Stock.
+- After an update from 1.0.0, a style picked there with a tile plays only for the moments that were set to *Same as
+  style*. The other moments take the new defaults until you choose again.
+- Surprise me covers every moment that is not set to Stock.
+- The Animations page shows every style's opening, loading and closing at once as still frames. A tap plays one
+  large, with its whole run as a strip you can drag. Looking changes nothing until you tap Use.
+- Three new styles in a new group, Paper: Contour, Fold and Halftone.
 - Fire, sparks, stars and lightning move while an app opens or closes, and frosted glass has a fine grain instead of
   square blocks.
-- All nine styles were reworked to look more like what they are made of, and none of them ends early or jumps at its
-  start or end.
+- The nine styles of 1.0.0 were reworked to look more like what they are made of, and none of them ends early or
+  jumps at its start or end.
 - Removing a data widget, restoring the starter widgets or going back to an older Seaglass no longer moves the other
   widgets away from their apps.
 - After a backup is restored, every widget shows the kind it was saved with.

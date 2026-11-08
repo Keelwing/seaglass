@@ -73,13 +73,13 @@ rises from below and blends in as the grid opens. Folder icons, open folders and
 
 ### App animations
 
-Apps open from the icon or cover you tapped, show a loading effect on their new cover while they start, and close
-with the swipe from the top, in one of nine styles: *Seaglass*, *Tide* and *Northern lights* (calm, made of glass,
-water and light), *Ember*, *Volt* and *Frost* (fire, lightning and ice), and *Shatter*, *Singularity* and *Dust*
-(loud on purpose). Each moment can have a style of its own, or *Surprise me* picks one each time, on a settings page
-with a live preview. The effects are shaders on a copy of the window, so Sailfish never waits for them. Out of the
-box, apps open in *Ember*, load in *Dust* and close in *Northern lights*. More:
-[docs/ANIMATIONS.md](docs/ANIMATIONS.md).
+Apps can open from the icon or cover you tapped, show a loading effect on their new cover while they start, and close
+with the swipe from the top, in one of twelve styles: *Contour*, *Fold* and *Halftone* (drawn, folded and printed),
+*Seaglass*, *Tide* and *Northern lights* (calm, made of glass, water and light), *Ember*, *Volt* and *Frost* (fire,
+lightning and ice), and *Shatter*, *Singularity* and *Dust* (loud on purpose). The settings page shows every style's
+opening, loading and closing at once, and plays any of them before you choose. The effects are shaders on a copy of
+the window, so Sailfish never waits for them. Out of the box, apps open in *Ember*, load in *Dust* and close in
+*Northern lights*. More: [docs/ANIMATIONS.md](docs/ANIMATIONS.md).
 
 <p align="center">
   <img src="docs/images/animations-sailfish.webp" width="250" alt="Notes opening from its icon and closing in the Seaglass, Tide and Northern lights styles">
@@ -205,7 +205,8 @@ the launcher, and is not in the backup.
 **Removing.** Deactivate *Seaglass* in Patchmanager, or remove the package: `devel-su rpm -e seaglass`. Removing the
 package deactivates the patch first. Folders shown as widgets go back to being ordinary folders, in their places in
 the app grid. The settings stay in dconf, in case you install it again; to clear them as well:
-`dconf reset -f /apps/seaglass/`
+`dconf reset -f /apps/seaglass/`. The Animations page's picture of its frames stays in `~/.cache` too:
+`rm ~/.cache/seaglass-animations-*`
 
 ## Privacy
 
@@ -213,7 +214,8 @@ the app grid. The settings stay in dconf, in case you install it again; to clear
   notifications, the calendar, the media player, the Weather app's saved place, and the connection and battery
   states.
 - It stores its settings, the app launch counts and the recently closed apps in dconf (`/apps/seaglass`), on the
-  phone only. *Forget used apps* and *Forget closed apps* in the settings clear them.
+  phone only. *Forget used apps* and *Forget closed apps* in the settings clear them. The Animations page keeps one
+  picture of its frames in `~/.cache`, drawn from a made-up app and stock icons only.
 - It sends nothing anywhere. The weather widget uses the stock weather module, whose requests follow the stock Events
   view's rules. *Support Seaglass* in the settings opens Ko-fi in the browser, only when you tap it.
 - It writes nothing to the system journal unless *Debug log* is on.
