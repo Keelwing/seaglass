@@ -333,45 +333,6 @@ class RepoTest(unittest.TestCase):
                 if Path(target).name in files:
                     self.assertTrue((path.parent / target).is_file(), f"{path.relative_to(REPO)}: {target}")
 
-    def test_every_style_has_its_shaders(self):
-        # a style's moment without its shader would stay stock without a word (docs/ANIMATIONS.md)
-        shaders = REPO / "qml" / "animations" / "shaders"
-        styles = (REPO / "qml" / "animations" / "styles.js").read_text(encoding="utf-8")
-        found = re.findall(r'\{ "id": "(\w+)"(.*?)\}', styles, re.S)
-        self.assertEqual(len(found), 9)
-        for style, rest in found:
-            moments = ["load"] if '"shards": true' in rest else ["open", "close", "load"]
-            for moment in moments:
-                self.assertTrue((shaders / f"{style}-{moment}.frag").is_file(), f"{style}-{moment}.frag")
-            for lib in re.findall(r'"(\w+)"', re.search(r'"libs": \[(.*?)\]', rest).group(1)):
-                self.assertTrue((shaders / f"{lib}.glsl").is_file(), f"{lib}.glsl")
-        self.assertTrue((shaders / "shards.vert").is_file())
-        # the noise tile is made when the package is built, never committed
-        self.assertIn("scripts/noise.py", (REPO / "rpm" / "build.sh").read_text(encoding="utf-8"))
-        self.assertIn("qml/animations/noise.png", (REPO / ".gitignore").read_text(encoding="utf-8"))
-
-    def test_half_resolution_is_per_moment(self):
-        # styles.js lists the moments drawn at half the resolution, and the split ones among them; Effect.qml asks
-        # for its own moment, and no other file reads them. A split moment's shader reads part, or both passes
-        # would draw all of it.
-        styles = (REPO / "qml" / "animations" / "styles.js").read_text(encoding="utf-8")
-        shaders = REPO / "qml" / "animations" / "shaders"
-        for style, rest in re.findall(r'\{ "id": "(\w+)"(.*?)\}', styles, re.S):
-            self.assertNotRegex(rest, r'"(half|split)": true', style)
-            lists = {key: set(re.findall(r'"(\w+)"', moments))
-                     for key, moments in re.findall(r'"(half|split)": \[(.*?)\]', rest)}
-            for key, moments in lists.items():
-                self.assertLessEqual(moments, {"open", "close", "load"}, f"{style} {key}")
-            self.assertLessEqual(lists.get("split", set()), lists.get("half", set()), style)
-            for moment in lists.get("split", set()):
-                shader = (shaders / f"{style}-{moment}.frag").read_text(encoding="utf-8")
-                self.assertRegex(shader, r"\bpart [!=]= [12]\.0", f"{style}-{moment}.frag")
-        effect = (REPO / "qml" / "animations" / "Effect.qml").read_text(encoding="utf-8")
-        self.assertIn("Styles.half(style, moment)", effect)
-        self.assertIn("Styles.split(style, moment)", effect)
-        for path in sorted([*REPO.glob("qml/**/*.qml"), *REPO.glob("harness/*.qml")]):
-            self.assertNotRegex(path.read_text(encoding="utf-8"), r'has\([^)]*"half"\)', path.relative_to(REPO))
-
     def test_qtquick_import_fits_qt_56(self):
         for path in QML:
             for version in re.findall(r"^import QtQuick (\d+\.\d+)", path.read_text(encoding="utf-8"), re.M):

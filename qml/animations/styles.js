@@ -9,6 +9,9 @@
 .pragma library
 
 var STYLES = [
+    { "id": "contour", "name": "Contour", "group": "Paper", "open": 480, "close": 520, "libs": [] },
+    { "id": "fold", "name": "Fold", "group": "Paper", "open": 560, "close": 600, "libs": [] },
+    { "id": "halftone", "name": "Halftone", "group": "Paper", "open": 600, "close": 640, "libs": [] },
     { "id": "seaglass", "name": "Seaglass", "group": "Sailfish", "open": 480, "close": 560, "libs": [], "blur": true },
     { "id": "tide", "name": "Tide", "group": "Sailfish", "open": 650, "close": 720, "libs": [] },
     { "id": "aurora", "name": "Northern lights", "group": "Sailfish", "open": 780, "close": 850, "libs": ["aurora"] },
