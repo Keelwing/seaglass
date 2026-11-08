@@ -310,6 +310,27 @@ class RepoTest(unittest.TestCase):
             ids = set(re.findall(r"^\s*id:\s*(\w+)", text, re.M))
             properties = set(re.findall(r"^\s*(?:readonly\s+)?property\s+[\w<>.]+\s+(\w+)", text, re.M))
             self.assertEqual(sorted(ids & properties), [], path.relative_to(REPO))
+    def test_pages_on_top_read_their_page_container(self):
+        # a Silica Page has no pageStack property (Sailfish OS 5.0 and 5.1): page.pageStack is undefined, so a preview
+        # running "while Active or outside a page stack" ran on under every page pushed over it. A page in a stack has
+        # its pageContainer; the window's stack is read unqualified, as pageStack.push() does
+        for path in QML + JS:
+            for number, line in code_lines(path):
+                self.assertNotRegex(line, r"\.\s*pageStack\b", f"{path.relative_to(REPO)}:{number}")
+        # what runs only while its page is on top runs outside a stack too, in the harness
+        checked = set()
+        for path in sorted(REPO.glob("qml/**/*.qml")):
+            code = "\n".join(line for _, line in code_lines(path))
+            conditions = re.findall(r"(?m)^\s*(?:readonly property bool \w+|running|paused):.*PageStatus\.Active.*$",
+                                    code)
+            for condition in conditions:
+                self.assertIn("!page.pageContainer", condition, path.relative_to(REPO))
+                checked.add(path.name)
+        self.assertLessEqual({"FoldersPage.qml", "GlassPage.qml"}, checked)
+        # the Glass page's preview pauses under a picker and goes on where it was: stopped, it would start over from
+        # the frame it held, with jumps
+        glass = "\n".join(line for _, line in code_lines(REPO / "qml" / "settings" / "GlassPage.qml"))
+        self.assertRegex(glass, r"(?m)^\s*running: true\n\s*paused: !\(\(page\.status === PageStatus\.Active")
 
 
 if __name__ == "__main__":
