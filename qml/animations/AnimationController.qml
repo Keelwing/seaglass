@@ -198,7 +198,10 @@ Item {
         var queue = []
         for (var i = 0; i < all.length; i++) {
             var item = all[i]
-            var chosen = styleFor(item.moment === "load" ? "loading" : item.moment) === item.style
+            var chosen = item.moment === "field"
+                    ? Styles.setting(settings, "open") === item.style
+                      || Styles.setting(settings, "close") === item.style
+                    : styleFor(item.moment === "load" ? "loading" : item.moment) === item.style
             if (settings.surprise || chosen) {
                 Shaders.load(base, item.style + "-" + item.moment, Styles.libs(item.style), es3, function () {})
                 queue.push(item)

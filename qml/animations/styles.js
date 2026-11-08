@@ -2,9 +2,10 @@
 // effects in ms at the normal speed, the shader libraries they use (shaders/NAME.glsl, after common.glsl), whether
 // they blur their source (blur: it needs mipmaps), and the moments ("open", "close", "load") drawn at half the
 // resolution and scaled up (half: the grains, the heaviest shaders, and these styles' loading). Of those, a split
-// moment draws its picture at full resolution and only its flying grains at half (split, Effect.qml). A style plays
-// a moment only with its shader there (shaders/STYLE-MOMENT.frag); without it, that moment stays stock. Shatter
-// opens and closes with its shards (Shards.qml), not with one shader.
+// moment draws its picture at full resolution and only its flying grains at half (split, Effect.qml), from the progress
+// grainsFrom on if it has one. The moments listed under field read what the style's field shader (STYLE-field.frag,
+// FrostField.qml) bakes when they start. A style plays a moment only with its shader there (shaders/STYLE-MOMENT.frag);
+// without it, that moment stays stock. Shatter opens and closes with its shards (Shards.qml), not with one shader.
 .pragma library
 
 var STYLES = [
@@ -14,7 +15,7 @@ var STYLES = [
     { "id": "ember", "name": "Ember", "group": "Elements", "open": 620, "close": 880, "libs": ["ember"] },
     { "id": "volt", "name": "Volt", "group": "Elements", "open": 620, "close": 700, "libs": ["volt"] },
     { "id": "frost", "name": "Frost", "group": "Elements", "open": 700, "close": 950, "libs": ["frost"],
-      "blur": true, "half": ["close", "load"], "split": ["close"] },
+      "blur": true, "half": ["close", "load"], "split": ["close"], "field": ["open", "close"], "grainsFrom": 0.5 },
     { "id": "shatter", "name": "Shatter", "group": "Extreme", "open": 720, "close": 1000, "libs": [],
       "shards": true },
     { "id": "singularity", "name": "Singularity", "group": "Extreme", "open": 660, "close": 950, "libs": [] },
@@ -62,15 +63,24 @@ function split(id, moment) {
     return listed(id, "split", moment)
 }
 
+// from what progress a split moment's second pass has anything to draw
+function grainsFrom(id) {
+    var style = find(id)
+    return style !== null && style.grainsFrom !== undefined ? style.grainsFrom : 0
+}
+
 function listed(id, key, moment) {
     var style = find(id)
     return style !== null && style[key] !== undefined && style[key].indexOf(moment) >= 0
 }
 
-// the shaders of every style: [{style, moment}], Shatter's opening and closing left out (its shards)
+// the shaders of every style: [{style, moment}], Shatter's opening and closing left out (its shards). A field comes
+// first: the moments that read it would otherwise compile it together with their own
 function shaders() {
     var list = []
     for (var i = 0; i < STYLES.length; i++) {
+        if (STYLES[i].field !== undefined)
+            list.push({ "style": STYLES[i].id, "moment": "field" })
         var moments = STYLES[i].shards ? ["load"] : ["open", "close", "load"]
         for (var j = 0; j < moments.length; j++)
             list.push({ "style": STYLES[i].id, "moment": moments[j] })

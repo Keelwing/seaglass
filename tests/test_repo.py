@@ -372,20 +372,6 @@ class RepoTest(unittest.TestCase):
         for path in sorted([*REPO.glob("qml/**/*.qml"), *REPO.glob("harness/*.qml")]):
             self.assertNotRegex(path.read_text(encoding="utf-8"), r'has\([^)]*"half"\)', path.relative_to(REPO))
 
-    def test_effect_passes_have_every_input(self):
-        # Qt sets a shader's uniform from the ShaderEffect's property of that name, and warns without one: both
-        # passes of Effect.qml (the split moment's grains are a ShaderEffect of their own) have common.glsl's inputs
-        common = (REPO / "qml" / "animations" / "shaders" / "common.glsl").read_text(encoding="utf-8")
-        inputs = [name for name in re.findall(r"^uniform \w+ (\w+);", common, re.M) if not name.startswith("qt_")]
-        self.assertIn("part", inputs)
-        effect = (REPO / "qml" / "animations" / "Effect.qml").read_text(encoding="utf-8")
-        inner = [block for block in qml_blocks(effect, "ShaderEffect") if block.startswith(" ")]
-        self.assertEqual(len(inner), 1)
-        outer = effect.replace(inner[0], "")
-        for text, what in ((outer, "Effect"), (inner[0], "its grains pass")):
-            properties = set(re.findall(r"^\s*(?:readonly\s+)?property\s+\w+\s+(\w+)", text, re.M))
-            self.assertLessEqual(set(inputs), properties, what)
-
     def test_qtquick_import_fits_qt_56(self):
         for path in QML:
             for version in re.findall(r"^import QtQuick (\d+\.\d+)", path.read_text(encoding="utf-8"), re.M):

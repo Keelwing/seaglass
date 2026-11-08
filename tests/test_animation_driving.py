@@ -121,20 +121,25 @@ class AnimationDrivingTest(unittest.TestCase):
 
     def test_a_moment_makes_only_the_passes_it_has(self):
         # a cover makes an Effect every time it closes, so a make holds only what its moment draws: the grains pass is
-        # for a split moment only. fit() makes and drops it as the style or the moment changes, before the text, so
-        # that an Effect played as soon as it is ready finds it. By Component, as the runs: a Loader would make it later
-        # inside an asynchronous creation
+        # for a split moment only and the field's Loader for one with a field only. fit() makes and drops them as the
+        # style or the moment changes, before the text, so that an Effect played as soon as it is ready finds them. By
+        # Component, as the runs: a Loader would make them later inside an asynchronous creation
         effect = read("Effect.qml")
         fit = function(effect, "fit")
         self.assertIn("Styles.split(style, moment)", fit)
-        self.assertIn("grains = grainsComponent.createObject(effect)", fit)
-        self.assertEqual(effect.count("grainsComponent.createObject("), 1)
-        self.assertRegex(effect, r"\n    property Item grains: null\n")
+        self.assertIn('Styles.listed(style, "field", moment)', fit)
+        for component, made in (("grainsComponent", "grains"), ("fieldComponent", "fieldLoader")):
+            self.assertIn("%s = %s.createObject(effect)" % (made, component), fit)
+            self.assertEqual(effect.count("%s.createObject(" % component), 1, component)
+            self.assertRegex(effect, r"\n    property Item %s: null\n" % made)
+        self.assertRegex(by_id(effect, "Component", "fieldComponent"), r"\n\s*Loader \{")
+        self.assertEqual(len(qml_blocks(effect, "Loader")), 1)
         self.assertEqual(len(qml_blocks(effect, "ShaderEffect")), 2)
         self.assertIn(qml_blocks(effect, "ShaderEffect")[1], by_id(effect, "Component", "grainsComponent"))
         self.assertRegex(effect, r"onShaderNameChanged: \{\n\s*fit\(\)\n\s*load\(\)\n")
         # and dropped, after the property lets go of it
-        self.assertRegex(fit, r"var pass = grains\n\s*grains = null\n\s*pass\.destroy\(\)")
+        for made, local in (("grains", "pass"), ("fieldLoader", "loader")):
+            self.assertRegex(fit, r"var %s = %s\n\s*%s = null\n\s*%s\.destroy\(\)" % (local, made, made, local))
         # the grains pass is there only while split, its layer with it
         self.assertIn("layer.enabled: true", by_id(effect, "Component", "grainsComponent"))
         # nothing reads the grains pass but an animator, which does nothing without a target, and load(), which sets its
@@ -148,6 +153,20 @@ class AnimationDrivingTest(unittest.TestCase):
                     self.assertIn(line + "\n", sets)
                 elif re.search(r"\.grains\b", line):
                     self.assertRegex(line, r"^\s*target: [\w.]+\.grains$", f"{path.relative_to(REPO)}: {line.strip()}")
+
+    def test_an_effect_hides_no_id_it_reads(self):
+        # a binding reads the ids of its own component, then the properties of the object it is on, and only then the
+        # ids of the components around it: in the blur's component of FrostField.qml, field.owner read an Effect's
+        # property named field, and the blur had no picture. So no property of Effect.qml is named as an id that an
+        # Effect block reads
+        own = set(re.findall(r"^    (?:readonly )?property \w+ (\w+)", read("Effect.qml"), re.M))
+        self.assertIn("fieldLoader", own)
+        for path in sorted([*REPO.glob("qml/**/*.qml"), *REPO.glob("harness/*.qml")]):
+            text = path.read_text(encoding="utf-8")
+            ids = set(re.findall(r"\bid: (\w+)", text))
+            for block in qml_blocks(text, "Effect"):
+                hidden = own & ids & set(re.findall(r"(?<![\w.])(\w+)\.\w", block))
+                self.assertFalse(hidden, f"{path.relative_to(REPO)}: an Effect reads {sorted(hidden)}")
 
     def test_a_text_is_set_once(self):
         # Qt reads a text again each time it is set, on both passes. A make calls load() up to three times (from the
