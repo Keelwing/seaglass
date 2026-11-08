@@ -1,20 +1,37 @@
-// A made-up Notes app in the Silica look, at the phone's size, for the previews of the animations: the settings page
-// (AnimationsPage.qml) and the harness's reels. It draws only stock things and sample notes.
+// A made-up Notes app in the Silica look, at the phone's size, for the previews of the animations: the settings page's
+// stills (PreviewKit.qml) and the harness's reels. It draws only stock things and sample notes, light on dark in any
+// ambience, so that what is made of it does not depend on the ambience's scheme.
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 
-Item {
+SilicaControl {
     id: notes
 
-    // the ambience's picture, which a Silica app shows soft and dim as its background
+    // the ambience's picture, which a Silica app shows soft and dim as its background; without one, a neutral gradient
     property string picture
+    readonly property bool loading: background.status === Image.Loading
+
+    // the labels take a SilicaControl's palette (a SilicaItem's they do not)
+    palette.colorScheme: Theme.LightOnDark
 
     Rectangle {
         anchors.fill: parent
         color: "#0b1426"
     }
 
+    Rectangle {
+        anchors.fill: parent
+        visible: notes.picture === ""
+        opacity: 0.7
+        gradient: Gradient {
+            GradientStop { position: 0; color: "#23506a" }
+            GradientStop { position: 1; color: "#1a2f42" }
+        }
+    }
+
     Image {
+        id: background
+
         anchors.fill: parent
         asynchronous: true
         fillMode: Image.PreserveAspectCrop
@@ -36,7 +53,7 @@ Item {
         horizontalAlignment: Text.AlignRight
         verticalAlignment: Text.AlignVCenter
         font.pixelSize: Theme.fontSizeLarge
-        color: Theme.highlightColor
+        color: notes.palette.highlightColor
         text: "Notes"
     }
 
@@ -59,7 +76,7 @@ Item {
             Rectangle {
                 width: Math.floor((notes.width - 2 * Math.max(1, Math.round(Theme.pixelRatio))) / 3)
                 height: width
-                color: Theme.rgba(Theme.primaryColor, 0.07)
+                color: Theme.rgba(notes.palette.primaryColor, 0.07)
 
                 Rectangle {
                     width: Math.round(Theme.paddingSmall * 1.5)
@@ -86,7 +103,7 @@ Item {
                         margins: Theme.paddingSmall
                     }
                     font.pixelSize: Theme.fontSizeExtraSmall
-                    color: Theme.highlightColor
+                    color: notes.palette.highlightColor
                     text: index + 1
                 }
             }

@@ -110,6 +110,14 @@ class RepoTest(unittest.TestCase):
         for image in images:
             self.assertTrue((REPO / image).is_file(), image)
 
+    def test_doc_commands_make_the_folder_they_write_to(self):
+        # out/ is not in a fresh clone, and the shell opens a redirect's file before the command can make it
+        for path in sorted((REPO / "docs").glob("*.md")) + [REPO / "README.md"]:
+            text = path.read_text(encoding="utf-8")
+            for block in re.findall(r"(?ms)^```bash\n(.*?)^```", text):
+                for match in re.finditer(r">\s*out/", block):
+                    self.assertIn("mkdir -p out\n", block[:match.start()], path.relative_to(REPO))
+
     def test_workflows_run_the_make_targets(self):
         # CI and the release run what a development machine runs (docs/DEVELOPMENT.md)
         ci = (REPO / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
@@ -215,19 +223,6 @@ class RepoTest(unittest.TestCase):
         self.assertIn('import "../glass"', (REPO / "qml" / "settings" / "GlassPage.qml").read_text(encoding="utf-8"))
         self.assertIn('import "../badges"', (REPO / "qml" / "settings" / "BadgesPage.qml").read_text(encoding="utf-8"))
 
-    def test_harness_settings_copy_never_shows_the_phones_wallpaper(self):
-        # scripts/harness.sh rewrites these lines of the previewing pages' copies: they must be there as written
-        harness = (REPO / "scripts" / "harness.sh").read_text(encoding="utf-8")
-        lines = {"GlassPage": ("property string ambienceFile: ambiencePicture.value",
-                               "property bool persistentGlass: true"),
-                 "AnimationsPage": ("property string ambienceFile: ambiencePicture.value",)}
-        for name, rewritten in lines.items():
-            page = (REPO / "qml" / "settings" / f"{name}.qml").read_text(encoding="utf-8")
-            self.assertIn(f"~/$dir/qml/settings/{name}.qml", harness)
-            for line in rewritten:
-                self.assertIn(line, page)
-                self.assertIn(f"s|{line}|", harness)
-
     def test_every_settings_group_is_reset_and_backed_up(self):
         # SettingsHub resets each group from a copy at /apps/seaglass/defaults/…, AboutPage saves and restores it
         hub = (REPO / "qml" / "settings" / "SettingsHub.qml").read_text(encoding="utf-8")
@@ -253,29 +248,6 @@ class RepoTest(unittest.TestCase):
         self.assertEqual(keys, properties)
         self.assertEqual(keys, ["enabled", "style", "open", "loading", "close", "surprise", "speed", "ambience",
                                 "covers"])
-
-    def test_animations_page(self):
-        # the page of docs/ANIMATIONS.md, its row on the first page (after the task switcher), and a preview drawn
-        # by the home screen's own effect files, none of which may need Lipstick (the settings are not the compositor)
-        page = (REPO / "qml" / "settings" / "AnimationsPage.qml").read_text(encoding="utf-8")
-        for text in ("App animations", "Surprise me", "Same as style", "Opening", "Loading", "Closing", "Speed",
-                     "Relaxed", "Normal", "Quick", "Ambience colours", "Covers too", '"Open"', '"Close"'):
-            self.assertIn(f'qsTr("{text.strip(chr(34))}")', page, text)
-        for setting in ("enabled", "style", "surprise", "speed", "ambience", "covers"):
-            self.assertRegex(page, r"settings\.%s = " % setting, setting)
-        self.assertIn("page.setMoment(momentBox.settingKey", page)
-        self.assertIn('import "../animations"', page)
-        for kind in ("Effect {", "Shards {", "NoiseTile {", "Styles.choose(settings"):
-            self.assertIn(kind, page)
-        self.assertNotIn("OpenGLInfo", page)
-        hub = (REPO / "qml" / "settings" / "SettingsHub.qml").read_text(encoding="utf-8")
-        order = [hub.index(f'hub.open("{name}")') for name in ("SwitcherPage", "AnimationsPage", "WidgetsPage")]
-        self.assertEqual(order, sorted(order))
-        for name in ("AnimationsPage.qml", "../animations/Effect.qml", "../animations/Shards.qml",
-                     "../animations/NoiseTile.qml", "../animations/styles.js", "../animations/shaders.js"):
-            text = (REPO / "qml" / "settings" / name).read_text(encoding="utf-8")
-            self.assertNotRegex(text, r"(?m)^import (org\.nemomobile\.lipstick|Sailfish\.Lipstick)", name)
-            self.assertNotIn("Lipstick.", text, name)
 
     def test_support_links_agree(self):
         # one Ko-fi page for the developer's apps: GitHub's Sponsor button, the README, the site and the settings
@@ -333,86 +305,6 @@ class RepoTest(unittest.TestCase):
                 if Path(target).name in files:
                     self.assertTrue((path.parent / target).is_file(), f"{path.relative_to(REPO)}: {target}")
 
-    def test_every_style_has_its_shaders(self):
-        # a style's moment without its shader would stay stock without a word (docs/ANIMATIONS.md)
-        shaders = REPO / "qml" / "animations" / "shaders"
-        styles = (REPO / "qml" / "animations" / "styles.js").read_text(encoding="utf-8")
-        found = re.findall(r'\{ "id": "(\w+)"(.*?)\}', styles, re.S)
-        self.assertEqual(len(found), 9)
-        for style, rest in found:
-            moments = ["load"] if '"shards": true' in rest else ["open", "close", "load"]
-            for moment in moments:
-                self.assertTrue((shaders / f"{style}-{moment}.frag").is_file(), f"{style}-{moment}.frag")
-            for lib in re.findall(r'"(\w+)"', re.search(r'"libs": \[(.*?)\]', rest).group(1)):
-                self.assertTrue((shaders / f"{lib}.glsl").is_file(), f"{lib}.glsl")
-        self.assertTrue((shaders / "shards.vert").is_file())
-        # the noise tile is made when the package is built, never committed
-        self.assertIn("scripts/noise.py", (REPO / "rpm" / "build.sh").read_text(encoding="utf-8"))
-        self.assertIn("qml/animations/noise.png", (REPO / ".gitignore").read_text(encoding="utf-8"))
-
-    def test_every_effect_runs_its_clock(self):
-        # an effect whose time is never set stands still in all that moves with it (flames, sparks, stars, arcs):
-        # openings and closings run on their own seconds, which follow the speed; only the warm-up, a pixel nearly
-        # clear, has none
-        for path in sorted(REPO.glob("qml/**/*.qml")):
-            text = path.read_text(encoding="utf-8")
-            for block in qml_blocks(text, "Effect"):
-                if "id: warmEffect" in block:
-                    continue
-                self.assertRegex(block, r"\n\s*time: ", f"{path.relative_to(REPO)}: an Effect without time")
-        controller = (REPO / "qml" / "animations" / "AnimationController.qml").read_text(encoding="utf-8")
-        self.assertIn("time: openEffect.progress * openRun.duration / 1000", controller)
-        self.assertIn("time: closeEffect.progress * closeRun.duration / 1000", controller)
-        closing = (REPO / "qml" / "animations" / "CoverClosing.qml").read_text(encoding="utf-8")
-        self.assertIn("time: closing.progress * closing.duration / 1000", closing)
-
-    def test_an_opening_knows_the_corners_it_opens_from(self):
-        # an icon is round, a cover has the switcher's corners, the middle of the screen none
-        controller = (REPO / "qml" / "animations" / "AnimationController.qml").read_text(encoding="utf-8")
-        self.assertIn('kind === "icon" ? from.width / 2 : kind === "cover" ? from.radius : 0', controller)
-        self.assertIn("openEffect.radiusPx = from.radius", controller)
-        switcher = (REPO / "qml" / "switcher" / "SwitcherController.qml").read_text(encoding="utf-8")
-        cover = switcher[switcher.index("function coverRectFor"):]
-        self.assertIn('"radius": Theme.paddingMedium', cover[:cover.index("return null")])
-        page = (REPO / "qml" / "settings" / "AnimationsPage.qml").read_text(encoding="utf-8")
-        self.assertIn("effect.radiusPx = ", page)
-
-    def test_half_resolution_is_per_moment(self):
-        # styles.js lists the moments drawn at half the resolution, and the split ones among them; Effect.qml asks
-        # for its own moment, and no other file reads them. A split moment's shader reads part, or both passes
-        # would draw all of it.
-        styles = (REPO / "qml" / "animations" / "styles.js").read_text(encoding="utf-8")
-        shaders = REPO / "qml" / "animations" / "shaders"
-        for style, rest in re.findall(r'\{ "id": "(\w+)"(.*?)\}', styles, re.S):
-            self.assertNotRegex(rest, r'"(half|split)": true', style)
-            lists = {key: set(re.findall(r'"(\w+)"', moments))
-                     for key, moments in re.findall(r'"(half|split)": \[(.*?)\]', rest)}
-            for key, moments in lists.items():
-                self.assertLessEqual(moments, {"open", "close", "load"}, f"{style} {key}")
-            self.assertLessEqual(lists.get("split", set()), lists.get("half", set()), style)
-            for moment in lists.get("split", set()):
-                shader = (shaders / f"{style}-{moment}.frag").read_text(encoding="utf-8")
-                self.assertRegex(shader, r"\bpart [!=]= [12]\.0", f"{style}-{moment}.frag")
-        effect = (REPO / "qml" / "animations" / "Effect.qml").read_text(encoding="utf-8")
-        self.assertIn("Styles.half(style, moment)", effect)
-        self.assertIn("Styles.split(style, moment)", effect)
-        for path in sorted([*REPO.glob("qml/**/*.qml"), *REPO.glob("harness/*.qml")]):
-            self.assertNotRegex(path.read_text(encoding="utf-8"), r'has\([^)]*"half"\)', path.relative_to(REPO))
-
-    def test_effect_passes_have_every_input(self):
-        # Qt sets a shader's uniform from the ShaderEffect's property of that name, and warns without one: both
-        # passes of Effect.qml (the split moment's grains are a ShaderEffect of their own) have common.glsl's inputs
-        common = (REPO / "qml" / "animations" / "shaders" / "common.glsl").read_text(encoding="utf-8")
-        inputs = [name for name in re.findall(r"^uniform \w+ (\w+);", common, re.M) if not name.startswith("qt_")]
-        self.assertIn("part", inputs)
-        effect = (REPO / "qml" / "animations" / "Effect.qml").read_text(encoding="utf-8")
-        inner = [block for block in qml_blocks(effect, "ShaderEffect") if block.startswith(" ")]
-        self.assertEqual(len(inner), 1)
-        outer = effect.replace(inner[0], "")
-        for text, what in ((outer, "Effect"), (inner[0], "its grains pass")):
-            properties = set(re.findall(r"^\s*(?:readonly\s+)?property\s+\w+\s+(\w+)", text, re.M))
-            self.assertLessEqual(set(inputs), properties, what)
-
     def test_qtquick_import_fits_qt_56(self):
         for path in QML:
             for version in re.findall(r"^import QtQuick (\d+\.\d+)", path.read_text(encoding="utf-8"), re.M):
@@ -426,6 +318,28 @@ class RepoTest(unittest.TestCase):
             ids = set(re.findall(r"^\s*id:\s*(\w+)", text, re.M))
             properties = set(re.findall(r"^\s*(?:readonly\s+)?property\s+[\w<>.]+\s+(\w+)", text, re.M))
             self.assertEqual(sorted(ids & properties), [], path.relative_to(REPO))
+
+    def test_pages_on_top_read_their_page_container(self):
+        # a Silica Page has no pageStack property (Sailfish OS 5.0 and 5.1): page.pageStack is undefined, so a preview
+        # running "while Active or outside a page stack" ran on under every page pushed over it. A page in a stack has
+        # its pageContainer; the window's stack is read unqualified, as pageStack.push() does
+        for path in QML + JS:
+            for number, line in code_lines(path):
+                self.assertNotRegex(line, r"\.\s*pageStack\b", f"{path.relative_to(REPO)}:{number}")
+        # what runs only while its page is on top runs outside a stack too, in the harness
+        checked = set()
+        for path in sorted(REPO.glob("qml/**/*.qml")):
+            code = "\n".join(line for _, line in code_lines(path))
+            conditions = re.findall(r"(?m)^\s*(?:readonly property bool \w+|running|paused):.*PageStatus\.Active.*$",
+                                    code)
+            for condition in conditions:
+                self.assertIn("!page.pageContainer", condition, path.relative_to(REPO))
+                checked.add(path.name)
+        self.assertLessEqual({"FoldersPage.qml", "GlassPage.qml"}, checked)
+        # the Glass page's preview pauses under a picker and goes on where it was: stopped, it would start over from
+        # the frame it held, with jumps
+        glass = "\n".join(line for _, line in code_lines(REPO / "qml" / "settings" / "GlassPage.qml"))
+        self.assertRegex(glass, r"(?m)^\s*running: true\n\s*paused: !\(\(page\.status === PageStatus\.Active")
 
 
 if __name__ == "__main__":

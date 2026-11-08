@@ -1,16 +1,23 @@
 # Changelog
 
-Each version was checked on a Jolla Phone with Sailfish OS 5.2.0.20. How each feature works is in [docs/](docs/).
+Each version was checked on a Jolla Phone with the newest Sailfish OS it lists. How each feature works is in
+[docs/](docs/).
 
 ## Unreleased
 
-- App animations are on out of the box: apps open in Ember, load in Dust and close in Northern lights, at the quick
-  speed and in the ambience's colours.
-- A style tile sets all three moments, and Surprise me covers every moment that is not set to Stock.
+- Out of the box the animations are on with Surprise me, a different style each time. With Surprise me off, apps
+  open in Ember, load in Dust and close in Northern lights until you choose others. They run at the quick speed and
+  in the ambience's colours.
+- After an update from 1.0.0, a style picked there with a tile plays only for the moments that were set to *Same as
+  style*. The other moments take the new defaults until you choose again.
+- Surprise me covers every moment that is not set to Stock.
+- The Animations page shows every style's opening, loading and closing at once as still frames. A tap plays one
+  large, with its whole run as a strip you can drag. Looking changes nothing until you tap Use.
+- Three new styles in a new group, Paper: Contour, Fold and Halftone.
 - Fire, sparks, stars and lightning move while an app opens or closes, and frosted glass has a fine grain instead of
   square blocks.
-- All nine styles were reworked to look more like what they are made of, and none of them ends early or jumps at its
-  start or end.
+- The nine styles of 1.0.0 were reworked to look more like what they are made of, and none of them ends early or
+  jumps at its start or end.
 - Removing a data widget, restoring the starter widgets or going back to an older Seaglass no longer moves the other
   widgets away from their apps.
 - After a backup is restored, every widget shows the kind it was saved with.
@@ -19,6 +26,7 @@ Each version was checked on a Jolla Phone with Sailfish OS 5.2.0.20. How each fe
 - Weather: today's high and low and the "Today" column stay right after midnight. With *By size*, the hourly forecast
   is fetched only while a weather shelf is on the grid or in the gallery.
 - Next event: "Tomorrow" is right on the days the clocks change.
+- Sailfish OS 5.2.0.22.
 
 ## 1.0.0 (2026-10-17)
 

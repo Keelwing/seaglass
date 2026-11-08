@@ -197,8 +197,8 @@ Page {
 
                     // open, stay, close, pause: again and again; the closing motion runs the progress back
                     SequentialAnimation {
-                        // (outside a page stack, in the harness, always)
-                        running: (page.status === PageStatus.Active || !page.pageStack) && Qt.application.active
+                        // (outside a page stack, in the harness, always: a page in a stack has its pageContainer)
+                        running: (page.status === PageStatus.Active || !page.pageContainer) && Qt.application.active
                         loops: Animation.Infinite
 
                         PauseAnimation { duration: 500 }

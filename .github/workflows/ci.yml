@@ -49,6 +49,7 @@ jobs:
       matrix:
         include:
           # release (patch.json); Jolla publishes no SDK target for 5.2, so its QML is checked on a phone
+          - version: "5.2.0.22"
           - version: "5.2.0.20"
           - version: "5.2.0.18"
           # the testers' package: the hook, and our QML with the series' SDK target

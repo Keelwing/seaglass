@@ -75,7 +75,7 @@ diff. Two checks cover those versions without a phone, here and in CI:
   `Sailfish.Weather`, which comes with the Weather app from the Store. `qmlscene` aborts at the end, because it has
   no OpenGL for its window, so the script reads the check's own lines.
 
-| | 5.2.0.18, 5.2.0.20 | 5.1.0.11 | 5.0.0.78 |
+| | 5.2.0.18 to 5.2.0.22 | 5.1.0.11 | 5.0.0.78 |
 |---|---|---|---|
 | the hook checked against the stock files | yes | yes | yes |
 | our QML compiled with that release's Qt and Silica | no (no 5.2 target yet) | yes | yes |
@@ -105,10 +105,16 @@ The phone must be unlocked, with the display on: QML timers and the window grab 
 
 ```bash
 make harness                                          # the folder previews → out/shots/harness.png
-scripts/harness.sh --scene "NAME [ARGUMENT]" [--shot NAME [--grab SECS] | --frames NAME] [--picture PATH] [--wait SECS] [--keep] [--own-apps]
+scripts/harness.sh [--stack] --scene "NAME [ARGUMENT]" [--shot NAME [--grab SECS] | --frames NAME] [--picture PATH] [--wait SECS] [--until TEXT] [--env NAME=VALUE] [--keep] [--own-apps]
 ```
 
 `--frames` records the frames into `out/frames/NAME/` and a GIF into `out/shots/`; it waits for the scene's run to end.
+`--until` waits for a line in the harness's log, up to `--wait` seconds, and keeps the display from blanking meanwhile.
+`--env` passes an environment variable to `qmlscene`, such as `QSG_INFO=1` or
+`QT_LOGGING_RULES=qt.scenegraph.time.*=true`.
+`--stack` runs [harness/stack.qml](../harness/stack.qml) instead of `harness.qml`: a real `ApplicationWindow` and
+`PageStack`, for what only a page push shows, with scenes of its own (below). There `--shot` grabs at the end of the
+scene's first rest unless `--grab` says when, and `--frames` does not apply.
 `--slow-animations` runs qmlscene's slow motion (every animation and Timer five times slower), so that the film
 scene's grabs keep up. `--grab` takes the shot that many seconds after the scene starts (2.5 by
 default), for a moment of a scene's timeline. The harness shows only the stock apps, in made-up folders (*Media*,
@@ -133,9 +139,71 @@ scenes:
 | `film "clip=move\|add\|resize"` | the widget clips for the README: the touch scene's controller and events, dressed as the home screen; run with `--slow-animations --frames` |
 | `animations "STYLE open\|close\|load [PROGRESS]"\|"check"` | one style's effect for a moment on a made-up app, running or held at a progress; `check` draws every shader once and logs the ones that loaded |
 | `reel "STYLE,STYLE,… [slow=3]"` | styles one after the other on the app grid: Notes opens from its icon and closes, with the style's name; for `--frames` |
-| `settings "[PAGE] [SCROLL]"` | the settings: the first page, or one of the others (`Glass`, `Widgets`, …), scrolled down so many pixels, with the live previews |
+| `settings "[PAGE] [scheme=light] [SCROLL]"` | the settings: the first page, or one of the others (`Glass`, `Widgets`, `Animations`, `AnimationViewer`, …), scrolled down so many pixels, with the live previews; `scheme=light` draws the page dark on light over a light background, which comes near a light ambience without changing one |
+| `bench "cost\|play\|compile\|page\|quiet\|animators [OPTION=VALUE …]"` | what the animations cost on this phone in ms, logged: each effect held at a few progress values, each played from an idle GPU, a shader's first draw, the settings page; the modes are below, the method and options in [BenchScene.qml](../harness/BenchScene.qml); run with `--until "bench done"` |
 
 `FOLDER` is the title of a folder: *Media*, *Office* or *Tools*, or one of the phone's with `--own-apps`.
+
+With `--stack`, the scenes log `harness: stack step NAME begin` and `end` around each step and end with
+`harness: stack done`; `orientation=landscape` in either turns the window:
+
+| Scene | What |
+|---|---|
+| `push "[page=stripped] [rest=8] [from=hub] [hubrest=3]"` | the default: the Animations page pushed with the stock picture, a rest, a pop, and a second push in the same process; `page=stripped` pushes a page with only a header instead, as the measure for the real one; `from=hub` pushes the settings' first page first, leaves it `hubrest` seconds at rest and makes each push of the Animations page from it, as a tap on its row does, after a line `hub page compiled` (or `compiling`, or `not requested` before the first page has started its compile, 1 s after it is made); with `page=stripped` the stripped page is pushed over it, with no such line |
+| `viewer "STYLE MOMENT [rest=8]"` | the Animations page pushed and its sheet made, then the viewer pushed on that style and moment (`ember open` by default) as a tap on a frame pushes it: its first run, a rest, a tap on the stage, a swipe to the next style (mouse events, a move each frame; the release logs `drag released after N moves in M ms`), a rest, a pop; after the first run, a line on how the stage's and the strip's made-up home screens grabbed their pictures, as `bench page` logs it; after the push and after the swipe, how the line about the style came out in the phone's font, `about STYLE MOMENT lines N whole` (or `cut`, where it needs more than its two lines) |
+
+The bench modes, the first word of its argument:
+
+- `cost`: every style and moment held at a few progress values, drawn K times a frame until the frames come far
+  apart, so that the slope gives what one copy costs. Options: `size=100,55` (percent of the screen's width),
+  `at=0.15,0.5,0.85`, `only=ember-close,blit`, `ks=1,2,4`, `kmax=160`, `layered=1`.
+- `play`: every style and moment once at its length from an idle GPU, each frame counted, played as the home screen
+  plays it: on the render thread, through `Effect.play()` (a loading through `runClock()`, for 3 s) and
+  `Shards.play()`. Options: `size`, `only`, `rounds=3`, `driver=gui` (`progress` and `time` set from the GUI thread
+  by an animation instead, for comparison).
+- `compile`: the longest frame when each shader first draws, twice over. Options: `size`, `only`.
+- `page`: the Animations page, by steps: the spare time over an empty window (`empty`), the sheet made (`build`), at
+  rest at the top and the bottom (`rest`), flicked (`flick`), the spare time over it (`spare`), a page that keeps its
+  sheet in a file (`saved`), a second one that must show it (`cached`), and last the viewer's stage (`viewer`): every
+  style and moment as the viewer plays it, three rounds each, an opening or closing at its size in `stills.js` and
+  then at the next larger size while it passes, or the next smaller while it fails, so that the log names the largest
+  that passes. The viewer step takes the longest, 7 to 10 minutes by the moments' lengths alone, so give `--wait`
+  room for it. Options: `steps=` (any of them), `ks=` (the spare time's blits), `rest=10`, `flick=1` (flicked while
+  the sheet is made), `tick=0` (the scene's own tick stopped while the sheet is made, as in the Settings app, where
+  only the page's animations ask for frames; any running animation keeps every Timer to frames, so this is the build
+  as it is there, its frames read from the frame log), `flatten=0` (the frames stay the sheet, with no picture); for
+  `viewer`, `rounds=3`, `only=ember-open,…`, `speed=2` (0 relaxed, 1 normal, 2 quick), `stage=WIDTH` (in pixels, in
+  a phone's shape; by default the viewer page's own stage in portrait, from a page made and dropped at once, which the
+  step logs as `viewer stage WxH from the viewer page (made in N ms)`) and `rungs=table` (each moment only at its size
+  in `stills.js`) or `rungs=1,0.8` (at those sizes). The mode ends with a line for each check it ran, `check NAME: what
+  it saw | limit: … | passes`, `fails`, or `-` where the bench cannot tell, from its own frame intervals; what the
+  frame log shows is read with `scripts/bench-frames.py` below. After the build it logs how the made-up home screen
+  the stills are drawn from grabbed its pictures: `page kit shot once its pictures came`, or `page kit gave up waiting
+  for` what was still loading after 1.5 s; the viewer step logs its own as `viewer kit …`.
+- `quiet`: nothing drawn and the scene's own tick stopped, as at the page's rest: what is rendered anyway. Option:
+  `rest=10`.
+- `animators`: a moment on the render thread through a 400 ms block of the GUI thread, how often `ended` comes, a
+  split moment's grains, effects that go while they run, and how long an `Effect` takes to make: with a shader, without
+  one, and for a split closing. Options: `split=dust` (the split closing it grabs and times: `dust` or `frost`),
+  `back=contour` (the closing a window comes back from; `dust` or `frost` bring their grains pass back with it).
+
+`salt=1`, in any mode, makes every shader's text new to Qt's program store, so that its first draw is a cold compile.
+The store stays in `$XDG_RUNTIME_DIR` until the phone restarts and grows with each salted run, so use it sparingly.
+
+`scripts/bench-frames.py` reads what a run's frames did from its log, step by step: the frames rendered and per
+second, how long the first one took, the longest time between two and how many were over 16.7 ms, the mean sync,
+render and swap, the GUI thread's animations per frame, and each shader compile. It also counts the lines no log
+should have: "Problematic Vertex shader", "QOpenGLShader::compile" and a texture input with nothing to read. The run
+needs the scene graph's timing in its log:
+
+```bash
+mkdir -p out
+scripts/harness.sh --scene "bench play" --wait 600 --until "bench done" \
+    --env 'QT_MESSAGE_PATTERN=%{time process} %{category} %{message}' \
+    --env 'QT_LOGGING_RULES=qt.scenegraph.time.renderloop=true;qt.scenegraph.time.compilation=true' \
+    > out/bench-play.log 2>&1
+python3 -I scripts/bench-frames.py out/bench-play.log
+```
 
 ## Screenshots and icons
 

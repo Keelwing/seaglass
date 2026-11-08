@@ -14,7 +14,7 @@ ConfigurationGroup {
     property string open: "ember"
     property string loading: "dust"
     property string close: "aurora"
-    property bool surprise: false
+    property bool surprise: true
     // 0 relaxed, 1 normal, 2 quick
     property int speed: 2
     property bool ambience: true

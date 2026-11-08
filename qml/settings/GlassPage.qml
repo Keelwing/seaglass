@@ -266,9 +266,12 @@ Page {
                         border.color: Theme.rgba(Theme.primaryColor, 0.3)
                     }
 
-                    // pull up, page two and back, close: again and again
+                    // pull up, page two and back, close: again and again (outside a page stack, in the harness, always:
+                    // a page in a stack has its pageContainer). Paused, not stopped, under a picker or in the
+                    // background, so that it goes on from where it was: a restart would jump from the held frame
                     SequentialAnimation {
-                        running: (page.status === PageStatus.Active || !page.pageStack) && Qt.application.active
+                        running: true
+                        paused: !((page.status === PageStatus.Active || !page.pageContainer) && Qt.application.active)
                         loops: Animation.Infinite
 
                         PauseAnimation { duration: 700 }

@@ -17,7 +17,10 @@
 //             (AnimationsScene.qml)
 //   reel      styles one after the other: Notes opens from its icon and closes, slowed down for frames
 //             (ReelScene.qml)
-// The scene file next to this one holds "NAME [ARGUMENT]".
+//   bench     what the animations cost on this phone in ms: each effect, a shader's first draw, the settings page
+//             (BenchScene.qml)
+// The scene file next to this one holds "NAME [ARGUMENT]". scripts/harness.sh --stack runs stack.qml instead, for
+// what needs a real page stack.
 //
 // XDG_CONFIG_HOME points at a copy of ~/.config/lipstick, so this LauncherFolderModel reads the real folders
 // but can never write the real applications.menu.

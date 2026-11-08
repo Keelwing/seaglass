@@ -1,10 +1,10 @@
 // Northern lights: the aurora's colours by height, the pink of the curtain's lower edge, and its rays
 vec3 aurora(float h)
 {
+    if (useTint > 0.5)
+        return mix(tint * 1.1, mix(tint, vec3(0.62, 0.42, 1.0), 0.55), smoothstep(0.2, 0.95, h));
     vec3 c = mix(vec3(0.22, 0.98, 0.62), vec3(0.12, 0.86, 0.86), smoothstep(0.0, 0.35, h));
-    c = mix(c, vec3(0.62, 0.38, 1.0), smoothstep(0.35, 0.95, h));
-    vec3 a = mix(tint * 1.1, mix(tint, vec3(0.62, 0.42, 1.0), 0.55), smoothstep(0.2, 0.95, h));
-    return mix(c, a, useTint);
+    return mix(c, vec3(0.62, 0.38, 1.0), smoothstep(0.35, 0.95, h));
 }
 // violet with the ambience's colours
 vec3 fringe() { return mix(vec3(0.95, 0.35, 0.62), vec3(0.62, 0.42, 1.0), useTint); }

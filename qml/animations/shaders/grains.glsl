@@ -10,6 +10,9 @@ float grainStart(vec2 C, float gp, vec4 sw, float jit)
     return max(0.005, ramp + sw.w + (fbm(cp * 1.3) - 0.5) * jit * 1.8 + hash(C) * jit);
 }
 vec2 grainDisp(float a, float v, vec2 drift, vec2 grav){ return (drift * v * a * 0.35 + 0.5 * grav * a * a) * resolution.y; }
+// the four speed classes fly a little apart: the drift turned by -0.21, -0.07, 0.07 and 0.21 radians
+const vec4 GRAIN_COS = vec4(0.97803092, 0.99755102, 0.99755102, 0.97803092);
+const vec4 GRAIN_SIN = vec4(-0.20845991, -0.06994285, 0.06994285, 0.20845991);
 // a grain flies for life and fades out over its last part, from fade (a share of life) on
 vec4 grains(vec2 uv, float k, float gp, vec4 sw, float jit, vec2 drift, vec2 grav, float life, vec3 tone, float toneMin,
             float fade)
@@ -19,8 +22,7 @@ vec4 grains(vec2 uv, float k, float gp, vec4 sw, float jit, vec2 drift, vec2 gra
     for (int j = 0; j < 4; j++) {
         float fj = float(j);
         float v = 0.5 + fj * 0.4;
-        float ang = (fj - 1.5) * 0.14;
-        vec2 dj = vec2(drift.x * cos(ang) - drift.y * sin(ang), drift.x * sin(ang) + drift.y * cos(ang));
+        vec2 dj = drift * GRAIN_COS[j] + vec2(-drift.y, drift.x) * GRAIN_SIN[j];
         vec2 C = floor((P - grainDisp(a0, v, dj, grav)) / gp);
         float a = max(0.0, k - grainStart(C, gp, sw, jit));
         C = floor((P - grainDisp(a, v, dj, grav)) / gp);

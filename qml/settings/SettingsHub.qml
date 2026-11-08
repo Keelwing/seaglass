@@ -22,6 +22,10 @@ SilicaFlickable {
     property bool preloadOk: true
     // whether Patchmanager has applied the patch: -1 not known (yet)
     property int applied: -1
+    // the Animations page, compiled on the loader thread a second after this page is made, once its own push is
+    // over, so that a tap on its row does not compile it on the GUI thread: a push by its URL finds it compiled, and
+    // one made during the compile waits only for the rest of it. Held here, so that the engine keeps it
+    property var animationsPage: null
 
     readonly property string repository: "https://github.com/Keelwing/seaglass"
     // the developer's Ko-fi page (README.md, .github/FUNDING.yml and the site link the same)
@@ -116,6 +120,14 @@ SilicaFlickable {
     SwitcherSettings { id: switcherDefaults; path: "/apps/seaglass/defaults/switcher" }
     AnimationSettings { id: animationDefaults; path: "/apps/seaglass/defaults/animations" }
     WidgetSettings { id: widgetDefaults; path: "/apps/seaglass/defaults/widgets" }
+
+    // the Animations page's compile (animationsPage)
+    Timer {
+        interval: 1000
+        running: hub.animationsPage === null
+        onTriggered: hub.animationsPage = Qt.createComponent(Qt.resolvedUrl("AnimationsPage.qml"),
+                                                             Component.Asynchronous)
+    }
 
     DBusInterface {
         id: patchmanager

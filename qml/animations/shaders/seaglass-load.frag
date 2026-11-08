@@ -3,10 +3,14 @@
 void main()
 {
     vec2 uv = qt_TexCoord0;
-    vec2 px = uv * resolution;
-    vec2 q = px - resolution * 0.5;
     float d;
     float inside = cardInside(d);
+    if (inside <= 0.0) {
+        FRAG_COLOR = vec4(0.0);
+        return;
+    }
+    vec2 px = uv * resolution;
+    vec2 q = px - resolution * 0.5;
     float breath = 0.5 + 0.5 * sin(time * PI);
     // the glass: the colour's gradient, a slow cloud and a fine grain
     vec3 glass = mix(tint * 0.30 + 0.06, tint * 0.12 + 0.02, uv.y);
@@ -19,19 +23,23 @@ void main()
     float band = (uv.x * 0.55 + uv.y * 0.45) - mix(-0.35, 1.35, fract(time / 1.9));
     col.rgb += vec3(1.0) * exp(-band * band * 70.0) * (0.08 + 0.25 * icon.a);
     // the bevel
-    vec2 g = vec2(sdRoundRect(q + vec2(1.0, 0.0), resolution * 0.5, radiusPx),
-                  sdRoundRect(q + vec2(0.0, 1.0), resolution * 0.5, radiusPx)) - d;
-    float facing = dot(normalize(g + vec2(0.0001)), vec2(-0.6, -0.8));
     float bevel = 1.0 - smoothstep(0.0, 0.035 * resolution.x, -d);
-    bevel *= bevel;
-    col.rgb += (tint * 0.5 + 0.5) * bevel * max(facing, 0.0) * 0.3;
-    col.rgb *= 1.0 - bevel * max(-facing, 0.0) * 0.3;
-    // the light round the edge, its tail fading behind it
-    float ang = atan(q.y / resolution.y, q.x / resolution.x);
-    float behind = mod(fract(time / 1.6) * 2.0 * PI - ang + PI + 0.08, 2.0 * PI) - 0.08;
-    float comet = exp(-max(behind, 0.0) * 0.9) * smoothstep(-0.08, 0.0, behind);
+    if (bevel > 0.0) {
+        vec2 g = vec2(sdRoundRect(q + vec2(1.0, 0.0), resolution * 0.5, radiusPx),
+                      sdRoundRect(q + vec2(0.0, 1.0), resolution * 0.5, radiusPx)) - d;
+        float facing = dot(normalize(g + vec2(0.0001)), vec2(-0.6, -0.8));
+        bevel *= bevel;
+        col.rgb += (tint * 0.5 + 0.5) * bevel * max(facing, 0.0) * 0.3;
+        col.rgb *= 1.0 - bevel * max(-facing, 0.0) * 0.3;
+    }
+    // the light round the edge, its tail fading behind it. Its glow is under half a level of 255 this far in
     float line = 1.0 - smoothstep(0.0, 2.2, abs(d + 1.4));
-    col.rgb += mix(tint, vec3(1.0), 0.3) * (line * (0.3 + 1.3 * comet) + exp(d / 14.0) * comet * 0.3);
+    if (d > -70.0) {
+        float ang = atan(q.y / resolution.y, q != vec2(0.0) ? q.x / resolution.x : 1.0);
+        float behind = mod(fract(time / 1.6) * 2.0 * PI - ang + PI + 0.08, 2.0 * PI) - 0.08;
+        float comet = exp(-max(behind, 0.0) * 0.9) * smoothstep(-0.08, 0.0, behind);
+        col.rgb += mix(tint, vec3(1.0), 0.3) * (line * (0.3 + 1.3 * comet) + exp(d / 14.0) * comet * 0.3);
+    }
     col.a = max(col.a, line * 0.7);
     FRAG_COLOR = col * inside * qt_Opacity;
 }

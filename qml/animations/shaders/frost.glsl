@@ -16,6 +16,22 @@ float frostPat(vec2 p, float thick)
     float rime = step(1.0 - 0.12 * f, hash(floor(gl_FragCoord.xy / 1.5)));
     return clamp(f + rime * 0.3, 0.0, 1.0);
 }
+// the same from what frost-field.frag baked: f = A + thick * B, and a rime dot from the thickness kept for its pixel
+float frostFrom(vec4 field, float thick)
+{
+    float f = clamp(field.r + thick * field.g * 1.5, 0.0, 1.0);
+    return clamp(f + step(field.a * 1.01, thick) * 0.3, 0.0, 1.0);
+}
+// the source at its full size, on a source with mipmaps: read inside a branch or a loop, or at a coordinate that jumps
+// from cell to cell, a mip level worked out from the neighbouring pixels would be undefined
+vec4 srcFull(vec2 uv)
+{
+#ifdef ES3
+    return textureLod(source, clamp(uv, 0.0, 1.0), 0.0) * clipMask(clamp(uv, 0.0, 1.0)) * inRect(uv);
+#else
+    return srcClamp(uv) * inRect(uv);
+#endif
+}
 // the picture (blurred, premultiplied) behind frosted glass: darker and cooler, white where the frost is dense.
 // Only the frost takes the ambience's colour, and only half of it: a frost all in the colour looks like mould
 vec3 icedBase(vec3 c)
@@ -62,12 +78,13 @@ vec4 snow(vec2 uv, float k, float gp, vec2 o, float spread, float life, vec3 ton
         vec2 pos = (C + 0.5) * gp + flakeDisp(a, v, fj);
         // flakes of different sizes, and about half the cells only melt: a snowfall, not a cloud of dots
         float h = hash(C + vec2(5.0, 11.0));
-        float hs = gp * (0.42 - 0.12 * clamp(a / life, 0.0, 1.0)) * (0.55 + 0.9 * h) * step(h, 0.5);
+        if (h > 0.5) continue;
+        float hs = gp * (0.42 - 0.12 * clamp(a / life, 0.0, 1.0)) * (0.55 + 0.9 * h);
         float flake = 1.0 - smoothstep(hs * 0.5, hs, length(P - pos));
         if (flake > 0.0) {
             // from the ice it was to white
             vec2 cu = (C + 0.5) * gp / resolution;
-            vec4 c = srcClamp(cu) * inRect(cu);
+            vec4 c = srcFull(cu);
             vec3 col = mix(icedBase(c.rgb / max(c.a, 0.001)), tone, 0.5 + 0.5 * clamp(a / (life * 0.4), 0.0, 1.0));
             return vec4(col, 1.0) * c.a * flake * (1.0 - smoothstep(life * 0.5, life, a));
         }

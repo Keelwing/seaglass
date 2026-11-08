@@ -1,8 +1,10 @@
 // The settings scene: the patch's settings in Patchmanager (patchmanager/main.qml, copied by scripts/harness.sh as
 // SettingsPage.qml with the pages of this tree), or one of its pages, with the live previews running. The pages read
 // the real dconf settings; outside a page stack they are made visible by hand.
-// Argument: "[PAGE] [SCROLL]": a page of qml/settings (Folders, Glass, Search, Badges, Switcher, Animations, Widgets,
-// About, WhatsNew; by default the first page), and how far to scroll it down in pixels (e.g. "settings Glass 900").
+// Argument: "[PAGE] [scheme=light] [SCROLL]": a page of qml/settings (Folders, Glass, Search, Badges, Switcher,
+// Animations, AnimationViewer, Widgets, About, WhatsNew; by default the first page), and how far to scroll it down in
+// pixels, the last number given (e.g. "settings Glass 900"). scheme=light draws the page dark on light over a light
+// background, which comes near a light ambience without changing one.
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 
@@ -12,9 +14,23 @@ Rectangle {
     property Item harness
     readonly property var words: harness ? harness.sceneArgument.split(" ") : []
     readonly property string pageName: words.length > 0 && /^[A-Z]/.test(words[0]) ? words[0] : ""
-    readonly property int scroll: parseInt(words[words.length - 1], 10) || 0
+    readonly property bool light: words.indexOf("scheme=light") >= 0
+    readonly property int scroll: {
+        for (var i = words.length - 1; i >= 0; i--) {
+            if (/^[0-9]+$/.test(words[i]))
+                return parseInt(words[i], 10)
+        }
+        return 0
+    }
 
-    color: Theme.overlayBackgroundColor
+    color: light ? "#e9edf2" : Theme.overlayBackgroundColor
+    // whichever comes first: the page or the word
+    onLightChanged: dark()
+
+    function dark() {
+        if (light && page.item && page.item.palette !== undefined)
+            page.item.palette.colorScheme = Theme.DarkOnLight
+    }
 
     function findFlickable(item) {
         if (!item || !item.children)
@@ -42,6 +58,7 @@ Rectangle {
         onLoaded: {
             item.visible = true
             item.opacity = 1
+            scene.dark()
             // the glass preview's picture: the harness's stock one (scripts/harness.sh empties the phone's
             // wallpaper in the page's copy)
             if (scene.harness && item.ambienceFile !== undefined) {
