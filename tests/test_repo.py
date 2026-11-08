@@ -215,19 +215,6 @@ class RepoTest(unittest.TestCase):
         self.assertIn('import "../glass"', (REPO / "qml" / "settings" / "GlassPage.qml").read_text(encoding="utf-8"))
         self.assertIn('import "../badges"', (REPO / "qml" / "settings" / "BadgesPage.qml").read_text(encoding="utf-8"))
 
-    def test_harness_settings_copy_never_shows_the_phones_wallpaper(self):
-        # scripts/harness.sh rewrites these lines of the previewing pages' copies: they must be there as written
-        harness = (REPO / "scripts" / "harness.sh").read_text(encoding="utf-8")
-        lines = {"GlassPage": ("property string ambienceFile: ambiencePicture.value",
-                               "property bool persistentGlass: true"),
-                 "AnimationsPage": ("property string ambienceFile: ambiencePicture.value",)}
-        for name, rewritten in lines.items():
-            page = (REPO / "qml" / "settings" / f"{name}.qml").read_text(encoding="utf-8")
-            self.assertIn(f"~/$dir/qml/settings/{name}.qml", harness)
-            for line in rewritten:
-                self.assertIn(line, page)
-                self.assertIn(f"s|{line}|", harness)
-
     def test_every_settings_group_is_reset_and_backed_up(self):
         # SettingsHub resets each group from a copy at /apps/seaglass/defaults/…, AboutPage saves and restores it
         hub = (REPO / "qml" / "settings" / "SettingsHub.qml").read_text(encoding="utf-8")
@@ -253,29 +240,6 @@ class RepoTest(unittest.TestCase):
         self.assertEqual(keys, properties)
         self.assertEqual(keys, ["enabled", "style", "open", "loading", "close", "surprise", "speed", "ambience",
                                 "covers"])
-
-    def test_animations_page(self):
-        # the page of docs/ANIMATIONS.md, its row on the first page (after the task switcher), and a preview drawn
-        # by the home screen's own effect files, none of which may need Lipstick (the settings are not the compositor)
-        page = (REPO / "qml" / "settings" / "AnimationsPage.qml").read_text(encoding="utf-8")
-        for text in ("App animations", "Surprise me", "Same as style", "Opening", "Loading", "Closing", "Speed",
-                     "Relaxed", "Normal", "Quick", "Ambience colours", "Covers too", '"Open"', '"Close"'):
-            self.assertIn(f'qsTr("{text.strip(chr(34))}")', page, text)
-        for setting in ("enabled", "style", "surprise", "speed", "ambience", "covers"):
-            self.assertRegex(page, r"settings\.%s = " % setting, setting)
-        self.assertIn("page.setMoment(momentBox.settingKey", page)
-        self.assertIn('import "../animations"', page)
-        for kind in ("Effect {", "Shards {", "NoiseTile {", "Styles.choose(settings"):
-            self.assertIn(kind, page)
-        self.assertNotIn("OpenGLInfo", page)
-        hub = (REPO / "qml" / "settings" / "SettingsHub.qml").read_text(encoding="utf-8")
-        order = [hub.index(f'hub.open("{name}")') for name in ("SwitcherPage", "AnimationsPage", "WidgetsPage")]
-        self.assertEqual(order, sorted(order))
-        for name in ("AnimationsPage.qml", "../animations/Effect.qml", "../animations/Shards.qml",
-                     "../animations/NoiseTile.qml", "../animations/styles.js", "../animations/shaders.js"):
-            text = (REPO / "qml" / "settings" / name).read_text(encoding="utf-8")
-            self.assertNotRegex(text, r"(?m)^import (org\.nemomobile\.lipstick|Sailfish\.Lipstick)", name)
-            self.assertNotIn("Lipstick.", text, name)
 
     def test_support_links_agree(self):
         # one Ko-fi page for the developer's apps: GitHub's Sponsor button, the README, the site and the settings

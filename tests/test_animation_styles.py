@@ -56,6 +56,27 @@ class AnimationStylesTest(unittest.TestCase):
         groups = [group for _, group in found]
         self.assertEqual(sorted(set(groups), key=groups.index), ["Paper", "Sailfish", "Elements", "Extreme"])
 
+    def test_heavy_lists_only_moments(self):
+        # filled from bench play on the phone; the viewer reads it through heavy() and shows it as text
+        styles = (REPO / "qml" / "animations" / "styles.js").read_text(encoding="utf-8")
+        self.assertIn('function heavy(id, moment) { return listed(id, "heavy", moment) }', styles)
+        for style, rest in re.findall(r'\{ "id": "(\w+)"(.*?)\}', styles, re.S):
+            self.assertNotRegex(rest, r'"heavy": true', style)
+            for moments in re.findall(r'"heavy": \[(.*?)\]', rest):
+                self.assertLessEqual(set(re.findall(r'"(\w+)"', moments)), {"open", "close", "load"}, style)
+
+    def test_heavy_moments_are_the_measured_ones(self):
+        # bench play at full screen on the Jolla Phone, from an idle GPU: these, and only these, had over 5 percent of
+        # their frames above 16.7 ms, pooled over three rounds
+        styles = (REPO / "qml" / "animations" / "styles.js").read_text(encoding="utf-8")
+        heavy = {}
+        for style, rest in re.findall(r'\{ "id": "(\w+)"(.*?)\}', styles, re.S):
+            lists = re.findall(r'"heavy": \[(.*?)\]', rest)
+            self.assertLessEqual(len(lists), 1, style)
+            if lists:
+                heavy[style] = re.findall(r'"(\w+)"', lists[0])
+        self.assertEqual(heavy, {"seaglass": ["close"], "volt": ["open", "close"], "frost": ["open"]})
+
     def test_paper_styles_stay_light(self):
         # flat entries with no library, half layer or second pass, and shaders with no noise and no mipmaps
         styles = (REPO / "qml" / "animations" / "styles.js").read_text(encoding="utf-8")

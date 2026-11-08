@@ -89,10 +89,14 @@ sed -e 's|file:///usr/share/seaglass/qml/|../qml/|' -e 's|inHarness: false|inHar
     "$REPO_ROOT/patchmanager/main.qml" \
     | ssh -o BatchMode=yes "$SEAGLASS_SSH" "cat > ~/$dir/harness/SettingsPage.qml"
 # never the phone's own wallpaper or photo in the previews of the glass and animations pages: no ambience picture
-# until the scene gives the stock one, and the stock picture instead of a photo set on the phone
+# until the scene gives the stock one, and the stock picture instead of a photo set on the phone. The animations
+# page reads and writes no file of its own here, so it makes its sheet on every visit, and the folder it would keep
+# one in is the harness's own, which the next run removes, never the phone's ~/.cache
 ssh -o BatchMode=yes "$SEAGLASS_SSH" "sed -i \
     -e 's|property string ambienceFile: ambiencePicture.value|property string ambienceFile: \"\"|' \
     -e 's|property bool persistentGlass: true|property bool persistentGlass: false|' \
+    -e 's|property bool keepSheet: true|property bool keepSheet: false|' \
+    -e 's|property string sheetFolder: StandardPaths.home + \"/.cache\"|property string sheetFolder: StandardPaths.home + \"/$dir/harness\"|' \
     ~/$dir/qml/settings/GlassPage.qml ~/$dir/qml/settings/AnimationsPage.qml"
 # (...&): the subshell exits at once, so the SSH session does not wait for the harness
 ssh -o BatchMode=yes "$SEAGLASS_SSH" "cd ~/$dir && ($xdg XDG_CONFIG_HOME=\$HOME/$dir/config QT_LOGGING_TO_CONSOLE=1 \

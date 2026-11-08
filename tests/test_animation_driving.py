@@ -201,10 +201,10 @@ class AnimationDrivingTest(unittest.TestCase):
         self.assertRegex(effect, r"onShaderNameChanged: \{\n\s*fit\(\)\n\s*load\(\)\n")
 
     def test_the_animators_are_made_by_the_first_run(self):
-        # an Effect or Shards driven by hand, as the settings page, the harness and the warm-up drive theirs, makes no
-        # animator. The first play() or runClock() makes them, at once, in that call, so that the run starts in it; a
-        # Loader would make them later inside an asynchronous creation (a cover's loading in a delegate being made),
-        # and the run would not start
+        # the sheet makes and drops 39 Effects that it drives by hand, as the viewer, the harness and the warm-up do:
+        # none of them makes an animator. The first play() or runClock() makes them, at once, in that call, so that
+        # the run starts in it; a Loader would make them later inside an asynchronous creation (a cover's loading in a
+        # delegate being made), and the run would not start
         for name, root, component, made, calls in (
                 ("Effect.qml", "effect", "animatorsComponent", "animators", ("play", "runClock")),
                 ("Shards.qml", "pane", "runComponent", "run", ("play",))):
@@ -249,7 +249,8 @@ class AnimationDrivingTest(unittest.TestCase):
                         ids.add(found.group(1))
             started = {ident for ident in ids if re.search(r"\b%s\.(play|runClock)\(" % ident, text)}
             self.assertEqual(started, players.get(name, set()), name)
-        for name in ("harness/ReelScene.qml", "harness/AnimationsScene.qml"):
+        for name in ("qml/settings/FrozenFrame.qml", "qml/settings/AnimationStage.qml", "harness/ReelScene.qml",
+                     "harness/AnimationsScene.qml"):
             text = (REPO / name).read_text(encoding="utf-8")
             self.assertNotRegex(text, r"\.runClock\(", name)
             for kind in ("Effect", "Shards"):
