@@ -78,8 +78,9 @@ with the swipe from the top, in one of twelve styles: *Contour*, *Fold* and *Hal
 *Seaglass*, *Tide* and *Northern lights* (calm, made of glass, water and light), *Ember*, *Volt* and *Frost* (fire,
 lightning and ice), and *Shatter*, *Singularity* and *Dust* (loud on purpose). The settings page shows every style's
 opening, loading and closing at once, and plays any of them before you choose. The effects are shaders on a copy of
-the window, so Sailfish never waits for them. Out of the box, apps open in *Ember*, load in *Dust* and close in
-*Northern lights*. More: [docs/ANIMATIONS.md](docs/ANIMATIONS.md).
+the window, so Sailfish never waits for them. Out of the box the animations are on with Surprise me, a different
+style each time. With Surprise me off, apps open in Ember, load in Dust and close in Northern lights until you choose
+others. More: [docs/ANIMATIONS.md](docs/ANIMATIONS.md).
 
 <p align="center">
   <img src="docs/images/animations-sailfish.webp" width="250" alt="Notes opening from its icon and closing in the Seaglass, Tide and Northern lights styles">

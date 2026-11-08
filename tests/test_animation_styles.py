@@ -1,5 +1,5 @@
 """The list of animation styles in qml/animations/styles.js: each style's shaders, the moments drawn at half the
-resolution, and what keeps the Paper styles light."""
+resolution, the defaults of qml/settings/AnimationSettings.qml, and what keeps the Paper styles light."""
 import re
 import unittest
 from pathlib import Path
@@ -47,6 +47,30 @@ class AnimationStylesTest(unittest.TestCase):
         self.assertIn("Styles.split(style, moment)", effect)
         for path in sorted([*REPO.glob("qml/**/*.qml"), *REPO.glob("harness/*.qml")]):
             self.assertNotRegex(path.read_text(encoding="utf-8"), r'has\([^)]*"half"\)', path.relative_to(REPO))
+
+    def test_defaults_are_surprise_me(self):
+        # on, a different style each time; with Surprise me turned off and no earlier choice it plays Ember, Dust and
+        # Northern lights
+        text = (REPO / "qml" / "settings" / "AnimationSettings.qml").read_text(encoding="utf-8")
+        for line in ("property bool enabled: true", "property bool surprise: true", 'property string style: "ember"',
+                     'property string open: "ember"', 'property string loading: "dust"',
+                     'property string close: "aurora"'):
+            self.assertIn(line, text)
+        # and so say the docs' dconf table, with every style, and the first section of the changelog, which the
+        # settings' What's new page shows on the phone
+        docs = (REPO / "docs" / "ANIMATIONS.md").read_text(encoding="utf-8")
+        self.assertIn("| App animations | `enabled` | true | |", docs)
+        self.assertIn("| Surprise me | `surprise` | true | |", docs)
+        values = re.search(r"(?m)^\| Style \| `style` \| `ember` \| (.*) \|$", docs).group(1)
+        styles = (REPO / "qml" / "animations" / "styles.js").read_text(encoding="utf-8")
+        self.assertEqual(re.findall(r"`(\w+)`", values), re.findall(r'\{ "id": "(\w+)"', styles) + ["stock"])
+        changelog = (REPO / "CHANGELOG.md").read_text(encoding="utf-8")
+        first = changelog[changelog.index("\n## "):]
+        first = first[:first.index("\n## ", 1)]
+        self.assertIn("Out of the box the animations are on with Surprise me", first)
+        self.assertNotIn("animations are off", first)
+        self.assertNotIn("on out of the box", first)
+        self.assertNotIn("style tile", first)
 
     def test_groups_run_from_light_to_loud(self):
         styles = (REPO / "qml" / "animations" / "styles.js").read_text(encoding="utf-8")

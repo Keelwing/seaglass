@@ -3,8 +3,9 @@
 Sailfish OS opens an app with a fade, shows a busy indicator on its cover while it starts, and closes it with a slide
 and a fade. Seaglass adds styles for these three moments, from paper ones that fold, print or draw the app and calm
 ones made of the ambience's glass, water and light to loud ones that burn, shatter or swallow it. Each effect is a
-shader on the GPU, played on a copy of the window, so Sailfish never waits for it. Out of the box, apps open in
-*Ember*, load in *Dust* and close in *Northern lights*.
+shader on the GPU, played on a copy of the window, so Sailfish never waits for it. Out of the box the animations are
+on with *Surprise me*, a different style each time. With *Surprise me* off, apps open in *Ember*, load in *Dust* and
+close in *Northern lights* until you choose others.
 
 <p align="center">
   <img src="images/animations-sailfish.webp" width="220" alt="Notes opening from its icon and closing in the Seaglass, Tide and Northern lights styles">
@@ -78,8 +79,8 @@ its own deep colour either way, and only its light takes the ambience's. Seaglas
 Under the sheet (in landscape, beside it), *Feel*:
 
 - **Speed.** *Relaxed* (×1.35), *Normal* or *Quick* (×0.72, the default).
-- **Surprise me.** A different style each time an app opens, loads or closes (never *Stock*). A moment set to
-  *Stock* stays stock.
+- **Surprise me.** A different style each time an app opens, loads or closes (never *Stock*), the default. A moment
+  set to *Stock* stays stock.
 - **Ambience colours.** As above.
 - **Covers too.** Closing a cover in the switcher, or all of them, plays the closing effect on the covers. Off, they
   close the stock way.
@@ -125,7 +126,7 @@ The settings are in dconf under `/apps/seaglass/animations`, and the home screen
 | App animations | `enabled` | true | |
 | Style | `style` | `ember` | `contour`, `fold`, `halftone`, `seaglass`, `tide`, `aurora`, `ember`, `volt`, `frost`, `shatter`, `singularity`, `dust`, `stock` |
 | Opening, Loading, Closing | `open`, `loading`, `close` | `ember`, `dust`, `aurora` | `""` (same as style), `stock` or a style |
-| Surprise me | `surprise` | false | |
+| Surprise me | `surprise` | true | |
 | Speed | `speed` | 2 | 0 relaxed, 1 normal, 2 quick |
 | Ambience colours | `ambience` | true | |
 | Covers too | `covers` | true | |

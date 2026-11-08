@@ -5,8 +5,9 @@ Each version was checked on a Jolla Phone with the newest Sailfish OS it lists. 
 
 ## Unreleased
 
-- App animations are on out of the box: apps open in Ember, load in Dust and close in Northern lights, at the quick
-  speed and in the ambience's colours.
+- Out of the box the animations are on with Surprise me, a different style each time. With Surprise me off, apps
+  open in Ember, load in Dust and close in Northern lights until you choose others. They run at the quick speed and
+  in the ambience's colours.
 - After an update from 1.0.0, a style picked there with a tile plays only for the moments that were set to *Same as
   style*. The other moments take the new defaults until you choose again.
 - Surprise me covers every moment that is not set to Stock.
