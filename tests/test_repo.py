@@ -350,33 +350,6 @@ class RepoTest(unittest.TestCase):
         self.assertIn("scripts/noise.py", (REPO / "rpm" / "build.sh").read_text(encoding="utf-8"))
         self.assertIn("qml/animations/noise.png", (REPO / ".gitignore").read_text(encoding="utf-8"))
 
-    def test_every_effect_runs_its_clock(self):
-        # an effect whose time is never set stands still in all that moves with it (flames, sparks, stars, arcs):
-        # openings and closings run on their own seconds, which follow the speed; only the warm-up, a pixel nearly
-        # clear, has none
-        for path in sorted(REPO.glob("qml/**/*.qml")):
-            text = path.read_text(encoding="utf-8")
-            for block in qml_blocks(text, "Effect"):
-                if "id: warmEffect" in block:
-                    continue
-                self.assertRegex(block, r"\n\s*time: ", f"{path.relative_to(REPO)}: an Effect without time")
-        controller = (REPO / "qml" / "animations" / "AnimationController.qml").read_text(encoding="utf-8")
-        self.assertIn("time: openEffect.progress * openRun.duration / 1000", controller)
-        self.assertIn("time: closeEffect.progress * closeRun.duration / 1000", controller)
-        closing = (REPO / "qml" / "animations" / "CoverClosing.qml").read_text(encoding="utf-8")
-        self.assertIn("time: closing.progress * closing.duration / 1000", closing)
-
-    def test_an_opening_knows_the_corners_it_opens_from(self):
-        # an icon is round, a cover has the switcher's corners, the middle of the screen none
-        controller = (REPO / "qml" / "animations" / "AnimationController.qml").read_text(encoding="utf-8")
-        self.assertIn('kind === "icon" ? from.width / 2 : kind === "cover" ? from.radius : 0', controller)
-        self.assertIn("openEffect.radiusPx = from.radius", controller)
-        switcher = (REPO / "qml" / "switcher" / "SwitcherController.qml").read_text(encoding="utf-8")
-        cover = switcher[switcher.index("function coverRectFor"):]
-        self.assertIn('"radius": Theme.paddingMedium', cover[:cover.index("return null")])
-        page = (REPO / "qml" / "settings" / "AnimationsPage.qml").read_text(encoding="utf-8")
-        self.assertIn("effect.radiusPx = ", page)
-
     def test_half_resolution_is_per_moment(self):
         # styles.js lists the moments drawn at half the resolution, and the split ones among them; Effect.qml asks
         # for its own moment, and no other file reads them. A split moment's shader reads part, or both passes

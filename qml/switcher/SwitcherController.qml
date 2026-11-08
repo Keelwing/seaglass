@@ -869,7 +869,8 @@ Item {
         var style = Styles.choose(animationSettings, "close")
         if (!animationSettings.covers || style === "stock")
             return
-        // only with its shaders loaded (AnimationController.qml reads them all): the cover hides at once
+        // only with its shaders loaded (AnimationController.qml has what the settings can pick read): the cover hides
+        // at once
         var base = Qt.resolvedUrl("../animations/shaders/")
         var loaded = Styles.has(style, "shards")
                 ? Shaders.fileReady(base + "shards.vert") && Shaders.fileReady(base + "shards.frag")

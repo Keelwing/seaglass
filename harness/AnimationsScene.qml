@@ -192,6 +192,7 @@ Item {
             Effect {
                 width: 1
                 height: 1
+                visible: ready
                 style: modelData.split("/")[0]
                 moment: modelData.split("/")[1]
                 source: noise

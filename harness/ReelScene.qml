@@ -246,7 +246,8 @@ Item {
         }
     }
 
-    // every shader of the reel drawn once, a pixel large, before it starts: compiling one stalls a frame
+    // every shader of the reel drawn once, a pixel large, before it starts: compiling one stalls a frame. Each only
+    // once its shader is set, as every Effect (Effect.qml)
     Row {
         visible: scene.step < 0
         opacity: 0.02
@@ -264,6 +265,7 @@ Item {
             Effect {
                 width: 1
                 height: 1
+                visible: ready
                 style: modelData.split("/")[0]
                 moment: modelData.split("/")[1]
                 source: appTexture

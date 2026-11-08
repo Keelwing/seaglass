@@ -13,8 +13,9 @@
 // it: the window comes back from where the swipe left it, and the effect takes it away. The stock close runs on
 // unseen underneath, the whole layer hidden.
 // The effects never hold Sailfish up: the window is shown, focused and closed at the stock moment, and the effect
-// plays on a copy of it. Every shader is read when the home screen starts and compiled a few seconds later, one at a
-// time, so that none is compiled while it should play.
+// plays on a copy of it, on the render thread (Effect.qml), so that it keeps moving while the home screen is busy with
+// the app. The shaders the settings can pick are read when the home screen starts or the settings change, and compiled
+// a few seconds later, one at a time, so that none is compiled while it should play.
 import QtQuick 2.6
 import Sailfish.Silica 1.0
 import org.nemomobile.lipstick 0.1
@@ -28,14 +29,14 @@ Item {
 
     readonly property Item appLayer: parent ? parent.appLayer : null
     readonly property Item overlay: parent && parent.overlay !== undefined ? parent.overlay : null
-    readonly property bool playing: openRun.running
+    readonly property bool playing: openEffect.running || openShards.running
     readonly property vector3d tint: Qt.vector3d(Theme.highlightColor.r, Theme.highlightColor.g,
                                                  Theme.highlightColor.b)
     readonly property bool es3: openEffect.es3
     // Shatter plays with its shards (Shards.qml) instead of one effect
     property bool openShardsOn
     property bool closeShardsOn
-    // the shaders still to compile ({style, moment})
+    // the shaders still to compile ({style, moment}, or {style: "shards"} for Shatter's)
     property var warmQueue: []
 
     function debugLog() {
@@ -48,7 +49,7 @@ Item {
         return Styles.choose(settings, moment)
     }
 
-    // whether a moment may be Shatter's (the shard items are made only then)
+    // whether a moment may be Shatter's (its shards read their files only then)
     function mayShatter(moment) {
         return settings.enabled && (Styles.setting(settings, moment) === "shatter"
                                     || (settings.surprise && settings[moment] !== "stock"))
@@ -79,8 +80,10 @@ Item {
     }
 
     function opening(layer) {
+        // an earlier opening's ended clears the source, so it ends before anything is set
+        stopOpening()
         var style = styleFor("open")
-        if (style === "stock" || !layer || !layer.window || !layer.active || closeRun.running)
+        if (style === "stock" || !layer || !layer.window || !layer.active || closeEffect.running || closeShards.running)
             return false
         var shards = Styles.has(style, "shards")
         if (!shards)
@@ -94,7 +97,6 @@ Item {
         openEffect.originRect = rect
         openEffect.radiusPx = from.radius
         openEffect.origin = Qt.point(rect.x + rect.width / 2, rect.y + rect.height / 2)
-        openEffect.progress = 0
         openShardsOn = shards
         if (shards) {
             openShards.impact = openEffect.origin
@@ -102,9 +104,12 @@ Item {
         }
         liveLayer.mipmap = es3 && Styles.has(style, "blur")
         liveLayer.sourceItem = layer
-        openRun.duration = Styles.duration(style, "open", settings.speed)
-        openRun.restart()
-        debugLog("open:", style, openRun.duration, "ms from", Math.round(rect.x * 100), Math.round(rect.y * 100),
+        var ms = Styles.duration(style, "open", settings.speed)
+        if (openShardsOn)
+            openShards.play(ms)
+        else
+            openEffect.play(ms)
+        debugLog("open:", style, ms, "ms from", Math.round(rect.x * 100), Math.round(rect.y * 100),
                  Math.round(rect.width * 100), Math.round(rect.height * 100))
         return true
     }
@@ -112,7 +117,7 @@ Item {
     // the app's own close gesture was let go: called once, from the first of the two signs (the gesture's trigger
     // with the top edge active, or the layer closing a window it dismisses)
     function closing(sign) {
-        if (closeRun.running || !appLayer.window)
+        if (closeEffect.running || closeShards.running || !appLayer.window)
             return
         Motion.noteWindowClosing(appLayer.window.window ? appLayer.window.window.windowId : 0)
         var style = styleFor("close")
@@ -127,14 +132,12 @@ Item {
             debugLog("close: stock,", style, "is not loaded yet")
             return
         }
-        if (openRun.running)
-            openRun.complete()
+        stopOpening()
         // the swipe has wiped the window down to here, and faded it this far
         var top = Math.max(0, Math.min(height - 1, appLayer.peekFilter.absoluteProgress))
         var faded = Math.max(0.2, Math.min(1, appLayer.contentOpacity))
         closeEffect.originRect = Qt.rect(0, 0, 1, 1)
         closeEffect.origin = Qt.point(0.5, (top + (height - top) * 0.3) / height)
-        closeEffect.progress = 0
         closeShardsOn = shards
         if (shards) {
             closeShards.impact = closeEffect.origin
@@ -145,13 +148,21 @@ Item {
         frozenLayer.scheduleUpdate()
         layerHider.sourceItem = appLayer
         unhide.restart()
-        comeBack.stop()
-        cameFrom.top = top / height
-        cameFrom.opacity = faded
-        comeBack.start()
-        closeRun.duration = Styles.duration(style, "close", settings.speed)
-        closeRun.restart()
-        debugLog("close:", style, closeRun.duration, "ms, window top at", Math.round(top), "faded to",
+        // the window comes back from there, and the GUI side starts there too, before the run
+        effectBack.stop()
+        shardsBack.stop()
+        var piece = shards ? closeShards : closeEffect
+        piece.clipTop = top / height
+        piece.opacity = faded
+        var ms = Styles.duration(style, "close", settings.speed)
+        if (closeShardsOn) {
+            closeShards.play(ms)
+            shardsBack.start()
+        } else {
+            closeEffect.play(ms)
+            effectBack.start()
+        }
+        debugLog("close:", style, ms, "ms, window top at", Math.round(top), "faded to",
                  Math.round(faded * 100) / 100, "(" + sign + ")")
     }
 
@@ -163,16 +174,23 @@ Item {
         }
     }
 
-    function finish() {
-        if (openRun.running)
-            openRun.complete()
-        if (closeRun.running)
-            closeRun.complete()
+    function stopOpening() {
+        openEffect.halt()
+        openShards.halt()
     }
 
-    // every shader is read at once, then compiled one at a time (the chosen styles only, or every style with Surprise
-    // me), a pixel large and nearly clear: compiling one can stall a frame
+    function finish() {
+        stopOpening()
+        closeEffect.halt()
+        closeShards.halt()
+    }
+
+    // what the settings can pick (the chosen styles only, or every style with Surprise me) is read at once, then
+    // compiled one at a time, a pixel large and nearly clear: compiling one can stall a frame. The shards read their
+    // own files while they are active. Turned off, what is still queued is not compiled either
     function prepare() {
+        if (!settings.enabled)
+            warmQueue = []
         if (!settings.enabled || openEffect.glMajor === 0)
             return
         var base = Qt.resolvedUrl("shaders/")
@@ -180,13 +198,14 @@ Item {
         var queue = []
         for (var i = 0; i < all.length; i++) {
             var item = all[i]
-            Shaders.load(base, item.style + "-" + item.moment, Styles.libs(item.style), es3, function () {})
-            var moment = item.moment === "load" ? "loading" : item.moment
-            if (settings.surprise || styleFor(moment) === item.style)
+            var chosen = styleFor(item.moment === "load" ? "loading" : item.moment) === item.style
+            if (settings.surprise || chosen) {
+                Shaders.load(base, item.style + "-" + item.moment, Styles.libs(item.style), es3, function () {})
                 queue.push(item)
+            }
         }
-        Shaders.loadFile(base + "shards.vert", function () {})
-        Shaders.loadFile(base + "shards.frag", function () {})
+        if (mayShatter("open") || mayShatter("close"))
+            queue.push({ "style": "shards" })
         warmQueue = queue
         warmUp.restart()
     }
@@ -203,14 +222,15 @@ Item {
 
     NoiseTile {
         id: noise
+
+        wanted: settings.enabled
     }
 
     Connections {
         target: controller.appLayer ? controller.appLayer.peekFilter : null
         onGestureStarted: {
             // a swipe on an app that is still opening: the app as it is
-            if (openRun.running)
-                openRun.complete()
+            controller.stopOpening()
             controller.debugLog("gesture started, top", controller.appLayer.peekFilter.topActive)
         }
         onGestureTriggered: {
@@ -230,8 +250,8 @@ Item {
         }
         onClosed: layerHider.sourceItem = null
         onWindowChanged: {
-            if (openRun.running && liveLayer.sourceItem !== null)
-                openRun.complete()
+            if (liveLayer.sourceItem !== null)
+                controller.stopOpening()
         }
         onCompleteTransitions: controller.finish()
     }
@@ -298,106 +318,110 @@ Item {
         id: openEffect
 
         anchors.fill: parent
-        visible: openRun.running && ready && !controller.openShardsOn
+        visible: running && ready
         moment: "open"
         source: liveLayer
         noiseTex: noise
-        // the effect's own seconds, which follow the speed
-        time: openEffect.progress * openRun.duration / 1000
         tint: controller.tint
         useTint: settings.ambience ? 1 : 0
         onGlMajorChanged: controller.prepare()
+        onEnded: liveLayer.sourceItem = null
     }
 
     Shards {
         id: openShards
 
         anchors.fill: parent
-        visible: openRun.running && controller.openShardsOn
+        visible: running
         active: controller.mayShatter("open")
         source: liveLayer
         assemble: true
-        progress: openEffect.progress
         tint: controller.tint
         useTint: settings.ambience ? 1 : 0
-    }
-
-    NumberAnimation {
-        id: openRun
-
-        target: openEffect
-        property: "progress"
-        from: 0
-        to: 1
-        onStopped: liveLayer.sourceItem = null
+        onEnded: liveLayer.sourceItem = null
     }
 
     Effect {
         id: closeEffect
 
         anchors.fill: parent
-        visible: closeRun.running && ready && !controller.closeShardsOn
+        visible: running && ready
         moment: "close"
         source: frozenLayer
         noiseTex: noise
-        time: closeEffect.progress * closeRun.duration / 1000
         tint: controller.tint
         useTint: settings.ambience ? 1 : 0
-        clipTop: cameFrom.top
-        opacity: cameFrom.opacity
+        onEnded: {
+            layerHider.sourceItem = null
+            frozenLayer.sourceItem = null
+        }
     }
 
     Shards {
         id: closeShards
 
         anchors.fill: parent
-        visible: closeRun.running && controller.closeShardsOn
+        visible: running
         active: controller.mayShatter("close")
         source: frozenLayer
-        progress: closeEffect.progress
         tint: controller.tint
         useTint: settings.ambience ? 1 : 0
-        clipTop: cameFrom.top
-        opacity: cameFrom.opacity
+        onEnded: {
+            layerHider.sourceItem = null
+            frozenLayer.sourceItem = null
+        }
     }
 
-    // where the swipe left the window (its wiped top edge, its fade), on its way back to whole
-    QtObject {
-        id: cameFrom
-
-        property real top
-        property real opacity: 1
-    }
-
+    // the window from where the swipe left it (its wiped top edge, its fade) back to whole, on the render thread as the
+    // closing is. Written from the GUI thread, they would stand still while it is busy, and a write in the closing's
+    // last frame would put the GUI side's progress, 0, back into the effect: the window whole for a frame. (An
+    // OpacityAnimator does not reach an item drawn through its layer: no closing is half without being split.) A
+    // closing that is not split has no grains pass, and the animator for it has no target and does nothing
     ParallelAnimation {
-        id: comeBack
+        id: effectBack
 
-        NumberAnimation {
-            target: cameFrom
-            property: "top"
+        UniformAnimator {
+            target: closeEffect
+            uniform: "clipTop"
+            from: closeEffect.clipTop
             to: 0
             duration: 180
             easing.type: Easing.OutCubic
         }
-        NumberAnimation {
-            target: cameFrom
-            property: "opacity"
+        UniformAnimator {
+            target: closeEffect.grains
+            uniform: "clipTop"
+            from: closeEffect.clipTop
+            to: 0
+            duration: 180
+            easing.type: Easing.OutCubic
+        }
+        OpacityAnimator {
+            target: closeEffect
+            from: closeEffect.opacity
             to: 1
             duration: 180
             easing.type: Easing.OutCubic
         }
     }
 
-    NumberAnimation {
-        id: closeRun
+    ParallelAnimation {
+        id: shardsBack
 
-        target: closeEffect
-        property: "progress"
-        from: 0
-        to: 1
-        onStopped: {
-            layerHider.sourceItem = null
-            frozenLayer.sourceItem = null
+        UniformAnimator {
+            target: closeShards
+            uniform: "clipTop"
+            from: closeShards.clipTop
+            to: 0
+            duration: 180
+            easing.type: Easing.OutCubic
+        }
+        OpacityAnimator {
+            target: closeShards
+            from: closeShards.opacity
+            to: 1
+            duration: 180
+            easing.type: Easing.OutCubic
         }
     }
 
@@ -416,6 +440,21 @@ Item {
         progress: 0.5
     }
 
+    // Shatter's programs, the same way: they are the same for every Shards
+    Shards {
+        id: warmShards
+
+        x: -2
+        y: -2
+        width: 1
+        height: 1
+        opacity: 0.02
+        visible: ready
+        active: false
+        source: noise
+        progress: 0.5
+    }
+
     Timer {
         id: warmUp
 
@@ -425,13 +464,19 @@ Item {
         repeat: true
         onTriggered: {
             started = true
+            warmShards.active = false
+            // first of all, so that the next moment under the last style does not read a shader nobody queued
+            warmEffect.style = ""
             if (controller.warmQueue.length === 0) {
-                warmEffect.style = ""
                 stop()
                 return
             }
             var next = controller.warmQueue[0]
             controller.warmQueue = controller.warmQueue.slice(1)
+            if (next.style === "shards") {
+                warmShards.active = true
+                return
+            }
             warmEffect.moment = next.moment
             warmEffect.style = next.style
         }
