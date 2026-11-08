@@ -2,8 +2,8 @@
 AnimationSheetBuilder.qml, FrozenFrame.qml, FreezeQueue.qml, FrameCounter.qml, PreviewKit.qml, NotesPreview.qml,
 stills.js), the picture the frames become and the file it is kept in (AnimationSheetPicture.qml), the settings under
 the sheet (AnimationFeel.qml), the viewer a tap opens (AnimationViewerPage.qml, AnimationStage.qml,
-AnimationStrip.qml), its row on the first page, what the harness rewrites in its copy, and that none of it needs
-Lipstick."""
+AnimationStrip.qml), its row on the first page, what the harness rewrites in its copy and runs on it, and that none of
+it needs Lipstick."""
 import hashlib
 import json
 import re
@@ -280,8 +280,8 @@ class AnimationPageTest(unittest.TestCase):
         self.assertIn("if (cell === null || !cell.made)\n", waiting)
         self.assertLess(waiting.index("!cell.made"), waiting.index("cell.loading"))
         self.assertIn('if ((!shot || stale) && waitingFor() === "")\n            shoot("")', function(kit, "check"))
-        # a picture that never comes holds nothing up: giveUp grabs the textures and keeps what they waited for; a
-        # change of picture or colours waits again
+        # a picture that never comes holds nothing up: giveUp grabs the textures and keeps what they waited for, which
+        # the harness logs; a change of picture or colours waits again
         give_up = by_id(kit, "Timer", "giveUp")
         for line in ("interval: 1500", "running: true", 'onTriggered: kit.shoot(kit.waitingFor() || "nothing")'):
             self.assertIn(line, give_up)
@@ -290,6 +290,14 @@ class AnimationPageTest(unittest.TestCase):
         self.assertIn("giveUp.stop()\n        gaveUpOn = waited\n", function(kit, "shoot"))
         for line in ("stale = true", "giveUp.restart()", "recheck.restart()"):
             self.assertIn(line, function(kit, "regrab"))
+        bench = (REPO / "harness" / "BenchScene.qml").read_text(encoding="utf-8")
+        stack = (REPO / "harness" / "stack.qml").read_text(encoding="utf-8")
+        for text in (bench, stack):
+            self.assertIn('"gave up waiting for " + kit.gaveUpOn', function(text, "kitWait"))
+        self.assertIn('log("page kit", kitWait(findKit(page)))', bench)
+        self.assertIn('log("viewer kit", kitWait(view.kit))', bench)
+        self.assertIn('step("viewer-first", "end")\n                    log("viewer kit", kitWait(viewer.kit), '
+                      '"strip kit", kitWait(viewer.stripKit))', stack)
 
     def test_a_still_is_the_moment_at_the_normal_speed(self):
         # the sheet is made for colours and size, not for the speed setting: no still may depend on it
@@ -494,6 +502,140 @@ class AnimationPageTest(unittest.TestCase):
         self.assertIn("readonly property real iconRadius: Theme.iconSizeLauncher * k / 2", read("PreviewKit.qml"))
         self.assertIn("readonly property real coverRadius: Theme.paddingMedium * k", read("PreviewKit.qml"))
 
+    def test_the_bench_and_the_settings_scene_run_the_sheet(self):
+        bench = (REPO / "harness" / "BenchScene.qml").read_text(encoding="utf-8")
+        self.assertIn('option("steps", "empty,build,rest,flick,spare,saved,cached,viewer")', bench)
+        self.assertIn('numbers("ks", "0,16,18,20,22,24,26,28,30,32,40")', bench)
+        for name in ('spare("empty"', 'step("build", "begin")', 'quietly("rest-top"', 'quietly("rest-bottom"',
+                     'phase("flick", 14000', 'spare("page"', "page.built", 'step("flatten", "begin")',
+                     'keptPage("saved", next)', 'keptPage("cached", next)', "list.push(viewerStep)"):
+            self.assertIn(name, bench)
+        # the page at rest draws no frame: the blits are drawn on every frame only while something moves
+        spare = function(bench, "spare")
+        self.assertLess(spare.index("moving = true"), spare.index("each(ks"))
+        # flatten=0 leaves the frames as the sheet; only the two kept pages keep a file, set before they start, and in
+        # the harness's own folder, which is set first
+        self.assertIn('page.flatten = kept || option("flatten", "1") !== "0"', bench)
+        make = bench[bench.index("function makePage(kept)"):bench.index("function keptFolder()")]
+        self.assertIn("        page.sheetFolder = keptFolder()\n        page.keepSheet = kept\n", make)
+        self.assertLess(make.index("pageLoader.active = true"), make.index("page.sheetFolder = keptFolder()"))
+        # making the page is the push's cost: the next interval starts after it, not in the build or a kept page's start
+        self.assertIn("        lastFrame = Date.now()\n        return page\n", make)
+        self.assertEqual(re.findall(r"keepSheet = \w+", bench), ["keepSheet = kept"])
+        self.assertEqual(bench.count("makePage(true)"), 1)
+        self.assertIn('return Qt.resolvedUrl(".").toString()', bench)
+        for old in ("page.story", "page.begin(", "page.forced"):
+            self.assertNotIn(old, bench)
+        scene = (REPO / "harness" / "SettingsScene.qml").read_text(encoding="utf-8")
+        self.assertIn('words.indexOf("scheme=light") >= 0', scene)
+        self.assertIn("page.item.palette.colorScheme = Theme.DarkOnLight", scene)
+
+    def test_the_bench_builds_the_sheet_as_the_settings_app_does(self):
+        # the bench's tick is an animation, and a running animation keeps every Timer to frames, which the Settings app
+        # has only while the page counts its own. tick=0 stops the tick while the sheet is built; a poll, a Timer that
+        # asks for no frame, watches the build instead, and the build's check then reads only its time
+        bench = (REPO / "harness" / "BenchScene.qml").read_text(encoding="utf-8")
+        build = function(bench, "buildPage")
+        self.assertIn('var tickless = option("tick", "1") === "0"', build)
+        self.assertIn("if (tickless) {\n            quiet = true\n            polling = true\n        }", build)
+        self.assertLess(build.index("polling = true"), build.index("bench.watch = function"))
+        self.assertLess(build.index("bench.watch = null"), build.index("polling = false"))
+        self.assertLess(build.index("polling = false"), build.index("done()"))
+        tick = bench[bench.index("NumberAnimation on tick {"):]
+        self.assertIn("running: !scene.quiet", tick[:tick.index("}")])
+        polls = [timer for timer in qml_blocks(bench, "Timer") if "running: scene.polling" in timer]
+        self.assertEqual(len(polls), 1)
+        for line in ("repeat: true", "onTriggered: scene.frame(true)"):
+            self.assertIn(line, polls[0])
+        # a look of the poll changes nothing that draws, or it would ask for frames itself
+        self.assertIn("if (!polled)\n            flip = !flip", function(bench, "frame"))
+        table = function(bench, "pageTable")
+        self.assertIn('var tickless = option("tick", "1") === "0"', table)
+        self.assertIn('tickless ? (slow ? verdict(false) : "-")', table)
+        self.assertIn("tick=0", (REPO / "docs" / "DEVELOPMENT.md").read_text(encoding="utf-8"))
+
+    def test_the_harness_keeps_files_only_in_its_own_folder(self):
+        # with a KEY a page that keeps its sheet writes it: in the harness only the bench's two kept pages do, in the
+        # harness's own folder, which scripts/harness.sh empties on every run; the rest of the harness writes its
+        # pictures next to its own files
+        for path in sorted((REPO / "harness").glob("*.qml")):
+            text = path.read_text(encoding="utf-8")
+            self.assertNotIn("/.cache", text, path.name)
+            self.assertNotIn("StandardPaths", text, path.name)
+            for line in re.findall(r".*(?:saveToFile\(|sheetFolder =|keepSheet =).*", text):
+                self.assertRegex(line, r"saveToFile\((path|name)\)|sheetFolder = keptFolder\(\)|keepSheet = kept",
+                                 f"{path.name}: {line.strip()}")
+            for line in re.findall(r"var path = .*", text):
+                self.assertIn("Qt.resolvedUrl(", line, path.name)
+            self.assertNotRegex(text, r'Qt\.resolvedUrl\("(/|\.\./|file:)[^"]*\.(jpg|png|key)"', path.name)
+        bench = (REPO / "harness" / "BenchScene.qml").read_text(encoding="utf-8")
+        self.assertIn('var path = Qt.resolvedUrl("frames/" + name + ".jpg")', bench)
+        # the page's copy is rewritten before qmlscene starts: no file kept by default, and its folder the harness's
+        harness = (REPO / "scripts" / "harness.sh").read_text(encoding="utf-8")
+        self.assertLess(harness.index("property bool keepSheet: false"), harness.index("nohup qmlscene"))
+        self.assertLess(harness.index('/$dir/harness\\"|'), harness.index("nohup qmlscene"))
+
+    def test_the_bench_plays_the_viewers_runs(self):
+        # every style and moment on the viewer's own stage, at the viewer's size, through the stage's API: play(), and
+        # ran() with the run's frames by the stage's own intervals, ended() for the run's end. What a run needs is made
+        # at rest first, as the viewer's queue makes it, and each run gets its own step, up to ran()
+        bench = (REPO / "harness" / "BenchScene.qml").read_text(encoding="utf-8")
+        loader = by_id(bench, "Loader", "viewerLoader")
+        for line in ("AnimationStage {", "PreviewKit {", "kit: viewerKit", "side: viewerLoader.stageWidth",
+                     'speed: parseInt(scene.option("speed", "2"), 10)', "property var warmed: ({})"):
+            self.assertIn(line, loader)
+        # the stage at the viewer page's own size, read from a page made from its file and dropped at once, or
+        # stage=WIDTH in a phone's shape, as the page shapes it; set before the Loader makes the stage
+        size = function(bench, "viewerStageSize")
+        self.assertIn('Qt.resolvedUrl("../qml/settings/AnimationViewerPage.qml")', size)
+        self.assertIn("component.createObject(null)", size)
+        self.assertIn('"width": page.stageWidth, "height": page.stageHeight', size)
+        self.assertIn('"from": "the viewer page (made in " + (Date.now() - since) + " ms)"', size)
+        self.assertLess(size.index("var since = Date.now()"), size.index("Qt.createComponent("))
+        self.assertIn("page.destroy()", size)
+        self.assertIn('parseInt(option("stage", "0"), 10)', size)
+        self.assertIn("Math.round(given * viewerLoader.phoneHeight / viewerLoader.phoneWidth)", size)
+        self.assertIn("readonly property int stageHeight: Math.round(stageWidth * phoneHeight / phoneWidth)",
+                      read("AnimationViewerPage.qml"))
+        self.assertNotIn("0.68", loader)
+        for handler in ("scene.atRan(ranStyle, ranMoment, frames)", "scene.atRunEnded(whole)", "then()"):
+            self.assertIn(handler, bench)
+        step = function(bench, "viewerStep")
+        self.assertLess(step.index("viewerLoader.stageWidth = size.width"), step.index("viewerLoader.active = true"))
+        self.assertLess(step.index("viewerLoader.stageHeight = size.height"), step.index("viewerLoader.active = true"))
+        self.assertIn('"from", size.from', step)
+        self.assertIn("quiet = true", step)
+        self.assertIn("view.kit.ready", step)
+        moments = function(bench, "viewerList")
+        self.assertIn("Stills.ORDER", moments)
+        self.assertIn('["open", "load", "close"]', moments)
+        run = function(bench, "viewerRun")
+        for line in ("stage.style = point.style", "stage.moment = point.moment", "stage.rung = rung",
+                     "kit.runScale = rung", "kit.runMip = mip", 'return "app"', "stage.warmer.develop()",
+                     'step("viewer " + name, "begin")\n                stage.play()', 'step("viewer " + name, "end")',
+                     "stepdown="):
+            self.assertIn(line, run)
+        self.assertLess(run.index("stage.warmer.develop()"), run.index("stage.play()"))
+        self.assertIn('parseInt(option("rounds", "3"), 10)', function(bench, "viewerRounds"))
+        # a moment passes with under 5 percent over 16.7 ms and none over 33 ms over its rounds, and the log names the
+        # largest rung that does, with stills.js's STAGE for it
+        self.assertIn("s.over16 < 0.05 * all.length && s.over33 === 0", function(bench, "viewerRounds"))
+        # less a run's first two intervals: the wait for the first tick, and the first frame's render, which the GUI
+        # thread's tick comes after; the frame log keeps that frame out of its intervals too
+        self.assertIn("all = all.concat(frames.slice(2))", function(bench, "viewerRounds"))
+        self.assertIn("var s = stats(frames.slice(2))", run)
+        self.assertNotIn("frames.slice(1)", bench)
+        self.assertIn("Stills.RUNGS", function(bench, "viewerMoment"))
+        summary = function(bench, "viewerSummary")
+        self.assertIn('log("viewer STAGE", JSON.stringify(stage)', summary)
+        self.assertIn("Math.abs(result.largest - 0.62) > 0.001", summary)
+        self.assertIn("? STAGE[id][moment] : 0.62", read("stills.js"))
+        # the table at the end of the page mode, a line a check
+        table = function(bench, "pageTable")
+        for name in ('"rest"', '"flick"', '"spare"', '"build"', '"saved"', '"cached"', '"viewer"', '"viewer rungs"'):
+            self.assertIn("line(" + name, table)
+        self.assertIn("pageTable(has)", function(bench, "runPage"))
+
     def test_the_page_works_without_its_picture(self):
         # the picture of the frames is one file and one Loader, which can go without touching the rest: the frames
         # are the sheet then. So the rest of the page names neither, and reads only the plain properties the picture
@@ -666,6 +808,38 @@ class AnimationPageTest(unittest.TestCase):
         self.assertIn('onClicked: hub.open("AnimationsPage")', hub)
         self.assertIn('pageStack.push(Qt.resolvedUrl(name + ".qml"), properties || {})', function(hub, "open"))
 
+    def test_the_stack_scene_pushes_from_the_first_page(self):
+        # beside the cold push from an empty first page, from=hub pushes the settings' first page as scripts/harness.sh
+        # writes it, rests, and makes each push of the Animations page through its open(), as a tap on its row, with
+        # the stock picture set before the page starts. A line before each such push says how far the hub has
+        # compiled the page; the push call is timed as the others
+        stack = (REPO / "harness" / "stack.qml").read_text(encoding="utf-8")
+        push_hub = function(stack, "pushHub")
+        self.assertIn('if (option("from", "") !== "hub") {\n            done()\n            return\n        }',
+                      push_hub)
+        self.assertIn('step("hub-push", "begin")', push_hub)
+        self.assertIn('pageStack.push(Qt.resolvedUrl("SettingsPage.qml"))', push_hub)
+        self.assertIn("page.children[i].animationsPage !== undefined", push_hub)
+        self.assertIn('rest("hub-rest", done, seconds("hubrest", 3))', push_hub)
+        # an option in seconds keeps 0, and one that is not a number falls back to its own default; a rest takes the
+        # seconds it is given as they are, 0 included, and the scene's rest= only when it is given none
+        self.assertIn('var value = parseFloat(option(name, ""))\n        return isNaN(value) ? fallback : value',
+                      function(stack, "seconds"))
+        self.assertIn('secs === undefined ? seconds("rest", 8) : secs', function(stack, "rest"))
+        self.assertNotRegex(stack, r"\|\| parseFloat\(")
+        push_page = function(stack, "pushPage")
+        self.assertIn('pageStack.push(Qt.resolvedUrl("../qml/settings/AnimationsPage.qml"), '
+                      '{ "ambienceFile": picture })', push_page)
+        for line in ('hub.open("AnimationsPage")', "page = pageStack.currentPage", "page.ambienceFile = picture"):
+            self.assertIn(line, push_page)
+        self.assertLess(push_page.index('log("hub page", hubCompile())'), push_page.index('step(name, "begin")'))
+        self.assertLess(push_page.index("var since = Date.now()"), push_page.index('hub.open("AnimationsPage")'))
+        self.assertLess(push_page.index("page.ambienceFile = picture"), push_page.index('log("push call took"'))
+        self.assertIn("var compile = hub.animationsPage", function(stack, "hubCompile"))
+        run = function(stack, "runPush")
+        self.assertLess(run.index("pushHub(next)"), run.index('pushPage("first-push", next)'))
+        self.assertIn("harness/SettingsPage.qml", (REPO / "scripts" / "harness.sh").read_text(encoding="utf-8"))
+
     def test_use_for_all_three(self):
         # Use is the viewer's write: a style for every moment, or for the moment shown. Use for all three clears
         # Surprise me for any row, Stock too, since Surprise me would go on playing other styles behind a Stock row; it
@@ -835,6 +1009,44 @@ class AnimationPageTest(unittest.TestCase):
                 self.assertNotIn(word, text, f"{name}: {word}")
         for name in ("AnimationViewerPage.qml", "AnimationStrip.qml"):
             self.assertNotRegex(read(name), r"(Animation|Animator) \{", name)
+
+    def test_the_stack_scene_runs_the_viewer(self):
+        stack = (REPO / "harness" / "stack.qml").read_text(encoding="utf-8")
+        self.assertIn('root.scene === "viewer"', stack)
+        self.assertIn("import QtTest 1.0", stack)
+        for name in ("sheet-push", "sheet-build", "viewer-push", "viewer-first", "viewer-rest", "run", "swipe",
+                     "rest", "pop"):
+            self.assertRegex(stack, r'(step|rest)\("%s"' % name, name)
+        self.assertIn('sheet.openViewer(styleId, momentId, "one")', stack)
+        scene = (REPO / "harness" / "SettingsScene.qml").read_text(encoding="utf-8")
+        self.assertIn("AnimationViewer", scene)
+        # the scene's steps end once the viewer has settled, which includes the strip's kit and the queueing of its
+        # stills: until then the rest after the first run would count them
+        viewer = read("AnimationViewerPage.qml")
+        settled = viewer[viewer.index("readonly property bool settled:"):viewer.index("readonly property real phoneWidth")]
+        self.assertIn("!stripDue", settled)
+        self.assertIn("(!stripWanted || stripKit !== null && stripKit.ready)", settled)
+        self.assertIn("viewer.played >= 1 && viewer.settled", stack)
+        # after the push and after the swipe, how the line about the style came out on this phone's font
+        self.assertIn("readonly property Item aboutLine: aboutLabel", viewer)
+        self.assertIn('line.truncated ? "cut" : "whole"', function(stack, "logAbout"))
+        calls = [call.start() for call in re.finditer(r"(?m)^\s+logAbout\(viewer\)$", stack)]
+        self.assertEqual(len(calls), 2)
+        self.assertLess(stack.index('step("viewer-push", "end")'), calls[0])
+        self.assertLess(calls[0], stack.index('step("viewer-first"'))
+        self.assertLess(stack.index('log("swiped from"'), calls[1])
+        # the swipe's finger moves on each tick of an animation, once a frame, not on a Timer, whose clock is not the
+        # display's; the release logs how many moves it took
+        drag = function(stack, "drag")
+        self.assertNotIn("after(", drag)
+        self.assertIn("finger.start()", drag)
+        finger = by_id(stack, "NumberAnimation", "finger")
+        for line in ("target: finger", 'property: "at"', "from: 0", "to: 1", "duration: 200",
+                     "events.mouseMove(item, startX + byX * at, startY + byY * at, -1, Qt.LeftButton)",
+                     "events.mouseRelease(item, startX + byX, startY + byY, Qt.LeftButton, Qt.NoModifier, -1)",
+                     'root.log("drag released after", moves'):
+            self.assertIn(line, finger)
+        self.assertLess(finger.index("events.mouseRelease("), finger.index("then()"))
 
     def test_a_touch_ends_the_tour(self):
         # on the style it is at; one between two runs leaves the neighbours and the strip to make, as the end of a

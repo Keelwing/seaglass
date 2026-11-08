@@ -201,9 +201,10 @@ class AnimationShadersTest(unittest.TestCase):
         self.assertIn("if (part != 2.0)", close)
 
     def test_a_field_input_never_goes_back_to_null(self):
-        # a texture input that goes from an item to null makes Qt warn at the end of every Frost moment. The field's
-        # Loader is there only for a moment with a field (fit()) and null otherwise, so each reads it behind a check:
-        # without one, every other Effect throws in both bindings and keeps neither input
+        # a texture input that goes from an item to null makes Qt warn at the end of every Frost moment, and
+        # scripts/bench-frames.py counts that warning. The field's Loader is there only for a moment with a field
+        # (fit()) and null otherwise, so each reads it behind a check: without one, every other Effect throws in both
+        # bindings and keeps neither input
         effect = (REPO / "qml" / "animations" / "Effect.qml").read_text(encoding="utf-8")
         self.assertIn("\n    property Item fieldLoader: null\n", effect)
         for name in ("fieldTex", "blurTex"):
@@ -211,6 +212,9 @@ class AnimationShadersTest(unittest.TestCase):
             self.assertTrue(line.endswith(": noiseTex"), line)
             self.assertNotIn("null", line)
             self.assertTrue(line.startswith("fieldLoader && fieldLoader.item"), line)
+        bench = (REPO / "scripts" / "bench-frames.py").read_text(encoding="utf-8")
+        warnings = re.search(r"^WARNINGS = \((.*)\)$", bench, re.M).group(1)
+        self.assertIn('"is not assigned a valid texture provider"', warnings)
 
     def test_an_angle_is_never_asked_of_the_origin_itself(self):
         # atan(0, 0) is undefined, and a GPU may draw that pixel black. Volt's front passes the origin while it is

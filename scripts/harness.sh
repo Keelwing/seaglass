@@ -3,20 +3,28 @@
 # launcher folders with qml/ from this tree, next to the stock look. No root, and the home screen is not
 # touched: the harness reads a copy of ~/.config/lipstick, and the script checks that the real
 # applications.menu did not change. The phone must be unlocked with the display on.
-# Usage: scripts/harness.sh [--scene "NAME [ARGUMENT]"] [--shot NAME] [--grab SECS] [--frames NAME] [--picture PATH]
-#        [--wait SECS] [--keep] [--own-apps] [--slow-animations]
+# Usage: scripts/harness.sh [--stack] [--scene "NAME [ARGUMENT]"] [--shot NAME] [--grab SECS] [--frames NAME]
+#        [--picture PATH] [--wait SECS] [--until TEXT] [--env NAME=VALUE] [--keep] [--own-apps] [--slow-animations]
+#   --stack  run harness/stack.qml instead of harness/harness.qml: a real ApplicationWindow and PageStack, with its
+#            own scenes: push (the default) ["[page=stripped] [orientation=landscape] [rest=8]"], viewer
+#            ["STYLE MOMENT [orientation=landscape] [rest=8]"]
 #   --scene  folders (default), selector ["Android=panel"], controller ["AI=card,Android=panel,..."],
 #            layout ["normal|edit AI=card@5,... drag=AI drop=Android"], motion ["zoom|spring|reveal|slide|fade
 #            [nocascade] [nodepth] [from=TITLE] [card] [slow=8]"], animations ["STYLE open|close|load [PROGRESS]"
-#            | "check"], reel ["STYLE,STYLE,... [slow=3]"] (harness/harness.qml)
+#            | "check"], reel ["STYLE,STYLE,... [slow=3]"],
+#            bench ["cost|play|compile|page|quiet|animators [OPTION=VALUE ...]"] (harness/harness.qml)
 #   --shot   copy the harness's own screenshot to out/shots/NAME.png
-#   --grab   when the harness takes that screenshot, in seconds after the scene starts (default 2.5)
+#   --grab   when the harness takes that screenshot, in seconds after the scene starts (default 2.5; with --stack at
+#            the end of the scene's first rest, and --shot waits for it)
 #   --frames the frames a scene grabbed (motion) to out/frames/NAME/, with their delay in centiseconds
 #            (out/frames/NAME/delay), and a GIF of them to out/shots/NAME.gif; it waits up to 3 minutes past --wait
 #            for the scene's run to end
 #   --picture the wallpaper the scenes draw (a file on the phone); by default a stock ambience picture, never the
 #            phone's own wallpaper, which may be private
 #   --wait   seconds between the start and the screenshot (default 6)
+#   --until  wait for a line with this text in the harness's log, up to --wait seconds, with the display kept from
+#            blanking; it gives up when the display goes off or locks, since a scene's frames stop then
+#   --env    an environment variable for qmlscene (QSG_INFO=1, QT_LOGGING_RULES=qt.scenegraph.time.*=true); may repeat
 #   --keep   leave the harness running (default: closed after the screenshot)
 #   --own-apps  the phone's own apps and folders (a copy of its menu). By default the harness shows only the stock
 #            apps, in made-up folders (Media, Office, Tools: harness/public-launcher.sh), so that whatever it draws
@@ -28,7 +36,8 @@ set -euo pipefail
 # shellcheck source=scripts/common.sh
 . "$(dirname "$0")/common.sh"
 
-scene=folders
+scene=
+qml=harness
 picture=
 frames=
 shot=
@@ -37,14 +46,27 @@ grab=
 keep=0
 public=1
 slow=
+until=
+env=
 while [ $# -gt 0 ]; do
     case $1 in
+        --stack) qml=stack ;;
         --scene) scene=${2:?}; shift ;;
         --shot) shot=${2:?}; shift ;;
         --grab) grab=${2:?}; shift ;;
         --frames) frames=${2:?}; shift ;;
         --picture) picture=${2:?}; shift ;;
         --wait) wait=${2:?}; shift ;;
+        --until) until=${2:?}; shift ;;
+        --env)
+            case ${2:?} in
+                *\'*|=*|[0-9]*) die "invalid environment variable: $2" ;;
+                *=*) case ${2%%=*} in *[!A-Za-z0-9_]*) die "invalid environment variable: $2" ;; esac ;;
+                *) die "invalid environment variable: $2" ;;
+            esac
+            env="$env ${2%%=*}='${2#*=}'"
+            shift
+            ;;
         --keep) keep=1 ;;
         --public) public=1 ;;
         --own-apps) public=0 ;;
@@ -53,17 +75,22 @@ while [ $# -gt 0 ]; do
     esac
     shift
 done
+case $qml in
+    stack) scene=${scene:-push}; [ -z "$frames" ] || die "--frames: stack.qml grabs no frames" ;;
+    *) scene=${scene:-folders} ;;
+esac
 case $shot$frames in *[!A-Za-z0-9._-]*) die "invalid name: $shot$frames" ;; esac
 case $scene in *[!A-Za-z0-9\ ,=@._-]*) die "invalid scene: $scene" ;; esac
 case $wait in ''|*[!0-9]*) die "invalid wait: $wait" ;; esac
 case $grab in *[!0-9.]*) die "invalid grab: $grab" ;; esac
 case $picture in *[!A-Za-z0-9/._-]*) die "invalid picture: $picture" ;; esac
+case $until in *[!A-Za-z0-9\ :._-]*) die "invalid text: $until" ;; esac
 
 check_ssh
 dir=$SEAGLASS_REMOTE_DIR/harness
 menu_sum() { ssh -o BatchMode=yes "$SEAGLASS_SSH" 'sha256sum ~/.config/lipstick/applications.menu' | cut -d' ' -f1; }
 # "[q]" keeps the pattern from matching the remote shell that runs pkill
-stop() { ssh -o BatchMode=yes "$SEAGLASS_SSH" "pkill -f '[q]mlscene .*$dir/harness/harness.qml' 2>/dev/null || true"; }
+stop() { ssh -o BatchMode=yes "$SEAGLASS_SSH" "pkill -f '[q]mlscene .*$dir/harness/(harness|stack).qml' 2>/dev/null || true"; }
 
 before=$(menu_sum)
 stop
@@ -90,8 +117,8 @@ sed -e 's|file:///usr/share/seaglass/qml/|../qml/|' -e 's|inHarness: false|inHar
     | ssh -o BatchMode=yes "$SEAGLASS_SSH" "cat > ~/$dir/harness/SettingsPage.qml"
 # never the phone's own wallpaper or photo in the previews of the glass and animations pages: no ambience picture
 # until the scene gives the stock one, and the stock picture instead of a photo set on the phone. The animations
-# page reads and writes no file of its own here, so it makes its sheet on every visit, and the folder it would keep
-# one in is the harness's own, which the next run removes, never the phone's ~/.cache
+# page reads and writes no file of its own here, so it makes its sheet on every visit; a bench step that keeps one
+# keeps it in the harness's own folder, which the next run removes, never in the phone's ~/.cache
 ssh -o BatchMode=yes "$SEAGLASS_SSH" "sed -i \
     -e 's|property string ambienceFile: ambiencePicture.value|property string ambienceFile: \"\"|' \
     -e 's|property bool persistentGlass: true|property bool persistentGlass: false|' \
@@ -100,12 +127,35 @@ ssh -o BatchMode=yes "$SEAGLASS_SSH" "sed -i \
     ~/$dir/qml/settings/GlassPage.qml ~/$dir/qml/settings/AnimationsPage.qml"
 # (...&): the subshell exits at once, so the SSH session does not wait for the harness
 ssh -o BatchMode=yes "$SEAGLASS_SSH" "cd ~/$dir && ($xdg XDG_CONFIG_HOME=\$HOME/$dir/config QT_LOGGING_TO_CONSOLE=1 \
-    nohup qmlscene $slow \$HOME/$dir/harness/harness.qml > harness.log 2>&1 < /dev/null &)"
-sleep "$wait"
+    $env nohup qmlscene $slow \$HOME/$dir/harness/$qml.qml > harness.log 2>&1 < /dev/null &)"
+if [ -n "$until" ]; then
+    mce="--dest=com.nokia.mce /com/nokia/mce/request com.nokia.mce.request"
+    end=$((SECONDS + wait))
+    while [ "$SECONDS" -lt "$end" ]; do
+        ssh -o BatchMode=yes "$SEAGLASS_SSH" "grep -q '$until' ~/$dir/harness.log" && break
+        state=$(ssh -o BatchMode=yes "$SEAGLASS_SSH" "dbus-send --system --print-reply $mce.get_display_status \
+            && dbus-send --system --print-reply $mce.get_tklock_mode \
+            && dbus-send --system --type=method_call $mce.req_display_blanking_pause")
+        case $state in
+            *'"off"'*|*'"locked"'*) log "the display went off or locked: the run stopped there"; break ;;
+        esac
+        sleep 10
+    done
+else
+    sleep "$wait"
+fi
 # a run that records frames ends with the "frames N delay D" line: wait for it
 if [ -n "$frames" ]; then
     for _ in $(seq 60); do
         ssh -o BatchMode=yes "$SEAGLASS_SSH" "grep -q 'harness: frames [0-9]* delay' ~/$dir/harness.log" && break
+        sleep 3
+    done
+fi
+
+# stack.qml grabs when its scene has come to rest, not after a fixed time: wait for its line
+if [ -n "$shot" ] && [ "$qml" = stack ]; then
+    for _ in $(seq 20); do
+        ssh -o BatchMode=yes "$SEAGLASS_SSH" "grep -q 'harness: screenshot' ~/$dir/harness.log" && break
         sleep 3
     done
 fi

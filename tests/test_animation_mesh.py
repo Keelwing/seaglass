@@ -95,6 +95,7 @@ class AnimationMeshTest(unittest.TestCase):
         for path in sorted(REPO.glob("qml/**/*.qml")) + sorted(REPO.glob("harness/*.qml")):
             for block in qml_blocks(path.read_text(encoding="utf-8"), "Shards"):
                 self.assertNotIn("capacity", block, path.name)
+        self.assertNotIn("capacity", (REPO / "harness" / "BenchScene.qml").read_text(encoding="utf-8"))
 
     def test_its_programs_stay_while_a_run_may_play(self):
         # active follows the settings, and can go false while a moment plays: blank shaders would shrink the uniform

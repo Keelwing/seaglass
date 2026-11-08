@@ -110,6 +110,14 @@ class RepoTest(unittest.TestCase):
         for image in images:
             self.assertTrue((REPO / image).is_file(), image)
 
+    def test_doc_commands_make_the_folder_they_write_to(self):
+        # out/ is not in a fresh clone, and the shell opens a redirect's file before the command can make it
+        for path in sorted((REPO / "docs").glob("*.md")) + [REPO / "README.md"]:
+            text = path.read_text(encoding="utf-8")
+            for block in re.findall(r"(?ms)^```bash\n(.*?)^```", text):
+                for match in re.finditer(r">\s*out/", block):
+                    self.assertIn("mkdir -p out\n", block[:match.start()], path.relative_to(REPO))
+
     def test_workflows_run_the_make_targets(self):
         # CI and the release run what a development machine runs (docs/DEVELOPMENT.md)
         ci = (REPO / ".github" / "workflows" / "ci.yml").read_text(encoding="utf-8")
@@ -310,6 +318,7 @@ class RepoTest(unittest.TestCase):
             ids = set(re.findall(r"^\s*id:\s*(\w+)", text, re.M))
             properties = set(re.findall(r"^\s*(?:readonly\s+)?property\s+[\w<>.]+\s+(\w+)", text, re.M))
             self.assertEqual(sorted(ids & properties), [], path.relative_to(REPO))
+
     def test_pages_on_top_read_their_page_container(self):
         # a Silica Page has no pageStack property (Sailfish OS 5.0 and 5.1): page.pageStack is undefined, so a preview
         # running "while Active or outside a page stack" ran on under every page pushed over it. A page in a stack has

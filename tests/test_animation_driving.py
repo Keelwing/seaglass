@@ -234,10 +234,13 @@ class AnimationDrivingTest(unittest.TestCase):
             self.assertNotIn("animate(", function(text, "load"))
 
     def test_effects_driven_by_hand_never_run(self):
-        # only these start runs: every other Effect and Shards binds its progress (and time) and never makes animators
+        # only these start runs, and the bench's copies in its play mode (made by a Repeater, with no id;
+        # test_the_bench_plays_as_the_home_screen_does): every other Effect and Shards binds its progress (and time)
+        # and never makes animators
         players = {"qml/animations/AnimationController.qml": {"openEffect", "openShards", "closeEffect", "closeShards"},
                    "qml/animations/CoverClosing.qml": {"effect", "pieces"},
-                   "qml/animations/CoverLoading.qml": {"effect"}}
+                   "qml/animations/CoverLoading.qml": {"effect"},
+                   "harness/BenchScene.qml": {"animated"}}
         for path in sorted([*REPO.glob("qml/**/*.qml"), *REPO.glob("harness/*.qml")]):
             text = path.read_text(encoding="utf-8")
             name = str(path.relative_to(REPO))
@@ -256,6 +259,17 @@ class AnimationDrivingTest(unittest.TestCase):
             for kind in ("Effect", "Shards"):
                 for block in qml_blocks(text, kind):
                     self.assertRegex(block, r"\n\s*progress: ", name)
+        # the bench's own: what it plays is made by a Component that ends it, and what it times is made and played
+        bench = (REPO / "harness" / "BenchScene.qml").read_text(encoding="utf-8")
+        self.assertIn("effect.play(going.ms)", function(bench, "animatorsGoing"))
+        made = function(bench, "animatorsMade")
+        self.assertIn('log("animators made over=20 mean="', made)
+        self.assertLess(made.index('log("animators made'), made.index(".play("))
+        self.assertIn('log("animators first play over=20 mean="', made)
+        for block in qml_blocks(bench, "Effect"):
+            if "id: warm\n" in block:
+                self.assertRegex(block, r"\n\s*progress: ")
+
     def test_nothing_is_drawn_before_its_shader(self):
         # Drawn before its shader is set, a ShaderEffect can be merged into a batch, and the batcher's rewrite then
         # adds an attribute to the GLSL ES 3.00 vertex shader, which fails ("Problematic Vertex shader"): a blank and a
@@ -463,6 +477,96 @@ class AnimationDrivingTest(unittest.TestCase):
         self.assertIn("property bool wanted: true", tile)
         self.assertIn('source: wanted ? "noise.png" : ""', tile)
         self.assertIn("wanted: settings.enabled", by_id(read("AnimationController.qml"), "NoiseTile", "noise"))
+
+    def test_the_bench_runs_the_animators(self):
+        bench = (REPO / "harness" / "BenchScene.qml").read_text(encoding="utf-8")
+        self.assertIn('mode === "animators"', bench)
+        animated = by_id(bench, "Effect", "animated")
+        self.assertNotRegex(animated, r"\n\s*(progress|time): ")
+        self.assertIn("animated.play(", bench)
+        self.assertIn("animated.halt()", bench)
+        self.assertIn("destroy()", by_id(bench, "Component", "ownEffect"))
+        self.assertIn('effects[i].moment === "field"', function(bench, "playList"))
+
+    def test_the_bench_names_the_split_closing_it_runs(self):
+        # bench animators split=frost back=dust names in its lines the split closing whose grains it grabs (Frost's
+        # 4 s, its first grab before the snow), the closing a window comes back from with its grains pass or none, and
+        # the time to make that split closing, after the split step has read its text
+        bench = (REPO / "harness" / "BenchScene.qml").read_text(encoding="utf-8")
+        split = function(bench, "animatorsSplit")
+        self.assertIn('var style = option("split", "dust")\n', split)
+        self.assertIn('cue(style, "close", function () {', split)
+        self.assertIn('log("animators split", style, "split=" + animated.split, "grains pass=" + (grains !== null))',
+                      split)
+        self.assertIn('animated.play(style === "dust" ? 6000 : 4000)', split)
+        back = function(bench, "animatorsComeBack")
+        self.assertIn('var style = option("back", "contour")\n', back)
+        self.assertIn('cue(style, "close", function () {', back)
+        self.assertIn('log("animators come back", style, "grains pass=" + (grainsOf(animated) !== null))', back)
+        self.assertIn('animated.play(Styles.duration(style, "close", 2))', back)
+        self.assertIn("effect.children[i].part === 2", function(bench, "grainsOf"))
+        made = function(bench, "animatorsMade")
+        self.assertIn('var split = mean(option("split", "dust"), "close")\n', made)
+        self.assertIn('+ " ms, split " + split.toFixed(2) + " ms (" + option("split", "dust") + " close)")', made)
+        self.assertLess(made.index("var split = mean("), made.index('log("animators made'))
+        steps = re.findall(r"\w+", re.search(r"each\(\[(.*?)\]", function(bench, "runAnimators"), re.S).group(1))
+        self.assertLess(steps.index("animatorsSplit"), steps.index("animatorsMade"))
+        # and the options as the docs give them, with their defaults
+        development = (REPO / "docs" / "DEVELOPMENT.md").read_text(encoding="utf-8")
+        for option in ("`split=dust`", "`back=contour`"):
+            self.assertIn(option, development)
+
+    def test_the_bench_plays_as_the_home_screen_does(self):
+        # bench play runs each moment through play(), a loading through runClock() for the length it always had, on the
+        # render thread as AnimationController.qml does; driver=gui keeps the GUI thread's animation for comparison.
+        # Its steps keep their names and lines, which the frame log is read by
+        bench = (REPO / "harness" / "BenchScene.qml").read_text(encoding="utf-8")
+        play = function(bench, "playPoint")
+        self.assertIn('var byGui = option("driver", "render") === "gui"', play)
+        self.assertIn('var length = point.moment === "load" ? 3000 : Styles.duration(point.style, point.moment, 1)',
+                      play)
+        self.assertIn("piece.runClock(length / 1000)", play)
+        self.assertIn("piece.play(length)", play)
+        self.assertIn("(kind === \"shards\" ? shardsCopies : effectCopies).itemAt(0)", play)
+        self.assertIn("if (byGui ? run.running : piece.running) {", play)
+        self.assertIn("run.restart()", play)
+        for line in ('step("warm " + name, "begin")', 'step("play " + name, "end")',
+                     'log("play", name, "length=" + length, statsText(stats(list)), "first="'):
+            self.assertEqual(play.count(line), 1, line)
+        # begun by either driver, right before its run starts
+        self.assertEqual(play.count('step("play " + name, "begin")\n                    run.restart()'), 1)
+        self.assertRegex(play, r'step\("play " \+ name, "begin"\)\n\s*var since = Date\.now\(\)\n\s*'
+                               r'if \(point\.moment === "load"\)\n\s*piece\.runClock')
+        self.assertIn('+ " round=" + point.round', play)
+        # a clock has no watchdog: the bench ends one that does not end
+        self.assertIn("piece.halt()", play)
+        for name in ("effectCopies", "shardsCopies"):
+            self.assertIn("id: %s" % name, bench)
+
+    def test_the_bench_says_when_a_cost_is_not_one(self):
+        # a slope across a change of the phone's state reads as a cost, even a falling one. The word comes after the
+        # numbers, where a reader of the lines finds it whatever it takes from their start
+        cost = function((REPO / "harness" / "BenchScene.qml").read_text(encoding="utf-8"), "costPoint")
+        self.assertIn("var rest = a.mean - a.k * ms", cost)
+        self.assertIn('"rest=" + rest.toFixed(1)]', cost)
+        self.assertRegex(cost, r'if \(ms < 0 \|\| rest < -3 \|\| rest > 20\)\n\s*line\.push\("suspect"\)\n\s*'
+                               r"log\.apply\(scene, line\)")
+
+    def test_a_given_kmax_ends_the_search_for_a_cost(self):
+        # eight samples would end the climb at K=128 although kmax asks for 1500 (size=0, where a copy costs next to
+        # nothing). Without kmax the search stops at eight samples
+        cost = function((REPO / "harness" / "BenchScene.qml").read_text(encoding="utf-8"), "costPoint")
+        self.assertIn('var kmaxGiven = option("kmax", "") !== ""', cost)
+        self.assertRegex(cost, r"if \(kmaxGiven && top\.mean < floor\)\n\s*climbed = samples\.length\n\s*"
+                               r"if \(samples\.length - climbed >= 8\) \{")
+        self.assertNotIn("if (samples.length >= 8)", cost)
+        # past the climb no K over a given kmax either
+        self.assertRegex(cost, r"\} else if \(kmaxGiven && top\.k >= kmax\) \{\n\s*report\(\)")
+        self.assertIn("tryK(kmaxGiven ? Math.min(kmax, up) : up)", cost)
+        # the first K is the last point's, which is below kmax, or ks= gives them all
+        for call in re.findall(r"tryK\((.*)\)\n", cost):
+            self.assertTrue(call.startswith(("Math.min(kmax", "fixed", "kmaxGiven ? Math.min(kmax", "Math.max(1, ")),
+                            call)
 
     def test_an_opening_knows_the_corners_it_opens_from(self):
         # an icon is round, a cover has the switcher's corners, the middle of the screen none
