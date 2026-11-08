@@ -1,126 +1,114 @@
-// Shatter's shards (docs/ANIMATIONS.md): a pane broken at a point into about 100 triangles, which fall (closing) or
-// burst out of the impact and fit together (opening, assemble). Qt 5.6's ShaderEffect has no custom meshes, so each
-// shard is a small ShaderEffect over its triangle's bounding box: shaders/shards.vert turns and moves it,
-// shaders/shards.frag cuts the triangle out. The shard items are made once; build() lays them out for a new break, at
-// impact (0 to 1 over the pane). Show it only when ready.
+// Shatter's shards (docs/ANIMATIONS.md): a pane broken at a point into triangles, which fall (closing) or burst out of
+// the impact and fit together (opening, assemble). All of them are one ShaderEffect over a GridMesh:
+// shaders/shards.vert works out each shard from a seed, then turns and moves it, and shaders/shards.frag draws it.
+// build() makes a new break, at impact (0 to 1 over the pane). Show it only when ready.
 import QtQuick 2.6
 import "shaders.js" as Shaders
 
-Item {
+ShaderEffect {
     id: pane
 
-    // the shard items exist only while active
+    // its shaders are read only while active, and it is ready only then
     property bool active: true
     property variant source
+    // in the vertex stage only: a uniform in both stages is not driven by an animator
     property real progress
     property bool assemble
     property point impact: Qt.point(0.5, 0.5)
     property vector3d tint: Qt.vector3d(1, 1, 1)
     property real useTint
     property real clipTop
-    // how many shard items there are, and the break: rays from the impact, rings further out (in pane heights)
-    property int capacity: 140
-    property int rays: 11
+    // the break: rays from the impact, and up to 8 rings further out (in pane heights)
+    property real rays: 11
     property var rings: [0.05, 0.12, 0.22, 0.35, 0.52, 0.75, 1.05, 1.5]
+    property vector4d seed: Qt.vector4d(0.37, 0.61, 0.13, 0.83)
+    readonly property real mode: assemble ? 1 : 0
+    readonly property point impactAt: Qt.point(impact.x * width / Math.max(1, height), impact.y)
+    readonly property real side: Math.max(1, height)
+    readonly property real aspect: width / Math.max(1, height)
+    // three columns a shard, less one: a grid has one more column of vertices than its resolution says
+    readonly property real columns: 3 * (rays + (rings.length - 1) * rays * 2) - 1
+    readonly property vector4d ringsA: Qt.vector4d(ring(0), ring(1), ring(2), ring(3))
+    readonly property vector4d ringsB: Qt.vector4d(ring(4), ring(5), ring(6), ring(7))
     property string vertexText
     property string fragmentText
-    readonly property bool ready: active && vertexText !== "" && fragmentText !== ""
-                                  && shardRepeater.count === capacity
+    readonly property bool loaded: vertexText !== "" && fragmentText !== ""
+    readonly property bool ready: active && loaded
+    // plays the moment on the render thread, so that it keeps moving while the GUI thread is busy. progress keeps its
+    // old value on the GUI side until the run ends. End a run with halt(): complete() does nothing on an animator.
+    // ended comes after a run ends or is halted
+    readonly property bool running: run !== null && run.running
+    property int length
+    // the run (runComponent below), from the first play() on
+    property QtObject run: null
+    signal ended
 
-    // a radial break: 11 cracks from the impact, rings of them further out, every cell split in two. Each triangle
-    // keeps how its edges broke (shards.frag draws the cracks out from the impact brightest, the cuts that split a
-    // cell faintest), in the order of the edges bc, ca, ab
+    function ring(at) {
+        return at < rings.length ? rings[at] : 1
+    }
+
     function build() {
-        var side = Math.max(1, height)
-        var aspect = width / side
-        var centre = [impact.x * aspect, impact.y]
-        var rings = pane.rings
-        var rays = pane.rays
-        var turnBy = Math.random() * Math.PI * 2
-        var angles = []
-        var jitter = []
-        for (var k = 0; k < rays; k++) {
-            angles.push((k + (Math.random() - 0.5) * 0.6) / rays * Math.PI * 2 + turnBy)
-            var row = []
-            for (var m = 0; m < rings.length; m++)
-                row.push(0.85 + 0.3 * Math.random())
-            jitter.push(row)
-        }
-        var corner = function (ray, ring) {
-            var r = ray % rays
-            var length = rings[ring] * jitter[r][ring]
-            return [centre[0] + Math.cos(angles[r]) * length, centre[1] + Math.sin(angles[r]) * length]
-        }
-        var radial = 1, round = 0.6, cut = 0.15
-        var triangles = []
-        for (k = 0; k < rays; k++)
-            triangles.push([centre, corner(k, 0), corner(k + 1, 0), [round, radial, radial]])
-        for (m = 0; m < rings.length - 1; m++) {
-            for (k = 0; k < rays; k++) {
-                var p = corner(k, m), q = corner(k + 1, m), r2 = corner(k + 1, m + 1), s = corner(k, m + 1)
-                if (Math.random() < 0.5)
-                    triangles.push([p, q, r2, [radial, cut, round]], [p, r2, s, [round, radial, cut]])
-                else
-                    triangles.push([p, q, s, [cut, radial, round]], [q, r2, s, [round, cut, radial]])
-            }
-        }
-        var used = 0
-        for (var i = 0; i < triangles.length && used < capacity; i++) {
-            var t = triangles[i]
-            var minX = Math.min(t[0][0], t[1][0], t[2][0]), maxX = Math.max(t[0][0], t[1][0], t[2][0])
-            var minY = Math.min(t[0][1], t[1][1], t[2][1]), maxY = Math.max(t[0][1], t[1][1], t[2][1])
-            if (maxX < -0.02 || minX > aspect + 0.02 || maxY < -0.02 || minY > 1.02)
-                continue
-            var shard = shardRepeater.itemAt(used++)
-            shard.x = Math.floor(minX * side) - 2
-            shard.y = Math.floor(minY * side) - 2
-            shard.width = Math.ceil((maxX - minX) * side) + 4
-            shard.height = Math.ceil((maxY - minY) * side) + 4
-            shard.a = Qt.point(t[0][0], t[0][1])
-            shard.b = Qt.point(t[1][0], t[1][1])
-            shard.c = Qt.point(t[2][0], t[2][1])
-            shard.kinds = Qt.vector3d(t[3][0], t[3][1], t[3][2])
-            shard.centroid = Qt.point((t[0][0] + t[1][0] + t[2][0]) / 3, (t[0][1] + t[1][1] + t[2][1]) / 3)
-            shard.rnd = Qt.vector4d(Math.random(), Math.random(), Math.random(), Math.random())
-            shard.visible = true
-        }
-        for (i = used; i < capacity; i++)
-            shardRepeater.itemAt(i).visible = false
+        seed = Qt.vector4d(Math.random(), Math.random(), Math.random(), Math.random())
     }
 
-    Repeater {
-        id: shardRepeater
-
-        model: pane.active && pane.vertexText !== "" && pane.fragmentText !== "" ? pane.capacity : 0
-
-        ShaderEffect {
-            property variant source: pane.source
-            property real progress: pane.progress
-            property real mode: pane.assemble ? 1 : 0
-            property point impact: Qt.point(pane.impact.x * pane.width / Math.max(1, pane.height), pane.impact.y)
-            property real side: Math.max(1, pane.height)
-            property real aspect: pane.width / Math.max(1, pane.height)
-            property point corner: Qt.point(x, y)
-            property point a
-            property point b
-            property point c
-            property vector3d kinds
-            property point centroid
-            property vector4d rnd
-            property vector3d tint: pane.tint
-            property real useTint: pane.useTint
-            property real clipTop: pane.clipTop
-
-            visible: false
-            blending: true
-            vertexShader: pane.vertexText
-            fragmentShader: pane.fragmentText
-        }
+    function play(ms) {
+        length = ms
+        progress = 0
+        if (run === null)
+            run = runComponent.createObject(pane)
+        run.start()
+        watchdog.restart()
     }
 
-    Component.onCompleted: {
+    function halt() {
+        watchdog.stop()
+        if (run !== null)
+            run.stop()
+    }
+
+    function load() {
+        if (!active)
+            return
         var base = Qt.resolvedUrl("shaders/")
         Shaders.loadFile(base + "shards.vert", function (text) { pane.vertexText = text })
         Shaders.loadFile(base + "shards.frag", function (text) { pane.fragmentText = text })
+    }
+
+    blending: true
+    mesh: GridMesh {
+        resolution: Qt.size(pane.columns, 1)
+    }
+    // kept once read, also when it goes inactive: a run's animator holds its uniform's place in the program's list,
+    // and Qt does not check it against the shorter list of its own shaders
+    vertexShader: loaded ? vertexText : ""
+    fragmentShader: loaded ? fragmentText : ""
+    onActiveChanged: load()
+    Component.onCompleted: load()
+
+    // the run on the render thread, made at once by the first play(), so that it starts in that call, and kept. Shards
+    // driven by hand (the settings' pages, the harness, the warm-up) never make it. Not a Loader, which makes its item
+    // later inside an asynchronous creation
+    Component {
+        id: runComponent
+
+        UniformAnimator {
+            target: pane
+            uniform: "progress"
+            from: 0
+            to: 1
+            duration: pane.length
+            onStopped: {
+                watchdog.stop()
+                pane.ended()
+            }
+        }
+    }
+
+    // a render thread that draws no frames, as with the display off, never ends a run: it ends here, on the GUI side
+    Timer {
+        id: watchdog
+
+        interval: pane.length + 500
+        onTriggered: pane.halt()
     }
 }

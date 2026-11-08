@@ -535,7 +535,6 @@ Page {
 
                         anchors.fill: parent
                         visible: page.shardsOn && ready
-                        capacity: 70
                         rays: 9
                         rings: [0.08, 0.2, 0.38, 0.6, 1.0]
                         source: appTexture

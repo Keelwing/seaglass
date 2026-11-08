@@ -99,7 +99,6 @@ Item {
         anchors.fill: parent
         visible: closing.shards && ready
         active: closing.shards
-        capacity: 70
         rays: 9
         rings: [0.08, 0.2, 0.38, 0.6, 1.0]
         source: closing.copied ? kept : frozen
