@@ -43,6 +43,8 @@ uniform float clipTop;
 uniform float part;
 
 #define PI 3.14159265
+// atan(y, x) is undefined at (0, 0), and a GPU may draw that pixel black: an angle gets 1.0 for x where its vector has
+// no length (an angle of 0 there, the same angle everywhere else)
 
 float vnoise(vec2 p) { return texture2D(noiseTex, p).r; }
 float fbm(vec2 p) { return texture2D(noiseTex, p).g; }
@@ -70,10 +72,11 @@ float luma(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
 // a natural colour moved to the ambience's hue at the same brightness, when useTint is 1
 vec3 tinted(vec3 n)
 {
+    if (useTint < 0.5)
+        return n;
     float l = luma(n);
     vec3 t = tint * (l / max(luma(tint), 0.05));
-    t = mix(t, vec3(1.0), smoothstep(0.85, 1.4, l));
-    return mix(n, t, useTint);
+    return mix(t, vec3(1.0), smoothstep(0.85, 1.4, l));
 }
 float easeOutCubic(float t) { float u = 1.0 - t; return 1.0 - u * u * u; }
 float easeInCubic(float t) { return t * t * t; }
@@ -89,41 +92,44 @@ float sdRoundRect(vec2 p, vec2 b, float r)
     vec2 q = abs(p) - b + r;
     return length(max(q, 0.0)) + min(max(q.x, q.y), 0.0) - r;
 }
-// a soft blur of the source, about rpx pixels wide: with GLSL ES 3.00 from the source's mipmaps (its
-// ShaderEffectSource has mipmap: true), a few taps of a smaller level; else nine taps
+// a soft blur of the source, about rpx pixels wide, in nine taps: with GLSL ES 3.00 of a smaller level of the
+// source's mipmaps (its ShaderEffectSource has mipmap: true); else of the source itself, which has no mipmaps then,
+// and GLSL ES 1.00 has no way to choose a level anyway. A tap past the edge needs no clamp, a ShaderEffectSource
+// clamps to its edge by itself
 vec4 blurSrc(vec2 uv, float rpx)
 {
 #ifdef ES3
     // nine taps of a level finer than the blur. The same taps at every pixel show that level's texels as squares:
     // each pixel turns them by an angle of its own and spreads them a little wider or narrower, which leaves a fine
-    // grain instead, as on frosted glass
-    float r = rpx * (0.7 + 0.6 * hash(gl_FragCoord.xy));
-    float lod = max(log2(max(r, 1.0)) - 2.0, 0.0);
+    // grain instead, as on frosted glass. The level is a whole one, the pixel's own dither rounding it up or down by
+    // its fraction: a read between two levels reads both, and the Jolla Phone's GPU pays for the second
+    float h = hash(gl_FragCoord.xy);
+    float r = rpx * (0.7 + 0.6 * h);
+    float lod = floor(max(log2(max(r, 1.0)) - 2.0, 0.0) + fract(h * 61.7));
     float a = hash(gl_FragCoord.yx + 57.0) * 2.0 * PI;
-    mat2 turn = mat2(cos(a), sin(a), -sin(a), cos(a));
     vec2 s = r * 0.75 / resolution;
-    vec4 m = textureLod(source, clamp(uv, 0.0, 1.0), lod) * 0.2;
-    m += textureLod(source, clamp(uv + s * (turn * vec2( 0.53,  0.12)), 0.0, 1.0), lod) * 0.1;
-    m += textureLod(source, clamp(uv + s * (turn * vec2(-0.41,  0.48)), 0.0, 1.0), lod) * 0.1;
-    m += textureLod(source, clamp(uv + s * (turn * vec2(-0.15, -0.62)), 0.0, 1.0), lod) * 0.1;
-    m += textureLod(source, clamp(uv + s * (turn * vec2( 0.72, -0.55)), 0.0, 1.0), lod) * 0.1;
-    m += textureLod(source, clamp(uv + s * (turn * vec2(-0.86, -0.12)), 0.0, 1.0), lod) * 0.1;
-    m += textureLod(source, clamp(uv + s * (turn * vec2( 0.18,  0.93)), 0.0, 1.0), lod) * 0.1;
-    m += textureLod(source, clamp(uv + s * (turn * vec2( 0.95,  0.40)), 0.0, 1.0), lod) * 0.1;
-    m += textureLod(source, clamp(uv + s * (turn * vec2(-0.60, -0.92)), 0.0, 1.0), lod) * 0.1;
-    return m * clipMask(clamp(uv, 0.0, 1.0));
+    vec2 ex = s * vec2(cos(a), sin(a));
+    vec2 ey = s * vec2(-sin(a), cos(a));
+    vec4 m = textureLod(source, uv + ex *  0.53 + ey *  0.12, lod)
+           + textureLod(source, uv + ex * -0.41 + ey *  0.48, lod)
+           + textureLod(source, uv + ex * -0.15 + ey * -0.62, lod)
+           + textureLod(source, uv + ex *  0.72 + ey * -0.55, lod)
+           + textureLod(source, uv + ex * -0.86 + ey * -0.12, lod)
+           + textureLod(source, uv + ex *  0.18 + ey *  0.93, lod)
+           + textureLod(source, uv + ex *  0.95 + ey *  0.40, lod)
+           + textureLod(source, uv + ex * -0.60 + ey * -0.92, lod);
+    return (m * 0.1 + textureLod(source, uv, lod) * 0.2) * clipMask(clamp(uv, 0.0, 1.0));
 #else
     vec2 s = rpx / resolution;
-    vec4 c = srcClamp(uv) * 0.2;
-    c += srcClamp(uv + s * vec2( 0.53,  0.12)) * 0.1;
-    c += srcClamp(uv + s * vec2(-0.41,  0.48)) * 0.1;
-    c += srcClamp(uv + s * vec2(-0.15, -0.62)) * 0.1;
-    c += srcClamp(uv + s * vec2( 0.72, -0.55)) * 0.1;
-    c += srcClamp(uv + s * vec2(-0.86, -0.12)) * 0.1;
-    c += srcClamp(uv + s * vec2( 0.18,  0.93)) * 0.1;
-    c += srcClamp(uv + s * vec2( 0.95,  0.40)) * 0.1;
-    c += srcClamp(uv + s * vec2(-0.60, -0.92)) * 0.1;
-    return c;
+    vec4 m = texture2D(source, uv + s * vec2( 0.53,  0.12))
+           + texture2D(source, uv + s * vec2(-0.41,  0.48))
+           + texture2D(source, uv + s * vec2(-0.15, -0.62))
+           + texture2D(source, uv + s * vec2( 0.72, -0.55))
+           + texture2D(source, uv + s * vec2(-0.86, -0.12))
+           + texture2D(source, uv + s * vec2( 0.18,  0.93))
+           + texture2D(source, uv + s * vec2( 0.95,  0.40))
+           + texture2D(source, uv + s * vec2(-0.60, -0.92));
+    return (m * 0.1 + texture2D(source, uv) * 0.2) * clipMask(clamp(uv, 0.0, 1.0));
 #endif
 }
 // a cover's rounded rectangle: 1 inside, and d the signed distance to its edge in pixels

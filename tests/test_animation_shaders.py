@@ -1,5 +1,6 @@
 """The animation shaders against what draws them: the inputs each pass of qml/animations/Effect.qml has. And what their
 shared libraries must keep: pixel diffs prove the look, these keep the shape that makes them cheap and correct."""
+import math
 import re
 import unittest
 from pathlib import Path
@@ -24,11 +25,86 @@ def function_of(text, name):
     return re.search(r"^( *)function %s\(.*?^\1\}" % name, text, re.M | re.S).group(0)
 
 
+def atan_calls(text):
+    """each atan(y, x) in a shader's text: where it is, and its two arguments"""
+    for match in re.finditer(r"\batan\(", text):
+        depth, start, args = 0, match.end(), []
+        for end in range(match.end() - 1, len(text)):
+            depth += {"(": 1, ")": -1}.get(text[end], 0)
+            if text[end] == "," and depth == 1:
+                args.append(text[start:end].strip())
+                start = end + 1
+            elif depth == 0:
+                args.append(text[start:end].strip())
+                break
+        yield match.start(), args
+
+
 class AnimationShadersTest(unittest.TestCase):
+    def test_a_colour_ramp_runs_only_for_the_tint_in_use(self):
+        # useTint is 0 or 1 for a whole effect: a branch, instead of working out both ramps per pixel and mixing them
+        for file, name in (("common.glsl", "tinted"), ("ember.glsl", "fire"), ("aurora.glsl", "aurora")):
+            body = glsl_function(file, name)
+            self.assertRegex(body, r"if \(useTint [<>] 0\.5\)", name)
+            self.assertNotRegex(body, r"mix\([^;]*useTint\)", name)
+
+    def test_the_blur_masks_the_clip_once(self):
+        # the whole blur at the pixel, in both languages, and no clamp per tap: the source clamps to its edge
+        body = glsl_function("common.glsl", "blurSrc")
+        es3, es1 = body.split("#else")
+        for path in (es3, es1):
+            self.assertEqual(path.count("clipMask("), 1)
+            self.assertEqual(len(re.findall(r"\b(?:textureLod|texture2D)\(source", path)), 9)
+            self.assertNotIn("clamp(uv +", path)
+            self.assertNotIn("srcClamp", path)
+
+    def test_the_blur_reads_whole_levels(self):
+        # a read between two mip levels reads both: each tap takes one whole level, rounded by the pixel's dither.
+        # GLSL ES 1.00 reads the source itself, which has no mipmaps there
+        es3, es1 = glsl_function("common.glsl", "blurSrc").split("#else")
+        self.assertRegex(es3, r"\n    float lod = floor\(max\(log2\(max\(r, 1\.0\)\) - 2\.0, 0\.0\)"
+                              r" \+ fract\(h \* [\d.]+\)\);")
+        self.assertEqual(len(re.findall(r"\blod\b", es3)), 10)
+        self.assertEqual(re.findall(r"textureLod\(source, [^;]*?, (\w+)\)", es3), ["lod"] * 9)
+        self.assertNotIn("textureLod", es1)
+
+    def test_the_grains_drift_needs_no_sine(self):
+        text = (SHADERS / "grains.glsl").read_text(encoding="utf-8")
+        self.assertNotRegex(text, r"\b(?:cos|sin)\(")
+        for name, turn in (("GRAIN_COS", math.cos), ("GRAIN_SIN", math.sin)):
+            values = re.search(r"const vec4 %s = vec4\((.*?)\);" % name, text).group(1).split(",")
+            self.assertEqual(len(values), 4)
+            for j, value in enumerate(values):
+                self.assertAlmostEqual(float(value), turn((j - 1.5) * 0.14), places=7, msg=f"{name}[{j}]")
+
+    def test_a_bolts_limits_follow_the_size_it_is_drawn_at(self):
+        # its glows are measured in pixels: a limit in units of the height alone cuts them off on a smaller item, as
+        # in the viewer and on a cover
+        limits = re.findall(r"if \(away > ([^)]*)\)", glsl_function("volt.glsl", "bolt"))
+        self.assertEqual(len(limits), 2)
+        for limit in limits:
+            self.assertRegex(limit, r"^[\d.]+ \* px1 \+ [\d.]+ \* size$")
+
+    def test_volts_arcs_are_called_one_by_one_and_the_fine_octave_only_near_a_core(self):
+        # an arc's number is a constant in each call, so that all of it that does not depend on the pixel is the same
+        # for the whole draw; in a loop it would be worked out again at every pixel. The fine octave moves only the
+        # core, which shows a few pixels from the bolt at most
+        close = (SHADERS / "volt-close.frag").read_text(encoding="utf-8")
+        self.assertNotIn("for (", close)
+        self.assertIn("arc(p, 0.0) + arc(p, 1.0) + arc(p, 2.0) + arc(p, 3.0)", close)
+        bolt = glsl_function("volt.glsl", "bolt")
+        self.assertNotIn("boltX(", bolt)
+        self.assertLess(bolt.index("if (length(vec2(near / sqrt(1.0 + sMax * sMax), ds)) < 4.5 * px1)"),
+                        bolt.index("jag(sc / size, 1.9,"))
+        self.assertIn("if (t < 0.42 && p.y < below)", (SHADERS / "volt-open.frag").read_text(encoding="utf-8"))
+
     def test_a_blur_or_a_noise_read_only_where_it_can_show(self):
-        # Frost's ice blurs only where it has formed
+        # Frost's ice blurs only where it has formed, and Seaglass's pebble reads its noise only while it wobbles
         frost = (SHADERS / "frost-open.frag").read_text(encoding="utf-8")
         self.assertLess(frost.index("if (formed > 0.0)"), frost.index("blurSrc("))
+        pebble = re.search(r"^float pebble\(.*?^\}$", (SHADERS / "seaglass-close.frag").read_text(encoding="utf-8"),
+                           re.M | re.S).group(0)
+        self.assertLess(pebble.index("if (wob > 0.0)"), pebble.index("vnoise("))
 
     def test_a_flake_has_no_undefined_mip_level_and_no_equal_edges(self):
         snow = glsl_function("frost.glsl", "snow")
@@ -135,6 +211,32 @@ class AnimationShadersTest(unittest.TestCase):
             self.assertTrue(line.endswith(": noiseTex"), line)
             self.assertNotIn("null", line)
             self.assertTrue(line.startswith("fieldLoader && fieldLoader.item"), line)
+
+    def test_an_angle_is_never_asked_of_the_origin_itself(self):
+        # atan(0, 0) is undefined, and a GPU may draw that pixel black. Volt's front passes the origin while it is
+        # small, Ember's ring starts there and Frost's cracks run out of it: every angle gets 1.0 for x where its
+        # vector has no length, which no other pixel takes
+        volt = (SHADERS / "volt-open.frag").read_text(encoding="utf-8")
+        self.assertNotIn("atan(v.y, v.x)", volt)
+        self.assertIn("atan(v.y, r > 0.0 ? v.x : 1.0)", volt)
+        self.assertIn("float r = length(v);", volt[:volt.index("atan(")])
+        files = set()
+        for path in sorted(SHADERS.glob("*.*")):
+            text = re.sub(r"//[^\n]*", "", path.read_text(encoding="utf-8"))
+            for at, (y, x) in atan_calls(text):
+                files.add(path.stem)
+                by_length = re.fullmatch(r"(\w+) > 0\.0 \? (\w+)\.x : 1\.0", x)
+                by_vector = re.fullmatch(r"(\w+) != vec2\(0\.0\) \? \1\.x / resolution\.x : 1\.0", x)
+                if by_length:
+                    length, vector = by_length.groups()
+                    self.assertEqual(y, vector + ".y", path.name)
+                    self.assertIn(f"float {length} = length({vector});", text[:at], path.name)
+                else:
+                    self.assertTrue(by_vector, f"{path.name}: atan({y}, {x})")
+                    self.assertEqual(y, by_vector.group(1) + ".y / resolution.y", path.name)
+        for name in ("ember-open", "dust-open", "frost-close", "shatter-load", "singularity-load", "singularity-close",
+                     "volt-open", "volt-load", "seaglass-load"):
+            self.assertIn(name, files)
 
     def test_effect_passes_have_every_input(self):
         # Qt sets a shader's uniform from the ShaderEffect's property of that name, and warns without one: both
