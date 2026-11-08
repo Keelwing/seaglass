@@ -3,7 +3,7 @@
 Each version was checked on a Jolla Phone with the newest Sailfish OS it lists. How each feature works is in
 [docs/](docs/).
 
-## Unreleased
+## 1.1.0 (2026-11-08)
 
 - Out of the box the animations are on with Surprise me, a different style each time. With Surprise me off, apps
   open in Ember, load in Dust and close in Northern lights until you choose others. They run at the quick speed and

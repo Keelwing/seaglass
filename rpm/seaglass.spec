@@ -116,6 +116,10 @@ fi
 %doc /usr/share/doc/seaglass/CHANGELOG.md
 
 %changelog
+* Sun Nov 08 2026 Syrtis Major <d31m05z@gmail.com> - 1.1.0-1
+- App animations: a page that shows every style as stills, three Paper styles, effects on the render thread and
+  Surprise me by default; data widgets keep their places; Sailfish OS 5.2.0.22.
+
 * Sat Oct 17 2026 Syrtis Major <d31m05z@gmail.com> - 1.0.0-1
 - First public release: folder previews and folders as widgets, folder motion, glass, app search, notification
   badges, a richer task switcher and data widgets, with its settings in Patchmanager.
