@@ -83,9 +83,10 @@ style each time. With Surprise me off, apps open in Ember, load in Dust and clos
 others. More: [docs/ANIMATIONS.md](docs/ANIMATIONS.md).
 
 <p align="center">
-  <img src="docs/images/animations-sailfish.webp" width="250" alt="Notes opening from its icon and closing in the Seaglass, Tide and Northern lights styles">
-  <img src="docs/images/animations-elements.webp" width="250" alt="Notes opening from its icon and closing in the Ember, Volt and Frost styles">
-  <img src="docs/images/animations-extreme.webp" width="250" alt="Notes opening from its icon and closing in the Shatter, Singularity and Dust styles">
+  <img src="docs/images/animations-paper.webp" width="200" alt="Notes opening from its icon and closing in the Contour, Fold and Halftone styles">
+  <img src="docs/images/animations-sailfish.webp" width="200" alt="Notes opening from its icon and closing in the Seaglass, Tide and Northern lights styles">
+  <img src="docs/images/animations-elements.webp" width="200" alt="Notes opening from its icon and closing in the Ember, Volt and Frost styles">
+  <img src="docs/images/animations-extreme.webp" width="200" alt="Notes opening from its icon and closing in the Shatter, Singularity and Dust styles">
 </p>
 
 ### Folders
