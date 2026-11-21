@@ -225,9 +225,12 @@ with a clock and a line of text, an app tile and a plus. Patchmanager looks for 
 ## The site
 
 `make site` builds the GitHub Pages site into `out/site/` with `scripts/site.py`:
-- the landing page, from `site/index.html`;
+- the landing page, from `site/index.html`: a chapter per feature, whose phone shows the moment chosen in its list
+  (`site/assets/site.js`; without scripts every moment has its own phone), the settings' pages, the install steps
+  and the support link. The version, its day from the changelog and the Sailfish OS versions are filled in;
 - every Markdown doc as a page with a sidebar, with the links between the docs pointing at their pages;
-- the images and the icon.
+- the images, the icon, and the picture that link previews show (`icons/social.svg`, rendered by
+  `scripts/social.sh`).
 
 The font, Albert Sans, is served from `site/assets/fonts/`, so the site loads nothing from other hosts. The build
 fails on a broken link. To look at it, serve it locally: `python3 -m http.server -d out/site`.

@@ -20,8 +20,14 @@ OUT = Path(sys.argv[2]).resolve()
 SITE = REPO / "site"
 GITHUB = "https://github.com/Keelwing/seaglass"
 VERSION = (REPO / "VERSION").read_text().strip()
-COMPATIBLE = " or ".join(json.loads((REPO / "patchmanager" / "patch.json").read_text())["compatible"])
-RPM_URL = f"{GITHUB}/releases/download/v{VERSION}/seaglass-{VERSION}-1.noarch.rpm"
+VERSIONS = json.loads((REPO / "patchmanager" / "patch.json").read_text())["compatible"]
+COMPATIBLE = ", ".join(VERSIONS[:-1]) + " or " + VERSIONS[-1] if len(VERSIONS) > 1 else VERSIONS[0]
+# the versions of the testers' package (patchmanager/versions: "VERSION preview")
+PREVIEW = [line.split()[0] for line in (REPO / "patchmanager" / "versions").read_text().splitlines()
+           if line.split("#")[0].split()[1:] == ["preview"]]
+RELEASE = f"{GITHUB}/releases/download/v{VERSION}"
+RPM = f"seaglass-{VERSION}-1.noarch.rpm"
+RPM_URL = f"{RELEASE}/{RPM}"
 # the developer's Ko-fi page (.github/FUNDING.yml, README.md and the settings' About page link the same)
 SUPPORT = "https://ko-fi.com/D31m05z"
 
@@ -44,6 +50,24 @@ SECTIONS = [
     ("Development", [("docs/ARCHITECTURE.md", "docs/architecture.html", None),
                      ("docs/DEVELOPMENT.md", "docs/development.html", None)]),
 ]
+
+
+def released():
+    """The day of this version in the changelog ("## 1.1.0 (2026-11-08)"), as "8 November 2026"."""
+    match = re.search(rf"^## {re.escape(VERSION)} \((\d+)-(\d+)-(\d+)\)$", (REPO / "CHANGELOG.md").read_text(), re.M)
+    if not match:
+        sys.exit(f"CHANGELOG.md has no section of {VERSION} with its day")
+    months = ("January February March April May June July August September October November December").split()
+    year, month, day = (int(part) for part in match.groups())
+    return f"{day} {months[month - 1]} {year}"
+
+
+def older():
+    """A word on the testers' package, while patchmanager/versions lists versions for it."""
+    if not PREVIEW:
+        return ""
+    return (f' Sailfish OS {" and ".join(PREVIEW)} have a <a href="{RELEASE}/seaglass-{VERSION}-0.preview1.noarch.rpm">'
+            f"testers' package</a>, which CI checks but no such phone has run yet.")
 
 
 def fill(template, values):
@@ -188,7 +212,9 @@ def build():
     (OUT / "docs" / "index.html").write_text(fill(template, values), encoding="utf-8")
 
     # the landing page
-    values = {"version": VERSION, "compatible": COMPATIBLE, "rpm_url": RPM_URL, "support": SUPPORT}
+    values = {"version": VERSION, "compatible": COMPATIBLE, "rpm_url": RPM_URL, "rpm": RPM, "support": SUPPORT,
+              "github": GITHUB, "released": released(), "sums_url": f"{RELEASE}/SHA256SUMS",
+              "older": older()}
     values.update(partials("index.html", False))
     (OUT / "index.html").write_text(fill((SITE / "index.html").read_text(encoding="utf-8"), values), encoding="utf-8")
     print(f"site: {len(docs) + 2} pages in {OUT}")

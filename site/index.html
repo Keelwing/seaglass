@@ -35,7 +35,8 @@
           <a class="button primary" href="{{rpm_url}}">Download {{version}}</a>
           <a class="button" href="#install">How to install</a>
         </div>
-        <p class="requires">For Sailfish OS {{compatible}} with Patchmanager 3.2 or newer.</p>
+        <p class="requires">For Sailfish OS {{compatible}}, with Patchmanager 3.2 or newer.</p>
+        <p class="requires">Version {{version}} of {{released}}: <a href="docs/changelog.html">what is new</a>.</p>
       </div>
       <figure class="phone hero-phone">
         <div class="screen">
@@ -54,194 +55,321 @@
       </figure>
     </section>
 
-    <section class="features" id="features" aria-label="Features">
-      <div class="steps">
-        <article class="feature" data-shot="images/widget-add.webp" data-still="images/widgets.jpg">
-          <h2>Data widgets</h2>
-          <p>Live information as glass blocks among your icons: a clock with the next alarm, the battery and your
-            connections, what is playing, your next events and the weather.</p>
-          <p>Add them in the edit mode: <em>Add widget</em> opens a gallery with live previews. Carry one out and let
-            it go where you want it.</p>
-          <figure class="phone"><div class="screen"><picture>
-            <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
-            <img src="images/widget-add.webp" width="360" height="793" loading="lazy"
-                 alt="Add widget: a status card carried out of the gallery onto the grid">
-          </picture></div></figure>
-        </article>
+    <nav class="contents" aria-label="On this page">
+      <ul>
+        <li><a href="#widgets">Widgets</a></li>
+        <li><a href="#glass">Glass</a></li>
+        <li><a href="#animations">Animations</a></li>
+        <li><a href="#folders">Folders</a></li>
+        <li><a href="#search">Search and badges</a></li>
+        <li><a href="#switcher">Task switcher</a></li>
+        <li><a href="#settings">Settings</a></li>
+        <li><a href="#install">Install</a></li>
+        <li><a href="#support">Support</a></li>
+      </ul>
+    </nav>
 
-        <article class="feature" data-shot="images/widget-move.webp" data-still="images/widgets.jpg">
-          <h2>Move them like icons</h2>
-          <p>A long press picks a widget up anywhere on it. The icons flow around it as it moves, and it takes its
-            place in the grid's order when you let go.</p>
-          <figure class="phone"><div class="screen"><picture>
-            <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
-            <img src="images/widget-move.webp" width="360" height="793" loading="lazy"
-                 alt="The weather widget carried up two rows while the clock and the icons make way">
-          </picture></div></figure>
-        </article>
+    <div class="features" id="features">
+      <section class="chapter" id="widgets" aria-labelledby="widgets-title">
+        <div class="chapter-text">
+          <h2 id="widgets-title">Data widgets</h2>
+          <p class="chapter-lead">Live information as glass blocks among your icons: a clock with the next alarm, the battery and your connections, what is playing, your next events and the weather.</p>
+          <div class="moments">
+          <article class="moment">
+            <h3>Five kinds on the grid</h3>
+            <p>Each is a card of two by two cells or a shelf across the screen, and all but the clock can be a panel of two rows. A fresh install starts with the clock and the status.</p>
+            <figure class="phone"><div class="screen">
+              <img src="images/widgets.jpg" width="540" height="1189" loading="lazy"
+                   alt="The app grid on glass, with a clock, the status, now playing, the next events and the weather">
+            </div></figure>
+          </article>
+          <article class="moment">
+            <h3>Add one from the gallery</h3>
+            <p>In the edit mode, <em>Add widget</em> opens a gallery with a live preview of each size. Tap one, or carry it out and let it go where you want it.</p>
+            <figure class="phone"><div class="screen"><picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="images/widget-gallery.jpg">
+              <img src="images/widget-add.webp" width="360" height="793" loading="lazy"
+                   alt="Add widget: a status card carried out of the gallery onto the grid">
+            </picture></div></figure>
+          </article>
+          <article class="moment">
+            <h3>Move it like an icon</h3>
+            <p>A long press picks a widget up anywhere on it. The icons flow around it as it moves, and it takes its place in the grid's order when you let go.</p>
+            <figure class="phone"><div class="screen"><picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
+              <img src="images/widget-move.webp" width="360" height="793" loading="lazy"
+                   alt="The weather widget carried up two rows while the clock and the icons make way">
+            </picture></div></figure>
+          </article>
+          <article class="moment">
+            <h3>Change its size</h3>
+            <p>The pill on a widget in the edit mode makes it a card, a shelf or a panel, or takes it away.</p>
+            <figure class="phone"><div class="screen"><picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets-edit.jpg">
+              <img src="images/widget-resize.webp" width="360" height="793" loading="lazy"
+                   alt="The size pill turns the clock from a card into a shelf, and back">
+            </picture></div></figure>
+          </article>
+          <article class="moment">
+            <h3>Cards side by side</h3>
+            <p>Cards sit next to each other and next to your icons, and the clock has an analogue face.</p>
+            <figure class="phone"><div class="screen">
+              <img src="images/widgets-cards.jpg" width="540" height="1189" loading="lazy"
+                   alt="An analogue clock card and a weather card in the first rows, a now playing shelf, and an event card beside a status card">
+            </div></figure>
+          </article>
+          </div>
+          <p class="chapter-more"><a href="docs/widgets.html">How the widgets work</a></p>
+        </div>
+        <div class="chapter-stage" aria-hidden="true"><figure class="phone"><div class="screen"></div></figure></div>
+      </section>
 
-        <article class="feature" data-shot="images/widget-resize.webp" data-still="images/widgets.jpg">
-          <h2>Any size that fits</h2>
-          <p>The pill on a widget in the edit mode changes its size: a card of two by two cells, a shelf across the
-            screen, or a panel of two rows.</p>
-          <figure class="phone"><div class="screen"><picture>
-            <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
-            <img src="images/widget-resize.webp" width="360" height="793" loading="lazy"
-                 alt="The size pill turns the clock from a card into a shelf, and back">
-          </picture></div></figure>
-        </article>
+      <section class="chapter" id="glass" aria-labelledby="glass-title">
+        <div class="chapter-text">
+          <h2 id="glass-title">Glass over your ambience</h2>
+          <p class="chapter-lead">The app grid rises over the home screen's wallpaper, which eases back and follows the pages more slowly than the icons. Folders, open folders and widgets are glass too.</p>
+          <div class="moments">
+          <article class="moment">
+            <h3>Clear, with a picture of its own</h3>
+            <p>In the clear look only the icons rise, and the picture of another ambience, or a photo from the Gallery, can come up with them. It rises from below and blends into the wallpaper.</p>
+            <figure class="phone"><div class="screen"><picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
+              <img src="images/glass-clear.webp" width="320" height="704" loading="lazy"
+                   alt="The clear app grid pulled up as another ambience's picture rises and blends in, a page turned, and back">
+            </picture></div></figure>
+          </article>
+          <article class="moment">
+            <h3>Frosted</h3>
+            <p>In the glass look the wallpaper frosts as the grid comes up.</p>
+            <figure class="phone"><div class="screen"><picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
+              <img src="images/glass.webp" width="320" height="705" loading="lazy"
+                   alt="The app grid pulled up over the wallpaper as it frosts, a page turned, and back">
+            </picture></div></figure>
+          </article>
+          <article class="moment">
+            <h3>Tuned on a small home screen</h3>
+            <p>The Glass page draws the look as you change it: the dimming, the parallax and the depth, and tilt and drift if you want them. <em>Stock</em> keeps the Sailfish background.</p>
+            <figure class="phone"><div class="screen">
+              <img src="images/settings-glass.jpg" width="540" height="1189" loading="lazy"
+                   alt="The Glass page of the settings: a small home screen over the wallpaper, and the look, the picture, the dimming and the parallax under it">
+            </div></figure>
+          </article>
+          </div>
+          <p class="chapter-more"><a href="docs/glass.html">How the glass works</a></p>
+        </div>
+        <div class="chapter-stage" aria-hidden="true"><figure class="phone"><div class="screen"></div></figure></div>
+      </section>
 
-        <article class="feature" data-shot="images/glass.webp" data-still="images/widgets.jpg">
-          <h2>Glass over your ambience</h2>
-          <p>The app grid rises over the home screen's wallpaper, sharp or frosted like glass. The wallpaper eases
-            back and follows the pages more slowly than the icons, and another ambience's picture can take its place.
-            Folders, open folders and widgets are glass too.</p>
-          <figure class="phone"><div class="screen"><picture>
-            <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
-            <img src="images/glass.webp" width="320" height="705" loading="lazy"
-                 alt="The app grid pulled up over the wallpaper as it frosts, a page turned, and back">
-          </picture></div></figure>
-        </article>
+      <section class="chapter" id="animations" aria-labelledby="animations-title">
+        <div class="chapter-text">
+          <h2 id="animations-title">App animations</h2>
+          <p class="chapter-lead">An app opens from the icon or the cover you tapped and closes with the swipe from the top, in one of twelve styles. While it starts, its new cover shows the style's loading effect instead of the busy indicator.</p>
+          <div class="moments">
+          <article class="moment">
+            <h3>Paper</h3>
+            <p>Contour, Fold and Halftone are drawn lines, paper folds and printed dots, and light on the phone.</p>
+            <figure class="phone"><div class="screen"><picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="images/settings-animations.jpg">
+              <img src="images/animations-paper.webp" width="300" height="661" loading="lazy"
+                   alt="Notes opening from its icon and closing in the Contour, Fold and Halftone styles">
+            </picture></div></figure>
+          </article>
+          <article class="moment">
+            <h3>Glass, water and light</h3>
+            <p>Seaglass rises as frosted glass and sinks as a pebble, Tide spreads the app in a ripple and washes it away, and Northern lights sweeps it in with curtains of aurora.</p>
+            <figure class="phone"><div class="screen"><picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="images/settings-animations.jpg">
+              <img src="images/animations-sailfish.webp" width="300" height="661" loading="lazy"
+                   alt="Notes opening from its icon and closing in the Seaglass, Tide and Northern lights styles">
+            </picture></div></figure>
+          </article>
+          <article class="moment">
+            <h3>Fire, lightning and ice</h3>
+            <p>Ember opens an app in a ring of fire and burns it away from the bottom. Volt strikes it with lightning and switches it off like an old TV. Frost thaws it from the icon and freezes it into snow.</p>
+            <p>With <em>Ambience colours</em> on, the fire, the water and the light take the ambience's highlight colour.</p>
+            <figure class="phone"><div class="screen"><picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="images/settings-animations.jpg">
+              <img src="images/animations-elements.webp" width="300" height="661" loading="lazy"
+                   alt="Notes opening from its icon and closing in the Ember, Volt and Frost styles">
+            </picture></div></figure>
+          </article>
+          <article class="moment">
+            <h3>Loud on purpose</h3>
+            <p>Shatter breaks the window where your finger let go, Singularity pulls it into a black hole, and Dust lets the wind take it.</p>
+            <figure class="phone"><div class="screen"><picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="images/settings-animations.jpg">
+              <img src="images/animations-extreme.webp" width="300" height="661" loading="lazy"
+                   alt="Notes opening from its icon and closing in the Shatter, Singularity and Dust styles">
+            </picture></div></figure>
+          </article>
+          <article class="moment">
+            <h3>Every style at a glance</h3>
+            <p>The Animations page shows each style's opening, loading and closing as still frames. Pick one for all three, or a different one for each. Out of the box <em>Surprise me</em> chooses each time.</p>
+            <figure class="phone"><div class="screen">
+              <img src="images/settings-animations.jpg" width="540" height="1189" loading="lazy"
+                   alt="The Animations page: every style's opening, loading and closing as still frames">
+            </div></figure>
+          </article>
+          <article class="moment">
+            <h3>Tried before it is chosen</h3>
+            <p>A tap plays a style large, with its whole run as a strip you can drag. Nothing changes until you tap <em>Use</em>.</p>
+            <figure class="phone"><div class="screen">
+              <img src="images/settings-animations-viewer.jpg" width="540" height="1189" loading="lazy"
+                   alt="The viewer: one style large over a made-up home screen, with its run as a strip under it">
+            </div></figure>
+          </article>
+          </div>
+          <p class="chapter-more"><a href="docs/animations.html">How the animations work, and what they cost</a></p>
+        </div>
+        <div class="chapter-stage" aria-hidden="true"><figure class="phone"><div class="screen"></div></figure></div>
+      </section>
 
-        <article class="feature" data-shot="images/glass-clear.webp" data-still="images/widgets.jpg">
-          <h2>Another ambience under the icons</h2>
-          <p>In the clear look only the icons rise, and the picture of another ambience can come up with them. It rises
-            from below and blends into the wallpaper, so the app grid gets a backdrop of its own.</p>
-          <p>Choose one of the ambience pictures Sailfish OS ships, or a photo from the Gallery.</p>
-          <figure class="phone"><div class="screen"><picture>
-            <source media="(prefers-reduced-motion: reduce)" srcset="images/widgets.jpg">
-            <img src="images/glass-clear.webp" width="320" height="704" loading="lazy"
-                 alt="The clear app grid pulled up as another ambience's picture rises and blends in, a page turned, and back">
-          </picture></div></figure>
-        </article>
+      <section class="chapter" id="folders" aria-labelledby="folders-title">
+        <div class="chapter-text">
+          <h2 id="folders-title">Folders you can see into</h2>
+          <p class="chapter-lead">A folder shows small icons of its apps instead of a number, and opens from its icon with a motion of your choice.</p>
+          <div class="moments">
+          <article class="moment">
+            <h3>Open with a motion</h3>
+            <p>Zoom, spring, reveal or slide: a folder opens from its icon onto glass with its apps rippling in, and closes back into it.</p>
+            <figure class="phone"><div class="screen"><picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="images/folders.jpg">
+              <img src="images/folder-motion.webp" width="360" height="793" loading="lazy"
+                   alt="A folder zooming open from its icon onto glass, and closing back">
+            </picture></div></figure>
+          </article>
+          <article class="moment">
+            <h3>Folders as widgets</h3>
+            <p>Open a folder out into a card, a shelf or a panel on the grid, and its apps start with one tap. It stays an ordinary folder underneath.</p>
+            <figure class="phone"><div class="screen">
+              <img src="images/folders.jpg" width="540" height="1189" loading="lazy"
+                   alt="Folder previews, and folders shown as a card and a panel among the icons">
+            </div></figure>
+          </article>
+          <article class="moment">
+            <h3>Chosen where the shape is</h3>
+            <p>Tap an open folder's icon: under Sailfish's folder shapes, <em>On the home screen</em> offers the icon, the card, the shelf and the panel.</p>
+            <figure class="phone"><div class="screen">
+              <img src="images/folder-shapes.jpg" width="540" height="1189" loading="lazy"
+                   alt="An open folder's shapes, and under them the four ways it can sit on the home screen">
+            </div></figure>
+          </article>
+          </div>
+          <p class="chapter-more"><a href="docs/folders.html">How the folders work</a></p>
+        </div>
+        <div class="chapter-stage" aria-hidden="true"><figure class="phone"><div class="screen"></div></figure></div>
+      </section>
 
-        <article class="feature" data-shot="images/animations-paper.webp" data-still="images/settings-animations.jpg">
-          <h2>Apps open where you tap them</h2>
-          <p>An app opens from the icon or the cover you tapped and closes with the swipe from the top, in one of
-            twelve styles. Contour, Fold and Halftone are drawn lines, paper folds and printed dots, and light on the
-            phone.</p>
-          <p>While an app starts, its new cover in the switcher shows the style's loading effect instead of the busy
-            indicator. Every effect runs on the GPU, on a copy of the window, so Sailfish never waits for it.</p>
-          <figure class="phone"><div class="screen"><picture>
-            <source media="(prefers-reduced-motion: reduce)" srcset="images/settings-animations.jpg">
-            <img src="images/animations-paper.webp" width="300" height="661" loading="lazy"
-                 alt="Notes opening from its icon and closing in the Contour, Fold and Halftone styles">
-          </picture></div></figure>
-        </article>
+      <section class="chapter" id="search" aria-labelledby="search-title">
+        <div class="chapter-text">
+          <h2 id="search-title">Search and badges</h2>
+          <p class="chapter-lead">A glass pill on the first page holds the apps you use most, and icons show which apps have something new.</p>
+          <div class="moments">
+          <article class="moment">
+            <h3>Find any app as you type</h3>
+            <p>Accents don't matter, and initials and folder names match too. <em>Enter</em> starts the first match.</p>
+            <figure class="phone"><div class="screen"><picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="images/search.jpg">
+              <img src="images/search-typing.webp" width="360" height="502" loading="lazy"
+                   alt="The search sheet growing out of the pill: the letter rail, then typing">
+            </picture></div></figure>
+          </article>
+          <article class="moment">
+            <h3>Every app from A to Z</h3>
+            <p>Before you type, the sheet lists the apps you use most and then all of them, with a letter rail to jump along.</p>
+            <figure class="phone"><div class="screen">
+              <img src="images/search.jpg" width="540" height="754" loading="lazy"
+                   alt="The search sheet with its letter rail">
+            </div></figure>
+          </article>
+          <article class="moment">
+            <h3>Badges, and a peek</h3>
+            <p>Apps with notifications show how many on their icons, and folders add theirs up. A long press on an app or a folder shows the notifications, to open or clear them.</p>
+            <figure class="phone"><div class="screen">
+              <img src="images/badges.jpg" width="540" height="1189" loading="lazy"
+                   alt="Badges on app icons and a folder, and the peek at a folder's notifications">
+            </div></figure>
+          </article>
+          </div>
+          <p class="chapter-more"><a href="docs/search.html">How the search works</a>, and <a href="docs/badges.html">the badges</a></p>
+        </div>
+        <div class="chapter-stage" aria-hidden="true"><figure class="phone"><div class="screen"></div></figure></div>
+      </section>
 
-        <article class="feature" data-shot="images/animations-sailfish.webp" data-still="images/settings-animations.jpg">
-          <h2>Glass, water and light</h2>
-          <p>The calm styles are made of the ambience: Seaglass rises as frosted glass and sinks as a pebble, Tide
-            spreads the app in a ripple and washes it away, and Northern lights sweeps it in with curtains of aurora
-            and melts it into rays.</p>
-          <figure class="phone"><div class="screen"><picture>
-            <source media="(prefers-reduced-motion: reduce)" srcset="images/settings-animations.jpg">
-            <img src="images/animations-sailfish.webp" width="300" height="661" loading="lazy"
-                 alt="Notes opening from its icon and closing in the Seaglass, Tide and Northern lights styles">
-          </picture></div></figure>
-        </article>
+      <section class="chapter" id="switcher" aria-labelledby="switcher-title">
+        <div class="chapter-text">
+          <h2 id="switcher-title">A task switcher with names</h2>
+          <p class="chapter-lead">Covers get a chip with their app's icon and name, and the apps you closed last are one tap away.</p>
+          <div class="moments">
+          <article class="moment">
+            <h3>Names and recently closed</h3>
+            <p>The chips sit under the covers. The <em>Recently closed</em> capsule starts a closed app again.</p>
+            <figure class="phone"><div class="screen">
+              <img src="images/switcher.jpg" width="540" height="1189" loading="lazy"
+                   alt="The task switcher: covers with name chips under them, and the recently closed apps">
+            </div></figure>
+          </article>
+          <article class="moment">
+            <h3>Pinch between grid and cards</h3>
+            <p>A pinch switches between the grid of covers and a row of cards, following your fingers.</p>
+            <figure class="phone"><div class="screen"><picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="images/switcher.jpg">
+              <img src="images/switcher-pinch.webp" width="360" height="793" loading="lazy"
+                   alt="A pinch switching the task switcher from the card row to the grid, and back">
+            </picture></div></figure>
+          </article>
+          <article class="moment">
+            <h3>Pull a card up to close it</h3>
+            <p>In the card row the last app you used is in front. Pull a card up and the switcher shows the point of closing; let go before it and the card springs back.</p>
+            <figure class="phone"><div class="screen"><picture>
+              <source media="(prefers-reduced-motion: reduce)" srcset="images/switcher.jpg">
+              <img src="images/switcher-close.webp" width="360" height="793" loading="lazy"
+                   alt="A card pulled up past the point of closing">
+            </picture></div></figure>
+          </article>
+          </div>
+          <p class="chapter-more"><a href="docs/switcher.html">How the task switcher works</a></p>
+        </div>
+        <div class="chapter-stage" aria-hidden="true"><figure class="phone"><div class="screen"></div></figure></div>
+      </section>
+    </div>
 
-        <article class="feature" data-shot="images/animations-elements.webp" data-still="images/settings-animations.jpg">
-          <h2>Fire, lightning and ice</h2>
-          <p>Ember opens an app in a ring of fire and burns it away from the bottom. Volt strikes it with lightning and
-            switches it off like an old TV. Frost thaws it from the icon and freezes it into snow.</p>
-          <p>With <em>Ambience colours</em> on, the fire, the water and the light take the ambience's highlight colour.</p>
-          <figure class="phone"><div class="screen"><picture>
-            <source media="(prefers-reduced-motion: reduce)" srcset="images/settings-animations.jpg">
-            <img src="images/animations-elements.webp" width="300" height="661" loading="lazy"
-                 alt="Notes opening from its icon and closing in the Ember, Volt and Frost styles">
-          </picture></div></figure>
-        </article>
-
-        <article class="feature" data-shot="images/animations-extreme.webp" data-still="images/settings-animations.jpg">
-          <h2>Loud on purpose</h2>
-          <p>Shatter breaks the window where your finger let go, Singularity pulls it into a black hole, and Dust lets
-            the wind take it.</p>
-          <p>See every style side by side, try any of them, and pick one for all moments or a different one for
-            opening, loading or closing, or let <em>Surprise me</em> choose each time, as it does out of the box.
-            With it off, apps open in <em>Ember</em>, load in <em>Dust</em> and close in <em>Northern lights</em>
-            until you choose others.</p>
-          <figure class="phone"><div class="screen"><picture>
-            <source media="(prefers-reduced-motion: reduce)" srcset="images/settings-animations.jpg">
-            <img src="images/animations-extreme.webp" width="300" height="661" loading="lazy"
-                 alt="Notes opening from its icon and closing in the Shatter, Singularity and Dust styles">
-          </picture></div></figure>
-        </article>
-
-        <article class="feature" data-shot="images/folder-motion.webp" data-still="images/folders.jpg">
-          <h2>Folders you can see into</h2>
-          <p>A folder shows small icons of its apps instead of a number. It opens from its icon with a motion of your
-            choice, zoom, spring, reveal or slide, and closes back into it.</p>
-          <figure class="phone"><div class="screen"><picture>
-            <source media="(prefers-reduced-motion: reduce)" srcset="images/folders.jpg">
-            <img src="images/folder-motion.webp" width="360" height="793" loading="lazy"
-                 alt="A folder zooming open from its icon onto glass, and closing back">
-          </picture></div></figure>
-        </article>
-
-        <article class="feature" data-shot="images/folders.jpg" data-still="images/folders.jpg">
-          <h2>Folders as widgets</h2>
-          <p>Open a folder out into a card, a shelf or a panel on the grid, and its apps start with one tap. It stays an
-            ordinary folder underneath.</p>
-          <figure class="phone"><div class="screen">
-            <img src="images/folders.jpg" width="540" height="1189" loading="lazy"
-                 alt="Folder previews, and folders shown as a card and a panel among the icons">
-          </div></figure>
-        </article>
-
-        <article class="feature" data-shot="images/search-typing.webp" data-still="images/search.jpg">
-          <h2>Find any app as you type</h2>
-          <p>A glass pill on the first page holds the apps you use most. Tap it for every app from A to Z with a letter
-            rail, or start typing: accents don't matter, and initials and folder names match too.</p>
-          <figure class="phone"><div class="screen"><picture>
-            <source media="(prefers-reduced-motion: reduce)" srcset="images/search.jpg">
-            <img src="images/search-typing.webp" width="360" height="502" loading="lazy"
-                 alt="The search sheet growing out of the pill: the letter rail, then typing">
-          </picture></div></figure>
-        </article>
-
-        <article class="feature" data-shot="images/badges.jpg" data-still="images/badges.jpg">
-          <h2>Badges where they help</h2>
-          <p>Apps with notifications show how many on their icons, folders add theirs up, and a long press on an app or
-            a folder shows the notifications, to open or clear them.</p>
-          <figure class="phone"><div class="screen">
-            <img src="images/badges.jpg" width="540" height="1189" loading="lazy"
-                 alt="Badges on app icons and a folder, and the peek at a folder's notifications">
-          </div></figure>
-        </article>
-
-        <article class="feature" data-shot="images/switcher-pinch.webp" data-still="images/switcher.jpg">
-          <h2>A task switcher with names</h2>
-          <p>Covers get a chip with their app's name, and recently closed apps are one tap away. Pinch to switch between
-            the grid of covers and a row of cards.</p>
-          <figure class="phone"><div class="screen"><picture>
-            <source media="(prefers-reduced-motion: reduce)" srcset="images/switcher.jpg">
-            <img src="images/switcher-pinch.webp" width="360" height="793" loading="lazy"
-                 alt="A pinch switching the task switcher from the card row to the grid, and back">
-          </picture></div></figure>
-        </article>
-
-        <article class="feature" data-shot="images/switcher-close.webp" data-still="images/switcher.jpg">
-          <h2>Pull a card up to close it</h2>
-          <p>In the card row, the last app you used is in front. Pull a card up and the switcher shows the point of
-            closing; let go before it and the card springs back.</p>
-          <figure class="phone"><div class="screen"><picture>
-            <source media="(prefers-reduced-motion: reduce)" srcset="images/switcher.jpg">
-            <img src="images/switcher-close.webp" width="360" height="793" loading="lazy"
-                 alt="A card pulled up past the point of closing">
-          </picture></div></figure>
-        </article>
+    <section class="settings" id="settings" aria-labelledby="settings-title">
+      <div class="shots-intro">
+        <h2 id="settings-title">Every part is a setting</h2>
+        <p class="chapter-lead">Tap <em>Seaglass</em> in Patchmanager for its settings. The first page says whether
+          Seaglass runs, and what to do if it does not.</p>
+        <p>Each feature has a page of its own, several with a live preview, and changes apply at once. The pulley menu
+          resets the settings or restarts the home screen, and <em>About</em> backs everything up to a file in
+          Documents, for another phone or after a reflash.</p>
       </div>
-
-      <div class="stage" aria-hidden="true">
-        <figure class="phone stage-phone">
-          <div class="screen"></div>
-        </figure>
+      <div class="shots" tabindex="0" role="region" aria-label="The settings pages, scroll sideways">
+        <figure><div class="phone"><div class="screen"><img src="images/settings.jpg" width="540" height="1189" loading="lazy"
+          alt="The first page of the settings: the status, and a row per feature with what it is set to"></div></div><figcaption>The first page</figcaption></figure>
+        <figure><div class="phone"><div class="screen"><img src="images/settings-widgets.jpg" width="540" height="1189" loading="lazy"
+          alt="The Widgets page: the clock face, the status switches, now playing, events and weather options"></div></div><figcaption>Widgets</figcaption></figure>
+        <figure><div class="phone"><div class="screen"><img src="images/settings-glass.jpg" width="540" height="1189" loading="lazy"
+          alt="The Glass page with its small home screen"></div></div><figcaption>Glass</figcaption></figure>
+        <figure><div class="phone"><div class="screen"><img src="images/settings-animations.jpg" width="540" height="1189" loading="lazy"
+          alt="The Animations page: every style's opening, loading and closing as still frames"></div></div><figcaption>Animations</figcaption></figure>
+        <figure><div class="phone"><div class="screen"><img src="images/settings-folders.jpg" width="540" height="1189" loading="lazy"
+          alt="The Folders page: a folder opening on a small screen, and its animation, cascade, depth and speed"></div></div><figcaption>Folders</figcaption></figure>
+        <figure><div class="phone"><div class="screen"><img src="images/settings-search.jpg" width="540" height="1189" loading="lazy"
+          alt="The Search page: the search row, its position, and remembering launches"></div></div><figcaption>Search</figcaption></figure>
+        <figure><div class="phone"><div class="screen"><img src="images/settings-badges.jpg" width="540" height="1189" loading="lazy"
+          alt="The Badges page: the style and colour of the badges, folders and the long press"></div></div><figcaption>Badges</figcaption></figure>
+        <figure><div class="phone"><div class="screen"><img src="images/settings-switcher.jpg" width="540" height="1189" loading="lazy"
+          alt="The Task switcher page: the background, names under the covers, the layout, the pinch and recently closed apps"></div></div><figcaption>Task switcher</figcaption></figure>
+        <figure><div class="phone"><div class="screen"><img src="images/settings-about.jpg" width="540" height="1189" loading="lazy"
+          alt="The About page: the debug log, back up and restore, the version and the links"></div></div><figcaption>About and backup</figcaption></figure>
       </div>
     </section>
 
     <section class="install" id="install" aria-labelledby="install-title">
       <h2 id="install-title">Install</h2>
+      <p class="install-intro">You need Sailfish OS {{compatible}}. Everything else the package needs is part of
+        Sailfish OS.</p>
       <ol class="install-steps">
         <li>
           <h3>Get Patchmanager</h3>
@@ -249,8 +377,9 @@
         </li>
         <li>
           <h3>Install the package</h3>
-          <p><a href="{{rpm_url}}">Download the RPM</a>, then install it in a terminal:</p>
-          <pre><code>devel-su pkcon install-local seaglass-{{version}}-1.noarch.rpm</code></pre>
+          <p><a href="{{rpm_url}}">Download the RPM</a> on the phone, then install it in a terminal:</p>
+          <pre><code id="install-command">devel-su pkcon install-local {{rpm}}</code></pre>
+          <button class="copy" type="button" data-copy="install-command" hidden>Copy the command</button>
         </li>
         <li>
           <h3>Activate Seaglass</h3>
@@ -258,26 +387,45 @@
             restart the home screen. Tap <em>Seaglass</em> there for its settings.</p>
         </li>
       </ol>
-      <p class="install-more">To take it back, deactivate it in Patchmanager or run
-        <code>devel-su rpm -e seaglass</code>. More in the <a href="docs/guide.html#install">install guide</a>
-        and <a href="docs/guide.html#troubleshooting">troubleshooting</a>.</p>
-    </section>
 
-    <section class="gallery" aria-labelledby="gallery-title">
-      <h2 id="gallery-title">Screens</h2>
-      <div class="gallery-row" tabindex="0" role="region" aria-label="Screenshots, scroll sideways">
-        <figure><div class="phone"><div class="screen"><img src="images/widgets.jpg" width="540" height="1189" loading="lazy" alt="The app grid on glass with data widgets"></div></div><figcaption>Data widgets on glass</figcaption></figure>
-        <figure><div class="phone"><div class="screen"><img src="images/folders.jpg" width="540" height="1189" loading="lazy" alt="Folder previews and folder widgets"></div></div><figcaption>Folders and folder widgets</figcaption></figure>
-        <figure><div class="phone"><div class="screen"><img src="images/search.jpg" width="540" height="754" loading="lazy" alt="The search sheet with its letter rail"></div></div><figcaption>App search</figcaption></figure>
-        <figure><div class="phone"><div class="screen"><img src="images/badges.jpg" width="540" height="1189" loading="lazy" alt="Notification badges and the peek"></div></div><figcaption>Badges and the peek</figcaption></figure>
-        <figure><div class="phone"><div class="screen"><img src="images/switcher.jpg" width="540" height="1189" loading="lazy" alt="The task switcher's card row"></div></div><figcaption>Task switcher</figcaption></figure>
-        <figure><div class="phone"><div class="screen"><img src="images/settings.jpg" width="540" height="1189" loading="lazy" alt="The first page of the Seaglass settings"></div></div><figcaption>Settings</figcaption></figure>
-        <figure><div class="phone"><div class="screen"><img src="images/settings-animations.jpg" width="540" height="1189" loading="lazy" alt="The Animations page: every style's opening, loading and closing as still frames"></div></div><figcaption>Animations settings</figcaption></figure>
-        <figure><div class="phone"><div class="screen"><img src="images/settings-animations-viewer.jpg" width="540" height="1189" loading="lazy" alt="The viewer: one style large over the made-up home screen, with its run as a strip under it"></div></div><figcaption>The animation viewer</figcaption></figure>
+      <div class="notes">
+        <div>
+          <h3>Which Sailfish OS</h3>
+          <p>Seaglass patches the home screen of particular versions, so Patchmanager applies it only to the ones a
+            release lists.{{older}} After a Sailfish OS update, wait for a Seaglass that lists the new version.
+            <a href="docs/guide.html#compatibility">Compatibility</a></p>
+        </div>
+        <div>
+          <h3>Updating</h3>
+          <p>Install the new package the same way. It takes the patch out before the update and activates it again
+            afterwards; then restart the home screen from Patchmanager's pulley menu.
+            <a href="docs/guide.html#updating-and-removing">Updating</a></p>
+        </div>
+        <div>
+          <h3>Removing</h3>
+          <p>Deactivate <em>Seaglass</em> in Patchmanager, or remove the package with
+            <code>devel-su rpm -e seaglass</code>. Folders shown as widgets go back to being ordinary folders.</p>
+        </div>
+        <div>
+          <h3>If the home screen stays stock</h3>
+          <p>Reboot the phone if the app grid does not come up after activating. If the patch is active and nothing
+            changed, the settings' first page says why.
+            <a href="docs/guide.html#troubleshooting">Troubleshooting</a></p>
+        </div>
+        <div>
+          <h3>Checking the download</h3>
+          <p>Each release has a <a href="{{sums_url}}">SHA256SUMS</a> file beside its packages on the
+            <a href="{{github}}/releases">releases page</a>.</p>
+        </div>
+        <div>
+          <h3>Something is wrong</h3>
+          <p>Tell what you see in an <a href="{{github}}/issues">issue</a>. Reports from phones other than the
+            Jolla Phone, and from the older Sailfish OS versions, help most.</p>
+        </div>
       </div>
     </section>
 
-    <section class="facts" aria-label="How it works, privacy and support">
+    <section class="facts" aria-label="How it works, privacy and the source">
       <div>
         <h2>Safe to try</h2>
         <p>Seaglass never changes the home screen's files. Patchmanager adds a few lines that load our QML, and
@@ -292,39 +440,50 @@
           the debug log.</p>
         <p><a href="docs/guide.html#privacy">What it reads</a></p>
       </div>
-      <div class="support" id="support">
-        <!-- a sea glass cup of coffee, its steam rising -->
-        <svg class="support-cup" viewBox="0 0 100 100" aria-hidden="true">
-          <defs>
-            <linearGradient id="cup-glass" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#7ff0d8" stop-opacity="0.5"/>
-              <stop offset="1" stop-color="#14a39a" stop-opacity="0.22"/>
-            </linearGradient>
-            <linearGradient id="cup-ember" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#ffd38a"/>
-              <stop offset="0.55" stop-color="#ff9a5c"/>
-              <stop offset="1" stop-color="#f2575f"/>
-            </linearGradient>
-            <clipPath id="cup-inside">
-              <path d="M20 42h52v16a24 24 0 0 1-24 24h-4a24 24 0 0 1-24-24z"/>
-            </clipPath>
-          </defs>
-          <path class="steam" d="M35 34c-4-6 4-10 0-16c-3-5 2-9 1-12"/>
-          <path class="steam" d="M47 34c-4-6 4-10 0-16c-3-5 2-9 1-12"/>
-          <path class="steam" d="M59 34c-4-6 4-10 0-16c-3-5 2-9 1-12"/>
-          <ellipse class="saucer" cx="46" cy="88" rx="38" ry="6"/>
-          <g clip-path="url(#cup-inside)">
-            <rect x="16" y="50" width="60" height="40" fill="#5a2e16" opacity="0.9"/>
-            <ellipse cx="46" cy="50" rx="27" ry="3.5" fill="#d9a066"/>
-          </g>
-          <path class="handle" d="M72 50h5a10 10 0 0 1 0 20h-7"/>
-          <path class="glass" d="M20 42h52v16a24 24 0 0 1-24 24h-4a24 24 0 0 1-24-24z"/>
-          <path class="glint" d="M26 50v9a18 18 0 0 0 6 13"/>
-          <path fill="url(#cup-ember)" d="M46 75c-7-4.5-10-8-10-11.5a4.6 4.6 0 0 1 10-1.6a4.6 4.6 0 0 1 10 1.6c0 3.5-3 7-10 11.5z"/>
-        </svg>
-        <h2>Free, and staying free</h2>
-        <p>Seaglass is free software under the GNU GPL, made in spare time and tested on a Jolla Phone. If it makes
-          your phone a little nicer, a coffee helps keep it going: new Sailfish OS versions, fixes and new features.</p>
+      <div>
+        <h2>Free software</h2>
+        <p>Seaglass is under the GNU General Public License, version 3 or later. It is plain QML that builds without
+          the Sailfish SDK, and every release is checked against each Sailfish OS version it lists.</p>
+        <p><a href="{{github}}">The source on GitHub</a></p>
+      </div>
+    </section>
+
+    <section class="support" id="support" aria-labelledby="support-title">
+      <div class="support-inner">
+      <!-- a sea glass cup of coffee, its steam rising -->
+      <svg class="support-cup" viewBox="0 0 100 100" aria-hidden="true">
+        <defs>
+          <linearGradient id="cup-glass" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#7ff0d8" stop-opacity="0.5"/>
+            <stop offset="1" stop-color="#14a39a" stop-opacity="0.22"/>
+          </linearGradient>
+          <linearGradient id="cup-ember" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#ffd38a"/>
+            <stop offset="0.55" stop-color="#ff9a5c"/>
+            <stop offset="1" stop-color="#f2575f"/>
+          </linearGradient>
+          <clipPath id="cup-inside">
+            <path d="M20 42h52v16a24 24 0 0 1-24 24h-4a24 24 0 0 1-24-24z"/>
+          </clipPath>
+        </defs>
+        <path class="steam" d="M35 34c-4-6 4-10 0-16c-3-5 2-9 1-12"/>
+        <path class="steam" d="M47 34c-4-6 4-10 0-16c-3-5 2-9 1-12"/>
+        <path class="steam" d="M59 34c-4-6 4-10 0-16c-3-5 2-9 1-12"/>
+        <ellipse class="saucer" cx="46" cy="88" rx="38" ry="6"/>
+        <g clip-path="url(#cup-inside)">
+          <rect x="16" y="50" width="60" height="40" fill="#5a2e16" opacity="0.9"/>
+          <ellipse cx="46" cy="50" rx="27" ry="3.5" fill="#d9a066"/>
+        </g>
+        <path class="handle" d="M72 50h5a10 10 0 0 1 0 20h-7"/>
+        <path class="glass" d="M20 42h52v16a24 24 0 0 1-24 24h-4a24 24 0 0 1-24-24z"/>
+        <path class="glint" d="M26 50v9a18 18 0 0 0 6 13"/>
+        <path fill="url(#cup-ember)" d="M46 75c-7-4.5-10-8-10-11.5a4.6 4.6 0 0 1 10-1.6a4.6 4.6 0 0 1 10 1.6c0 3.5-3 7-10 11.5z"/>
+      </svg>
+        <div>
+          <h2 id="support-title">Free, and staying free</h2>
+          <p>Seaglass is made in spare time and tested on a Jolla Phone. If it makes your phone a little nicer, a
+            coffee helps keep it going: new Sailfish OS versions, fixes and new features.</p>
+        </div>
         <p><a class="button support-button" href="{{support}}">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 9h12v4a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5z" fill="none" stroke="currentColor" stroke-width="1.8"

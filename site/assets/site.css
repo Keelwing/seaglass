@@ -108,18 +108,18 @@ pre code { background: none; padding: 0; }
 }
 .brand { display: flex; align-items: center; gap: 0.6rem; color: var(--ink); text-decoration: none; font-weight: 500; }
 .brand img { width: 2rem; height: 2rem; }
-.bar nav { display: flex; gap: 1.25rem; margin-left: auto; flex-wrap: wrap; }
-.bar nav a { color: var(--mist); text-decoration: none; font-size: var(--step--1); }
+.bar nav { display: flex; gap: 1.25rem; margin-left: auto; }
+.bar nav a { color: var(--mist); text-decoration: none; font-size: var(--step--1); white-space: nowrap; }
 .bar nav a:hover, .bar nav a[aria-current="page"] { color: var(--ink); }
-.bar .button { padding: 0.45rem 1rem; font-size: var(--step--1); }
-@media (max-width: 40rem) { .bar nav a.optional { display: none; } .bar .button { display: none; } }
-/* the bar keeps one line: the support link only where there is room (the footer and the landing page have it too) */
-@media (max-width: 60rem) { .bar nav a.wide { display: none; } }
+.bar .button { padding: 0.45rem 1rem; font-size: var(--step--1); white-space: nowrap; }
+/* a narrow bar keeps the docs, the source and the support link; the rest is on the page */
+@media (max-width: 52rem) { .bar nav a.optional { display: none; } }
+@media (max-width: 30rem) { .bar { gap: 1rem; } .bar nav { gap: 1rem; } .bar .button { display: none; } }
 
 .button {
   display: inline-block; padding: 0.75rem 1.4rem; border-radius: 999px;
-  border: 1px solid var(--glass-edge); color: var(--ink); text-decoration: none; font-weight: 500;
-  background: var(--glass);
+  border: 1px solid var(--glass-edge); color: var(--ink); text-decoration: none; font: inherit; font-weight: 500;
+  background: var(--glass); cursor: pointer;
 }
 .button.primary { background: var(--ember); border-color: transparent; color: var(--on-ember); }
 .button:hover { text-decoration: none; filter: brightness(1.08); }
@@ -141,11 +141,19 @@ pre code { background: none; padding: 0; }
   background: #000;
 }
 .phone .screen img { width: 100%; }
+/* a picture of the screen's upper part only: the phone runs out of the frame below it */
+.phone.cut {
+  padding-bottom: 0; border-bottom-left-radius: 0; border-bottom-right-radius: 0; box-shadow: none;
+  -webkit-mask-image: linear-gradient(#000 94%, transparent); mask-image: linear-gradient(#000 94%, transparent);
+}
+.phone.cut .screen { border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+
+.wrap { max-width: 72rem; margin: 0 auto; padding-left: var(--gutter); padding-right: var(--gutter); }
 
 /* Hero */
 .hero {
   display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--gutter);
-  max-width: 72rem; margin: 0 auto; padding: clamp(2rem, 7vw, 6rem) var(--gutter) 3rem;
+  max-width: 72rem; margin: 0 auto; padding: clamp(2rem, 6vw, 5rem) var(--gutter) 3rem;
 }
 .hero h1 {
   /* as thin as the lock screen's clock */
@@ -153,12 +161,13 @@ pre code { background: none; padding: 0; }
 }
 .lead { font-size: var(--step-1); max-width: 32rem; line-height: 1.45; }
 .hero-note, .requires { color: var(--mist); max-width: 32rem; }
-.requires { font-size: var(--step--1); margin-top: 1.25rem; }
 .actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.75rem; }
-.hero-phone { width: min(78vw, 21rem); position: relative; }
+.requires { font-size: var(--step--1); margin: 1.5rem 0 0; }
+.requires + .requires { margin-top: 0.3rem; }
+.hero-phone { width: min(74vw, 18.5rem); position: relative; margin-right: 3.4rem; }
 @media (max-width: 52rem) {
   .hero { grid-template-columns: 1fr; }
-  .hero-phone { justify-self: center; }
+  .hero-phone { justify-self: center; margin: 1.5rem 0 0; }
 }
 
 /* The motif (docs/BRAND.md): a glass clock card lifted out of the phone, past its edge, and the ember pebble. The
@@ -204,41 +213,70 @@ main { overflow-x: clip; }
   }
 }
 
-/* Features: steps on the left; with scripts on a wide screen, one phone on the right shows the step in view */
-.features {
-  max-width: 72rem; margin: 0 auto; padding: 4rem var(--gutter);
+/* What is on the page: the chapters by name */
+.contents { max-width: 72rem; margin: 0 auto; padding: 1rem var(--gutter) 0; }
+.contents ul {
+  list-style: none; margin: 0; padding: 1.1rem 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.75rem;
+  border-top: 1px solid var(--glass-edge); border-bottom: 1px solid var(--glass-edge);
 }
-.feature {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--gutter); align-items: center;
-  padding: 3rem 0;
-}
-.feature h2 { font-size: var(--step-2); }
-.feature p { color: var(--mist); max-width: var(--measure); }
-.feature p:first-of-type { color: var(--ink); }
-.feature .phone { width: min(70vw, 17rem); }
-.stage { display: none; }
+.contents a { color: var(--mist); text-decoration: none; }
+.contents a:hover { color: var(--ink); }
 
-@media (min-width: 60rem) {
-  .js .features { display: grid; grid-template-columns: minmax(0, 1fr) 22rem; gap: var(--gutter); }
-  .js .feature { min-height: 78vh; padding: 0; display: flex; flex-direction: column; align-items: flex-start;
-    justify-content: center; opacity: 0.45; transition: opacity 300ms ease; }
-  .js .feature.active { opacity: 1; }
-  .js .feature .phone { display: none; }
-  .js .stage { display: block; }
-  .js .stage-phone { position: sticky; top: calc(50vh - 22rem); width: 22rem; }
-  .js .stage .screen img { position: absolute; inset: 0; opacity: 0; transition: opacity 250ms ease; }
-  .js .stage .screen img.shown { opacity: 1; }
+/* Chapters: a feature's text and its moments on the left, one phone on the right. With scripts the phone shows
+   the moment chosen in the list; without them every moment has its own phone */
+.features { max-width: 72rem; margin: 0 auto; padding: 1rem var(--gutter) 2rem; }
+.chapter { padding: clamp(3rem, 7vw, 5.5rem) 0; }
+.chapter > h2, .chapter-text h2 { margin-bottom: 0.5em; }
+.chapter-lead { font-size: var(--step-1); line-height: 1.45; max-width: 34rem; margin-bottom: 1.6rem; }
+.moments { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 2.5rem var(--gutter); }
+.moment h3 { margin-bottom: 0.4em; }
+.moment p { color: var(--mist); max-width: var(--measure); }
+.moment .phone { width: min(70vw, 15rem); margin-top: 1.2rem; }
+.chapter-more { margin: 1.6rem 0 0; }
+.chapter-stage { display: none; }
+
+.js .chapter { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 26rem); gap: 2.5rem var(--gutter);
+  align-items: start; }
+.js .chapter-text { padding-top: clamp(0rem, 3vw, 2.5rem); }
+.js .moments { display: block; max-width: 34rem; }
+.js .moment { border-left: 2px solid var(--glass-edge); padding: 0.1rem 0 0.1rem 1.2rem; }
+.js .moment.active { border-left-color: var(--highlight); }
+.js .moment h3 { margin: 0; }
+.js .moment button {
+  display: block; width: 100%; padding: 0.55rem 0; border: 0; background: none; cursor: pointer; text-align: left;
+  font: inherit; color: var(--mist);
 }
-@media (max-width: 40rem) {
-  .feature { grid-template-columns: 1fr; }
-  .feature .phone { justify-self: center; }
+.js .moment button:hover, .js .moment.active button { color: var(--ink); }
+.js .moment p { display: none; margin: 0; padding-bottom: 0.7rem; }
+.js .moment.active p { display: block; }
+.js .moment .phone { display: none; }
+.js .chapter-stage { display: flex; justify-content: center; }
+.js .chapter-stage .phone { width: min(70vw, 18rem); }
+.js .chapter-stage .screen img { position: absolute; inset: 0 0 auto; opacity: 0; transition: opacity 250ms ease; }
+.js .chapter-stage .screen img.shown { opacity: 1; }
+@media (max-width: 52rem) {
+  .js .chapter { grid-template-columns: 1fr; }
+  .js .chapter-stage .phone { margin: 0 auto; }
 }
+
+/* The settings: its pages side by side, scrolled sideways */
+.shots-intro { max-width: 72rem; margin: 0 auto; padding: clamp(3rem, 7vw, 5.5rem) var(--gutter) 0; }
+.shots-intro p { color: var(--mist); max-width: var(--measure); }
+.shots-intro .chapter-lead { color: var(--ink); }
+.shots {
+  display: flex; gap: 1.5rem; overflow-x: auto; scroll-snap-type: x proximity;
+  padding: 1.5rem max(var(--gutter), calc((100vw - 72rem) / 2 + var(--gutter))) 2.5rem; scrollbar-width: thin;
+}
+.shots figure { margin: 0; flex: 0 0 auto; scroll-snap-align: center; }
+.shots .phone { width: 14rem; }
+.shots figcaption { margin-top: 0.8rem; text-align: center; color: var(--mist); font-size: var(--step--1); }
 
 /* Install: a real sequence, so numbered */
-.install { max-width: 72rem; margin: 0 auto; padding: 4rem var(--gutter); }
+.install { max-width: 72rem; margin: 0 auto; padding: clamp(3rem, 7vw, 5.5rem) var(--gutter) 2rem; }
+.install-intro { color: var(--mist); max-width: var(--measure); margin-bottom: 2rem; }
 .install-steps {
-  list-style: none; counter-reset: step; padding: 0; margin: 0 0 1.5rem;
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 1rem;
+  list-style: none; counter-reset: step; padding: 0; margin: 0 0 3rem;
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1rem;
 }
 .install-steps li {
   counter-increment: step; padding: 1.4rem 1.4rem 0.6rem;
@@ -250,39 +288,55 @@ main { overflow-x: clip; }
   color: var(--highlight); margin-bottom: 0.6rem;
 }
 .install-steps p { color: var(--mist); }
-.install-steps pre { white-space: pre-wrap; overflow-wrap: anywhere; margin-bottom: 1em; }
-.install-more { color: var(--mist); max-width: 48rem; }
-
-/* Gallery: sideways, with snapping */
-.gallery { padding: 3rem 0 4rem; }
-.gallery h2 { max-width: 72rem; margin: 0 auto 1.5rem; padding: 0 var(--gutter); }
-.gallery-row {
-  display: flex; gap: 1.5rem; overflow-x: auto; scroll-snap-type: x mandatory;
-  padding: 0.5rem var(--gutter) 2rem; scrollbar-width: thin;
+.install-steps pre { white-space: pre-wrap; overflow-wrap: anywhere; margin: 0 0 0.6em; }
+.copy {
+  padding: 0.3rem 0.9rem; margin-bottom: 1em; border-radius: 999px; border: 1px solid var(--glass-edge);
+  background: none; color: var(--highlight); font: inherit; font-size: var(--step--1); cursor: pointer;
 }
-.gallery-row figure { margin: 0; flex: 0 0 auto; scroll-snap-align: center; }
-.gallery-row .phone { width: 14rem; }
-.gallery-row .screen { display: flex; align-items: flex-start; }
-.gallery-row figcaption { margin-top: 0.8rem; text-align: center; color: var(--mist); font-size: var(--step--1); }
+.copy:hover { background: var(--glass); }
 
-/* How it works and privacy */
+/* After the install: what to know, in short */
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 0.5rem var(--gutter); }
+.notes h3 { margin-bottom: 0.4em; }
+.notes p { color: var(--mist); }
+.notes code { white-space: nowrap; }
+
+/* How it works, privacy and the source */
 .facts {
-  max-width: 72rem; margin: 0 auto; padding: 3rem var(--gutter) 5rem;
-  display: grid; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); gap: 3rem;
+  max-width: 72rem; margin: 0 auto; padding: 3rem var(--gutter);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1rem var(--gutter);
 }
 .facts h2 { font-size: var(--step-2); }
 .facts p { color: var(--mist); max-width: var(--measure); }
 
 /* Support: a sea glass cup of coffee, its steam rising; a cup on the button */
-.support-cup { display: block; width: 7rem; height: 7rem; margin: -0.5rem 0 0.4rem -0.5rem; overflow: visible; }
+.support { max-width: 72rem; margin: 0 auto; padding: 1rem var(--gutter) 5rem; }
+.support-inner {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 1.5rem 2rem;
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+  background: var(--glass); border: 1px solid var(--glass-edge); border-radius: 1.6rem;
+  -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+}
+.support h2 { font-size: var(--step-2); margin-bottom: 0.4em; }
+.support p { color: var(--mist); max-width: var(--measure); margin: 0; }
+.support-cup { display: block; width: 6.5rem; height: 6.5rem; overflow: visible; }
 .support-cup .glass { fill: url(#cup-glass); stroke: var(--highlight); stroke-width: 1.6; }
 .support-cup .handle { fill: none; stroke: var(--highlight); stroke-width: 4; stroke-linecap: round; opacity: 0.8; }
 .support-cup .glint { fill: none; stroke: #ffffff; stroke-width: 2; stroke-linecap: round; opacity: 0.55; }
 .support-cup .saucer { fill: url(#cup-glass); stroke: var(--glass-edge); }
 .support-cup .steam { fill: none; stroke: var(--mist); stroke-width: 2.4; stroke-linecap: round; opacity: 0.7; }
-.support-button { display: inline-flex; align-items: center; gap: 0.6rem; border-color: rgba(255, 154, 92, 0.55); }
+.support-button { display: inline-flex; align-items: center; gap: 0.6rem; border-color: rgba(255, 154, 92, 0.55);
+  white-space: nowrap; }
 .support-button svg { width: 1.4rem; height: 1.4rem; flex: none; }
 .support-button:hover { box-shadow: 0 0 0 1px rgba(255, 154, 92, 0.5), 0 0.6rem 1.6rem -0.6rem rgba(255, 154, 92, 0.6); }
+@media (max-width: 52rem) {
+  .support-inner { grid-template-columns: auto minmax(0, 1fr); }
+  .support-inner > :last-child { grid-column: 1 / -1; }
+}
+@media (max-width: 30rem) {
+  .support-inner { grid-template-columns: 1fr; }
+  .support-cup { width: 5rem; height: 5rem; }
+}
 @media (prefers-reduced-motion: no-preference) {
   .support-cup .steam { animation: steam 3.6s ease-in-out infinite both; transform-box: fill-box;
     transform-origin: 50% 100%; }
