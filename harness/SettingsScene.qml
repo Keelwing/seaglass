@@ -1,11 +1,13 @@
 // The settings scene: the patch's settings in Patchmanager (patchmanager/main.qml, copied by scripts/harness.sh as
 // SettingsPage.qml with the pages of this tree), or one of its pages, with the live previews running. The pages read
-// the real dconf settings; outside a page stack they are made visible by hand.
+// the real dconf settings; outside a page stack they are made visible by hand. Behind them is the stock picture,
+// blurred and dimmed as an app's background.
 // Argument: "[PAGE] [scheme=light] [SCROLL]": a page of qml/settings (Folders, Glass, Search, Badges, Switcher,
 // Animations, AnimationViewer, Widgets, About, WhatsNew; by default the first page), and how far to scroll it down in
 // pixels, the last number given (e.g. "settings Glass 900"). scheme=light draws the page dark on light over a light
 // background, which comes near a light ambience without changing one.
 import QtQuick 2.6
+import QtGraphicalEffects 1.0
 import Sailfish.Silica 1.0
 
 Rectangle {
@@ -44,6 +46,29 @@ Rectangle {
                 return found
         }
         return null
+    }
+
+    // behind the page, what an app's window has on the phone: the ambience picture, blurred and dimmed
+    Image {
+        id: backdrop
+
+        anchors.fill: parent
+        source: scene.harness && !scene.light ? "file://" + scene.harness.picture : ""
+        fillMode: Image.PreserveAspectCrop
+        visible: false
+    }
+
+    FastBlur {
+        anchors.fill: parent
+        source: backdrop
+        radius: 64
+        visible: !scene.light
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        visible: !scene.light
+        color: Theme.rgba(Theme.overlayBackgroundColor, 0.6)
     }
 
     Loader {
