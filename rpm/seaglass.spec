@@ -116,6 +116,9 @@ fi
 %doc /usr/share/doc/seaglass/CHANGELOG.md
 
 %changelog
+* Sat Nov 21 2026 Syrtis Major <d31m05z@gmail.com> - 1.1.1-1
+- Patchmanager's page of the patch: the app animations in the description, and the support link.
+
 * Sun Nov 08 2026 Syrtis Major <d31m05z@gmail.com> - 1.1.0-1
 - App animations: a page that shows every style as stills, three Paper styles, effects on the render thread and
   Surprise me by default; data widgets keep their places; Sailfish OS 5.2.0.22.

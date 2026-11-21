@@ -65,7 +65,7 @@ class AnimationStylesTest(unittest.TestCase):
         styles = (REPO / "qml" / "animations" / "styles.js").read_text(encoding="utf-8")
         self.assertEqual(re.findall(r"`(\w+)`", values), re.findall(r'\{ "id": "(\w+)"', styles) + ["stock"])
         changelog = (REPO / "CHANGELOG.md").read_text(encoding="utf-8")
-        first = changelog[changelog.index("\n## "):]
+        first = changelog[changelog.index("\n## 1.1.0 "):]
         first = first[:first.index("\n## ", 1)]
         self.assertIn("Out of the box the animations are on with Surprise me", first)
         self.assertNotIn("animations are off", first)

@@ -3,6 +3,10 @@
 Each version was checked on a Jolla Phone with the newest Sailfish OS it lists. How each feature works is in
 [docs/](docs/).
 
+## 1.1.1 (2026-11-21)
+
+- Patchmanager's page of the patch names the app animations, and has a link to support Seaglass.
+
 ## 1.1.0 (2026-11-08)
 
 - Out of the box the animations are on with Surprise me, a different style each time. With Surprise me off, apps
