@@ -31,6 +31,10 @@ on a phone: say in the pull request which phone and Sailfish OS version you trie
 
 Keep commits small, with a short message in the imperative.
 
+## Code of conduct
+
+Everyone taking part in the issues and pull requests follows the [code of conduct](CODE_OF_CONDUCT.md).
+
 ## License
 
 Contributions are under the [GNU GPL, version 3 or later](LICENSE), like the rest of the code.
