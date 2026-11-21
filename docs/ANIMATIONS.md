@@ -326,6 +326,18 @@ way. With the animations off, nothing is read or compiled, and the noise tile is
 - **Budget.** One full-screen pass for the effect and one capture of the layer: live while opening, once when closing.
   A split moment adds a second pass at half the resolution for its grains, and Frost's opening and closing draw their
   field once, at the start of a run.
+- **Measured on the Jolla Phone** (90 Hz, so 11.1 ms a frame; Sailfish OS 5.2.0.22), with the harness's `bench`
+  modes (docs/DEVELOPMENT.md):
+  - At full screen, the heaviest moments take the GPU 5 to 8 ms a frame at their heaviest point: Frost's closing
+    7.9 ms, Seaglass's closing 6.8, Frost's opening 6.7, Volt's closing 6.4, Volt's opening 5.2 and Seaglass's
+    opening 5.1. Shatter, drawn as one effect over a grid, takes about 3 ms at most.
+  - Played from an idle GPU, Volt's opening and closing, Frost's opening and Seaglass's closing bring 11 to 23 percent
+    of their frames late (over 16.7 ms), so they can stutter, more so on slower phones. Every other moment, the Paper
+    styles among them, brings fewer than 4 percent late.
+  - The effects run on the render thread: with the home screen's own thread blocked for 400 ms, as when an app
+    starts, an effect still drew 36 frames in that time.
+  - The Animations page makes its stills in about 2 s, or about 3.5 s when the phone has not compiled the shaders
+    since it started. After that it shows the kept picture at once.
 
 ## Limits
 
