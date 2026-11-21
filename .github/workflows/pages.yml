@@ -16,6 +16,7 @@ on:
       - "VERSION"
       - "patchmanager/patch.json"
       - "scripts/site.*"
+      - "scripts/social.sh"
       - "docker/Dockerfile"
       - ".github/workflows/pages.yml"
   workflow_dispatch:

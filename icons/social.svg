@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280" height="640" viewBox="0 0 1280 640">
-  <!-- The GitHub preview (docs/BRAND.md): the icon, the name and the description, and two screenshots. scripts/icons.sh
+  <!-- The GitHub preview (docs/BRAND.md): the icon, the name and the description, and two screenshots. scripts/social.sh
        renders it next to seaglass.svg, widgets.jpg and switcher.jpg, with Albert Sans from the site. -->
   <defs>
     <linearGradient id="bg" x1="1" y1="0" x2="0" y2="1">
