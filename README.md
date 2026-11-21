@@ -179,6 +179,9 @@ which Sailfish OS has.
 1. Install the `seaglass` RPM from the [releases page](https://github.com/Keelwing/seaglass/releases). From a
    terminal:
    `devel-su pkcon install-local seaglass-*.noarch.rpm`
+
+   Without a terminal: turn on *Settings → Untrusted software*, then open the downloaded RPM in the File manager and
+   install it.
 2. Open *Settings → Patchmanager*, activate *Seaglass*, and let Patchmanager restart the home screen.
 3. Tap *Seaglass* in Patchmanager for its settings. The first page says whether Seaglass runs, and what to do if it
    does not. Each feature has a page of its own, and changes apply at once.
