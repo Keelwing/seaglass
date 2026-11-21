@@ -1,6 +1,6 @@
 # Build a release and publish it on GitHub (docs/DEVELOPMENT.md, "Releasing"): on a pushed tag vX.Y.Z, or by hand
 # for an existing tag. The same scripts as on a development machine: make test lint, then scripts/release.sh
-# --publish (the package, the OpenRepos icon, SHA256SUMS and the notes from CHANGELOG.md; a draft first, published
+# --publish (the package, the 200 px icon, SHA256SUMS and the notes from CHANGELOG.md; a draft first, published
 # once every asset is up; an existing release gets its notes and assets replaced).
 name: release
 

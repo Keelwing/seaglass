@@ -152,8 +152,7 @@ Patchmanager applies the patch only to the versions listed in the package's `pat
 | 5.1.0.11 | testers' | the hook; the QML with the 5.1.0.11 SDK target | not yet | [![Sailfish OS 5.1.0.11 in CI](https://img.shields.io/github/check-runs/Keelwing/seaglass/main?nameFilter=Sailfish%20OS%205.1.0.11&label=CI)](https://github.com/Keelwing/seaglass/actions/workflows/ci.yml) |
 | 5.0.0.78 | testers' | the hook; the QML with the 5.0.0.62 SDK target | not yet | [![Sailfish OS 5.0.0.78 in CI](https://img.shields.io/github/check-runs/Keelwing/seaglass/main?nameFilter=Sailfish%20OS%205.0.0.78&label=CI)](https://github.com/Keelwing/seaglass/actions/workflows/ci.yml) |
 
-- **Release** versions are in the `patch.json` of the package on OpenRepos and on the releases page, and have run on
-  a phone.
+- **Release** versions are in the `patch.json` of the package on the releases page, and have run on a phone.
 - **Testers'** versions are in each release's testers' package as well (`seaglass-VERSION-0.preview1`). CI checks
   them, but they have not run on such a phone yet. If you try one, the
   [Older Sailfish OS](https://github.com/Keelwing/seaglass/issues/new?template=older_sailfish_os.yml) form is the place
@@ -176,8 +175,8 @@ You need:
 The package also needs `lipstick-jolla-home-qt5`, `sailfishsilica-qt5` and `qt5-qtdeclarative-import-folderlistmodel`,
 which Sailfish OS has.
 
-1. Install the `seaglass` RPM, from OpenRepos (Storeman) or the
-   [releases page](https://github.com/Keelwing/seaglass/releases). From a terminal:
+1. Install the `seaglass` RPM from the [releases page](https://github.com/Keelwing/seaglass/releases). From a
+   terminal:
    `devel-su pkcon install-local seaglass-*.noarch.rpm`
 2. Open *Settings → Patchmanager*, activate *Seaglass*, and let Patchmanager restart the home screen.
 3. Tap *Seaglass* in Patchmanager for its settings. The first page says whether Seaglass runs, and what to do if it

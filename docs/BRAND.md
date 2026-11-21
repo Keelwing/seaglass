@@ -47,7 +47,7 @@ on it. The icon, the site's first screen and the GitHub preview all use it.
 - **The card.** A frosted clock card lifted out of the screen, turned 8°, past the phone's right edge.
 - **The plus.** The ember pebble at the bottom right, over the phone's corner, with a white plus.
 
-`make icons` renders `seaglass-200.png` for OpenRepos. The README and the site use the SVG. The icon has to read at
+`make icons` renders `seaglass-200.png` for the releases. The README and the site use the SVG. The icon has to read at
 86 px, the launcher's size on the Jolla Phone, and it does.
 
 ## The Patchmanager glyph

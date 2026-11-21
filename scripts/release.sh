@@ -1,5 +1,5 @@
 #!/bin/bash
-# Assemble a release in out/release/TAG: the package, the OpenRepos icon, SHA256SUMS and the release notes (the
+# Assemble a release in out/release/TAG: the package, the 200 px icon, SHA256SUMS and the release notes (the
 # version's section of CHANGELOG.md). When patchmanager/versions has preview versions, the testers' package
 # (-0.preview1, those versions in its patch.json) comes along, with a word in the notes. With --publish, put it on
 # GitHub with gh: a draft with every asset first, published once they are all up; an existing release gets its notes

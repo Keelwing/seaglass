@@ -147,7 +147,7 @@ icons are round, so the preview uses that 70 % area:
 |---|---|
 | `qml/` | the QML module → `/usr/share/seaglass/qml/` |
 | `patchmanager/` | the patch → `/usr/share/patchmanager/patches/seaglass/`: `patch.json`, the settings page `main.qml`, the list icons `main.svg` and `main-light.svg`; the hooks in `diffs/` (generated, one per series; `%post` copies the phone's as `unified_diff.patch`) and the versions they are for, `versions` |
-| `icons/` | the colour icon (OpenRepos, README) |
+| `icons/` | the colour icon (releases, README) |
 | `hook/apply_hook.py` | the source of the hook: anchors in the stock QML → unified diff |
 | `rpm/` | the package spec, and `build.sh`, which stages the tree and runs rpmbuild |
 | `docker/Dockerfile` | the tool image: rpmbuild, GNU patch, qmllint, shellcheck, ImageMagick, rsvg-convert, Python-Markdown, bsdtar |

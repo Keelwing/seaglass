@@ -1,5 +1,5 @@
 #!/bin/bash
-# Render the colour icon (icons/seaglass.svg) for OpenRepos, out/icons/seaglass-200.png (200 x 200), and the GitHub
+# Render the colour icon (icons/seaglass.svg) for the releases, out/icons/seaglass-200.png (200 x 200), and the GitHub
 # preview (icons/social.svg), out/icons/seaglass-social.png (1280 x 640, uploaded by hand in the repository's
 # settings), with the site's Albert Sans. The Patchmanager glyphs are installed as SVG and need no rendering.
 # Usage: scripts/icons.sh     (make icons)
