@@ -1,11 +1,11 @@
 {
     "name": "seaglass",
     "display_name": "Seaglass",
-    "description": "Widgets, glass, app search, notification badges and a richer task switcher for the stock home screen. Folders show their apps, open with a motion of your choice and can become cards on the app grid. Data widgets bring the clock, the battery and connections, what is playing, the next events and the weather. Each part is a setting: tap the patch for them.\n\nThe patch is a small hook in six home screen files, and the rest comes from the seaglass package. Without the package the home screen is stock.",
+    "description": "Widgets, glass, app search, notification badges, a richer task switcher and app animations for the stock home screen. Folders show their apps, open with a motion of your choice and can become cards on the app grid. Data widgets bring the clock, the battery and connections, what is playing, the next events and the weather. Apps open, load and close with an effect of your choice. Each part is a setting: tap the patch for them.\n\nThe patch is a small hook in eight home screen files, and the rest comes from the seaglass package. Without the package the home screen is stock.",
     "category": "homescreen",
     "author": "Syrtis Major",
     "discussion": "https://github.com/Keelwing/seaglass/issues",
-    "donations": "",
+    "donations": "https://ko-fi.com/D31m05z",
     "sources": "https://github.com/Keelwing/seaglass",
     "version": "1.1.0",
     "compatible": [

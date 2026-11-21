@@ -51,6 +51,12 @@ class RepoTest(unittest.TestCase):
         self.assertTrue(meta["compatible"], "no compatible Sailfish OS version (make hook)")
         for version in meta["compatible"]:
             self.assertRegex(version, r"^\d+\.\d+\.\d+\.\d+$")
+        # Patchmanager shows the description: it names as many stock files as every series' hook changes
+        counts = {len(re.findall(r"(?m)^\+\+\+ ", p.read_text(encoding="utf-8")))
+                  for p in (REPO / "patchmanager" / "diffs").glob("*.patch")}
+        self.assertEqual(len(counts), 1, counts)
+        words = {6: "six", 7: "seven", 8: "eight", 9: "nine", 10: "ten"}
+        self.assertIn(f"a small hook in {words[counts.pop()]} home screen files", meta["description"])
 
     def test_settings_page_is_installed_with_the_patch(self):
         build = (REPO / "rpm" / "build.sh").read_text(encoding="utf-8")
@@ -258,6 +264,8 @@ class RepoTest(unittest.TestCase):
         self.assertIn(f"({url})", readme)
         self.assertIn(f'<a href="{url}"><img src="docs/images/support.svg"', readme)
         self.assertIn(f'SUPPORT = "{url}"', (REPO / "scripts" / "site.py").read_text(encoding="utf-8"))
+        meta = json.loads((REPO / "patchmanager" / "patch.json").read_text(encoding="utf-8"))
+        self.assertEqual(meta["donations"], url)
         for template in ("index.html", "templates/nav.html", "templates/footer.html"):
             self.assertIn('href="{{support}}"', (REPO / "site" / template).read_text(encoding="utf-8"), template)
         for page in ("SettingsHub.qml", "AboutPage.qml"):
