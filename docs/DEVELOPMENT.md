@@ -210,7 +210,7 @@ python3 -I scripts/bench-frames.py out/bench-play.log
 ```bash
 make screenshots              # the public shot list → docs/images/ (540 px JPEGs, 360 px animated WebPs)
 scripts/screenshots.sh search # only some of them
-make icons                    # icons/seaglass.svg → out/icons/seaglass-200.png (for OpenRepos)
+make icons                    # icons/seaglass.svg → out/icons/seaglass-200.png (the release's icon)
 ```
 
 The screenshots come from the harness in its public mode: the stock apps in made-up folders, a stock ambience
@@ -263,7 +263,7 @@ committed), the harness and the screenshots. `make lint` also checks the workflo
 1. Bump `VERSION` and `patch.json`'s `version`. Add the version to `CHANGELOG.md` (`## X.Y.Z (DATE)`, written for
    users: it becomes the release notes) and to the spec's `%changelog`. `tests/test_repo.py` checks that they agree.
 2. Run `make test lint check-hook rpm`, then test the package on the phone. `make release` assembles the release
-   in `out/release/vX.Y.Z/` for a look: the package, the OpenRepos icon, `SHA256SUMS` and `notes.md`.
+   in `out/release/vX.Y.Z/` for a look: the package, the 200 px icon, `SHA256SUMS` and `notes.md`.
 3. Commit, then tag the version with your signature and push it:
 
    ```bash
@@ -275,7 +275,6 @@ committed), the harness and the screenshots. `make lint` also checks the workflo
    first, and publishes it once every asset is up. `scripts/release.sh` refuses a tag that is not `VERSION`'s, a
    version missing from either changelog, and a tree that is not the tag's. When `patchmanager/versions` has
    preview versions, the release also carries the testers' package, with a paragraph about it in the notes.
-4. Upload the package, the icon and the screenshots (`docs/images/*.jpg`) to OpenRepos.
 
 ## Troubleshooting the computer
 

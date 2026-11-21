@@ -8,9 +8,10 @@ on with *Surprise me*, a different style each time. With *Surprise me* off, apps
 close in *Northern lights* until you choose others.
 
 <p align="center">
-  <img src="images/animations-sailfish.webp" width="220" alt="Notes opening from its icon and closing in the Seaglass, Tide and Northern lights styles">
-  <img src="images/animations-elements.webp" width="220" alt="Notes opening from its icon and closing in the Ember, Volt and Frost styles">
-  <img src="images/animations-extreme.webp" width="220" alt="Notes opening from its icon and closing in the Shatter, Singularity and Dust styles">
+  <img src="images/animations-paper.webp" width="200" alt="Notes opening from its icon and closing in the Contour, Fold and Halftone styles">
+  <img src="images/animations-sailfish.webp" width="200" alt="Notes opening from its icon and closing in the Seaglass, Tide and Northern lights styles">
+  <img src="images/animations-elements.webp" width="200" alt="Notes opening from its icon and closing in the Ember, Volt and Frost styles">
+  <img src="images/animations-extreme.webp" width="200" alt="Notes opening from its icon and closing in the Shatter, Singularity and Dust styles">
 </p>
 
 ## What you see
@@ -36,7 +37,7 @@ Twelve styles in four groups, and the stock one. The lengths are at the normal s
 | Style | Opening | Loading | Closing |
 |---|---|---|---|
 | **Stock** | Fades in, 300 ms | A busy indicator on the new cover | Slides on and fades out, 300 ms |
-| *Paper: folded, printed and drawn* | | | |
+| *Paper: folded, printed and drawn, light on the phone* | | | |
 | **Contour** | Thin lines in the shape of what it opens from spread outward, and the app comes up in steps between them, 480 ms | Round lines leave the icon over a dark cover | The window draws in to where the finger let go, in steps with a line on each, 520 ms |
 | **Fold** | The window comes out of the icon as a narrow pleated strip and opens sideways until it lies flat, 560 ms | The cover is a paper screen with the icon printed on it, and a fold runs across and back | The window folds up from its sides into a narrow strip, which drops away, 600 ms |
 | **Halftone** | A screen of dots spreads from the icon; the dots grow, show the app and run together, 600 ms | The icon as a matrix of dots, with rings of larger dots spreading from it | The window breaks into dots from where the finger let go; they shrink and go out, 640 ms |
@@ -62,7 +63,10 @@ its own deep colour either way, and only its light takes the ambience's. Seaglas
 *Settings → Patchmanager → Seaglass → Animations*. The row on the first page shows the style of each moment,
 *Surprise me* or *Off*.
 
-<p align="center"><img src="images/settings-animations.jpg" width="250" alt="The animations settings: a live preview, and the styles as tiles with their loading effects"></p>
+<p align="center">
+  <img src="images/settings-animations.jpg" width="250" alt="The Animations page: every style's opening, loading and closing as still frames">
+  <img src="images/settings-animations-viewer.jpg" width="250" alt="The viewer: one style large over the made-up home screen, with its run as a strip under it">
+</p>
 
 - **App animations.** On or off. Off is the stock behaviour.
 - **The sheet.** Every style's opening, loading and closing at once, as still frames: a row for each style, *Stock*
@@ -322,6 +326,18 @@ way. With the animations off, nothing is read or compiled, and the noise tile is
 - **Budget.** One full-screen pass for the effect and one capture of the layer: live while opening, once when closing.
   A split moment adds a second pass at half the resolution for its grains, and Frost's opening and closing draw their
   field once, at the start of a run.
+- **Measured on the Jolla Phone** (90 Hz, so 11.1 ms a frame; Sailfish OS 5.2.0.22), with the harness's `bench`
+  modes (docs/DEVELOPMENT.md):
+  - At full screen, the heaviest moments take the GPU 5 to 8 ms a frame at their heaviest point: Frost's closing
+    7.9 ms, Seaglass's closing 6.8, Frost's opening 6.7, Volt's closing 6.4, Volt's opening 5.2 and Seaglass's
+    opening 5.1. Shatter, drawn as one effect over a grid, takes about 3 ms at most.
+  - Played from an idle GPU, Volt's opening and closing, Frost's opening and Seaglass's closing bring 11 to 23 percent
+    of their frames late (over 16.7 ms), so they can stutter, more so on slower phones. Every other moment, the Paper
+    styles among them, brings fewer than 4 percent late.
+  - The effects run on the render thread: with the home screen's own thread blocked for 400 ms, as when an app
+    starts, an effect still drew 36 frames in that time.
+  - The Animations page makes its stills in about 2 s, or about 3.5 s when the phone has not compiled the shaders
+    since it started. After that it shows the kept picture at once.
 
 ## Limits
 

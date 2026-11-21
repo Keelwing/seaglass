@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256">
-  <!-- The colour icon (OpenRepos, README, the site; docs/BRAND.md): a Sailfish app icon shape, a phone with Seaglass
+  <!-- The colour icon (releases, README, the site; docs/BRAND.md): a Sailfish app icon shape, a phone with Seaglass
        on its screen, a glass clock card lifted out past its edge, and the ember sea glass pebble with the plus.
        make icons renders out/icons/seaglass-200.png and the GitHub preview from it. -->
   <defs>
