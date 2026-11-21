@@ -23,7 +23,7 @@ load, the stock home screen stays. It is free software, tested on a Jolla Phone.
 <p align="center">
   <img src="docs/images/widgets.jpg" width="250" alt="The app grid on glass, with a clock, the status, now playing, the next events and the weather">
   <img src="docs/images/folders.jpg" width="250" alt="Folder previews, and folders shown as a card and a panel among the icons">
-  <img src="docs/images/switcher.jpg" width="250" alt="The task switcher's card row, with name chips and recently closed apps">
+  <img src="docs/images/switcher.jpg" width="250" alt="The task switcher: covers with name chips under them, and the recently closed apps">
 </p>
 
 The images and animations come from the development harness, which uses only the stock apps, a stock ambience and
